@@ -5,5 +5,20 @@
   "repository": "git@github.com:developmentseed/stac-react.git",
   "author": "Oliver Roick <oliver@roick.email>",
   "license": "MIT",
-  "private": false
+  "private": false,
+  "peerDependencies": {
+    "react": "^18.1.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/react": "^13.1.1",
+    "@types/jest": "^27.4.1",
+    "jest": "^27.5.1",
+    "react-dom": "^18.1.0",
+    "ts-jest": "^27.1.4",
+    "typescript": "^4.6.4"
+  },
+  "scripts": {
+    "test": "jest"
+  }
 }
