@@ -13,6 +13,7 @@
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.1.1",
     "@testing-library/react-hooks": "^8.0.0",
+    "@types/geojson": "^7946.0.8",
     "@types/jest": "^27.4.1",
     "@typescript-eslint/eslint-plugin": "^5.21.0",
     "@typescript-eslint/parser": "^5.21.0",
@@ -28,7 +29,7 @@
   },
   "scripts": {
     "test": "jest",
-    "lint": "eslint 'src/**/*.tsx'"
+    "lint": "eslint 'src/**/*.ts'"
   },
   "dependencies": {}
 }
