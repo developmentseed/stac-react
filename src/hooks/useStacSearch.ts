@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import ApiClient from '../api-client';
 
 type SearchResponse = {
@@ -15,19 +15,21 @@ type StacSearchHook = {
 }
 
 function useStacSearch(apiUrl: string): StacSearchHook {
-  const apiClient = new ApiClient(apiUrl);
   const [ results, setResults ] = useState();
   const [ bbox, setBbox ] = useState<Bbox>();
   
-  const submit = () => {
-    const payload = {
-      bbox
-    };
-
-    apiClient.search(payload)
-      .then(response => response.json())
-      .then(data => setResults(data));
-  };
+  const submit = useCallback(
+    () => {
+      const apiClient = new ApiClient(apiUrl);
+      const payload = {
+        bbox
+      };
+  
+      apiClient.search(payload)
+        .then(response => response.json())
+        .then(data => setResults(data));
+    }, [apiUrl, bbox]
+  );
 
   return { submit, bbox, setBbox, results };
 }
