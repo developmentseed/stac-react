@@ -15,7 +15,7 @@ type StacSearchHook = {
 }
 
 function useStacSearch(apiUrl: string): StacSearchHook {
-  const [ results, setResults ] = useState();
+  const [ results, setResults ] = useState<SearchResponse>();
   const [ bbox, setBbox ] = useState<Bbox>();
   
   const submit = useCallback(
