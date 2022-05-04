@@ -6,8 +6,13 @@
   "author": "Oliver Roick <oliver@roick.email>",
   "license": "MIT",
   "private": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "source": "./src/index.ts",
   "peerDependencies": {
-    "react": "^18.1.0"
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.4",
@@ -15,6 +20,8 @@
     "@testing-library/react-hooks": "^8.0.0",
     "@types/geojson": "^7946.0.8",
     "@types/jest": "^27.4.1",
+    "@types/react": "^18.0.8",
+    "@types/react-dom": "^18.0.3",
     "@typescript-eslint/eslint-plugin": "^5.21.0",
     "@typescript-eslint/parser": "^5.21.0",
     "eslint": "^8.14.0",
@@ -29,7 +36,8 @@
   },
   "scripts": {
     "test": "jest",
-    "lint": "eslint 'src/**/*.ts'"
+    "lint": "eslint 'src/**/*.ts'",
+    "build": "tsc"
   },
   "dependencies": {}
 }

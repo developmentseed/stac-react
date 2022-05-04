@@ -1,6 +1,8 @@
 import { useCallback, useState } from 'react';
 import ApiClient from '../api-client';
 
+import type { Link, Item, Bbox } from '../types';
+
 type SearchResponse = {
   type: 'FeatureCollection'
   features: Item[]

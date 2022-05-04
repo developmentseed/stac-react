@@ -1,3 +1,5 @@
+import type { Bbox } from '../types';
+
 type SearchPayload = {
   bbox?: Bbox
 }

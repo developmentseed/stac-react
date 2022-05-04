@@ -1,10 +1,12 @@
+import type { Geometry } from 'geojson';
+
 type GenericObject = {
   [key: string]: any  // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-type Bbox = [number, number, number, number];
+export type Bbox = [number, number, number, number];
 
-type Link = {
+export type Link = {
   href: string
   rel: string
   type?: string
@@ -17,7 +19,7 @@ type Link = {
   merge?: boolean
 }
 
-type ItemAsset = {
+export type ItemAsset = {
   href: string
   title?: string
   description?: string
@@ -25,7 +27,7 @@ type ItemAsset = {
   roles?: string[]
 }
 
-type Item = {
+export type Item = {
   id: string,
   bbox: Bbox,
   geometry: Geometry,
