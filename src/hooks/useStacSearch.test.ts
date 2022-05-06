@@ -10,6 +10,7 @@ function parseRequestPayload(mockApiCall?: RequestInit) {
 }
 
 describe('useStacSearch', () => {
+  beforeEach(() => fetch.resetMocks());
   it('includes Bbox in search', async () => {
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
 
@@ -23,6 +24,22 @@ describe('useStacSearch', () => {
 
     const postPayload = parseRequestPayload(fetch.mock.calls[0][1]);
     expect(postPayload).toEqual({ bbox: [-0.59, 51.24, 0.30, 51.74] });
+    expect(result.current.results).toEqual({ data: '12345' });
+  });
+
+  it('includes Collections in search', async () => {
+    fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useStacSearch('https://fake-stac-api.net')
+    );
+
+    act(() => result.current.setCollections(['wildfire', 'surface_temp']));
+    act(() => result.current.submit());
+    await waitForNextUpdate();
+
+    const postPayload = parseRequestPayload(fetch.mock.calls[0][1]);
+    expect(postPayload).toEqual({ collections: ['wildfire', 'surface_temp'] });
     expect(result.current.results).toEqual({ data: '12345' });
   });
 });

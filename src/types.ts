@@ -5,6 +5,7 @@ type GenericObject = {
 }
 
 export type Bbox = [number, number, number, number];
+export type CollectionIdList = string[];
 
 export type Link = {
   href: string

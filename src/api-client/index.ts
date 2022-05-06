@@ -1,7 +1,8 @@
-import type { Bbox } from '../types';
+import type { Bbox, CollectionIdList } from '../types';
 
 type SearchPayload = {
-  bbox?: Bbox
+  bbox?: Bbox,
+  collections?: CollectionIdList
 }
 
 type RequestPayload = SearchPayload;
