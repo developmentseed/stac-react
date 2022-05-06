@@ -7,7 +7,13 @@ import QueryBuilder from "./QueryBuilder";
 
 function Main() {
   const [isBboxDrawEnabled, setIsBboxDrawEnabled] = useState(false);
-  const { setBbox, submit, results } = useStacSearch(process.env.REACT_APP_STAC_API);
+  const {
+    setBbox,
+    collections,
+    setCollections,
+    submit,
+    results
+  } = useStacSearch(process.env.REACT_APP_STAC_API);
 
   const handleDrawComplete = useCallback((feature) => {
     setIsBboxDrawEnabled(false);
@@ -24,6 +30,8 @@ function Main() {
       <QueryBuilder
         setIsBboxDrawEnabled={setIsBboxDrawEnabled}
         handleSubmit={submit}
+        collections={collections}
+        setCollections={setCollections}
       />
       <ItemList />
       <Map
