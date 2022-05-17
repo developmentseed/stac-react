@@ -42,4 +42,53 @@ describe('useStacSearch', () => {
     expect(postPayload).toEqual({ collections: ['wildfire', 'surface_temp'] });
     expect(result.current.results).toEqual({ data: '12345' });
   });
+
+  it('includes date range in search', async () => {
+    fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useStacSearch('https://fake-stac-api.net')
+    );
+
+    act(() => result.current.setDateRangeFrom('2022-01-17'));
+    act(() => result.current.setDateRangeTo('2022-05-17'));
+    act(() => result.current.submit());
+    await waitForNextUpdate();
+
+    const postPayload = parseRequestPayload(fetch.mock.calls[0][1]);
+    expect(postPayload).toEqual({ datetime: '2022-01-17/2022-05-17' });
+    expect(result.current.results).toEqual({ data: '12345' });
+  });
+
+  it('includes open date range in search (no to-date)', async () => {
+    fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useStacSearch('https://fake-stac-api.net')
+    );
+
+    act(() => result.current.setDateRangeFrom('2022-01-17'));
+    act(() => result.current.submit());
+    await waitForNextUpdate();
+
+    const postPayload = parseRequestPayload(fetch.mock.calls[0][1]);
+    expect(postPayload).toEqual({ datetime: '2022-01-17/..' });
+    expect(result.current.results).toEqual({ data: '12345' });
+  });
+
+  it('includes open date range in search (no from-date)', async () => {
+    fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useStacSearch('https://fake-stac-api.net')
+    );
+
+    act(() => result.current.setDateRangeTo('2022-05-17'));
+    act(() => result.current.submit());
+    await waitForNextUpdate();
+
+    const postPayload = parseRequestPayload(fetch.mock.calls[0][1]);
+    expect(postPayload).toEqual({ datetime: '../2022-05-17' });
+    expect(result.current.results).toEqual({ data: '12345' });
+  });
 });

@@ -6,6 +6,10 @@ type GenericObject = {
 
 export type Bbox = [number, number, number, number];
 export type CollectionIdList = string[];
+export type DateRange = {
+  from?: string,
+  to?: string
+}
 
 export type Link = {
   href: string
