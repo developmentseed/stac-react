@@ -11,6 +11,10 @@ function Main() {
     setBbox,
     collections,
     setCollections,
+    dateRangeFrom,
+    setDateRangeFrom,
+    dateRangeTo,
+    setDateRangeTo,
     submit,
     results
   } = useStacSearch(process.env.REACT_APP_STAC_API);
@@ -32,6 +36,10 @@ function Main() {
         handleSubmit={submit}
         collections={collections}
         setCollections={setCollections}
+        dateRangeFrom={dateRangeFrom}
+        setDateRangeFrom={setDateRangeFrom}
+        dateRangeTo={dateRangeTo}
+        setDateRangeTo={setDateRangeTo}
       />
       <ItemList />
       <Map
