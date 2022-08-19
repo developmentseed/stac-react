@@ -8,7 +8,7 @@ type SearchPayload = {
 
 type RequestPayload = SearchPayload;
 
-class ApiClient {
+class StacApi {
   baseUrl: string;
 
   constructor(baseUrl: string) {
@@ -49,4 +49,4 @@ class ApiClient {
   }
 }
 
-export default ApiClient;
+export default StacApi;

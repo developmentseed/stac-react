@@ -1,6 +1,7 @@
 import fetch from 'jest-fetch-mock';
 import { renderHook, act } from '@testing-library/react-hooks';
 import useStacSearch from './useStacSearch';
+import StacApi from '../stac-api';
 
 function parseRequestPayload(mockApiCall?: RequestInit) {
   if (!mockApiCall) {
@@ -10,12 +11,14 @@ function parseRequestPayload(mockApiCall?: RequestInit) {
 }
 
 describe('useStacSearch', () => {
+  const stacApi = new StacApi('https://fake-stac-api.net');
   beforeEach(() => fetch.resetMocks());
+
   it('includes Bbox in search', async () => {
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
 
     const { result, waitForNextUpdate } = renderHook(
-      () => useStacSearch('https://fake-stac-api.net')
+      () => useStacSearch(stacApi)
     );
 
     act(() => result.current.setBbox([-0.59, 51.24, 0.30, 51.74]));
@@ -31,7 +34,7 @@ describe('useStacSearch', () => {
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
 
     const { result, waitForNextUpdate } = renderHook(
-      () => useStacSearch('https://fake-stac-api.net')
+      () => useStacSearch(stacApi)
     );
 
     act(() => result.current.setCollections(['wildfire', 'surface_temp']));
@@ -47,7 +50,7 @@ describe('useStacSearch', () => {
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
 
     const { result, waitForNextUpdate } = renderHook(
-      () => useStacSearch('https://fake-stac-api.net')
+      () => useStacSearch(stacApi)
     );
 
     act(() => result.current.setDateRangeFrom('2022-01-17'));
@@ -64,7 +67,7 @@ describe('useStacSearch', () => {
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
 
     const { result, waitForNextUpdate } = renderHook(
-      () => useStacSearch('https://fake-stac-api.net')
+      () => useStacSearch(stacApi)
     );
 
     act(() => result.current.setDateRangeFrom('2022-01-17'));
@@ -80,7 +83,7 @@ describe('useStacSearch', () => {
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
 
     const { result, waitForNextUpdate } = renderHook(
-      () => useStacSearch('https://fake-stac-api.net')
+      () => useStacSearch(stacApi)
     );
 
     act(() => result.current.setDateRangeTo('2022-05-17'));

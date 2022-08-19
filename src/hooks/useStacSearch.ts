@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import ApiClient from '../api-client';
+import StacApi from '../stac-api';
 
 import type { Link, Item, Bbox, CollectionIdList } from '../types';
 
@@ -22,7 +22,7 @@ type StacSearchHook = {
   results?: SearchResponse
 }
 
-function useStacSearch(apiUrl: string): StacSearchHook {
+function useStacSearch(stacApi: StacApi): StacSearchHook {
   const [ results, setResults ] = useState<SearchResponse>();
   const [ bbox, setBbox ] = useState<Bbox>();
   const [ collections, setCollections ] = useState<CollectionIdList>();
@@ -31,17 +31,16 @@ function useStacSearch(apiUrl: string): StacSearchHook {
   
   const submit = useCallback(
     () => {
-      const apiClient = new ApiClient(apiUrl);
       const payload = {
         bbox,
         collections,
         dateRange: { from: dateRangeFrom, to: dateRangeTo }
       };
   
-      apiClient.search(payload)
+      stacApi.search(payload)
         .then(response => response.json())
         .then(data => setResults(data));
-    }, [apiUrl, bbox, collections, dateRangeFrom, dateRangeTo]
+    }, [stacApi, bbox, collections, dateRangeFrom, dateRangeTo]
   );
 
   return {

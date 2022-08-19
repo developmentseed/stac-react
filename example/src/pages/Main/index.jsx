@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useStacSearch } from "stac-react";
+import { useStacSearch, StacApi } from "stac-react";
 
 import ItemList from "./ItemList";
 import Map from "./Map";
@@ -7,6 +7,7 @@ import QueryBuilder from "./QueryBuilder";
 
 function Main() {
   const [isBboxDrawEnabled, setIsBboxDrawEnabled] = useState(false);
+  const stacApi = new StacApi(process.env.REACT_APP_STAC_API)
   const {
     setBbox,
     collections,
@@ -17,7 +18,7 @@ function Main() {
     setDateRangeTo,
     submit,
     results
-  } = useStacSearch(process.env.REACT_APP_STAC_API);
+  } = useStacSearch(stacApi);
 
   const handleDrawComplete = useCallback((feature) => {
     setIsBboxDrawEnabled(false);
