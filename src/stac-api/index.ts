@@ -15,6 +15,27 @@ class StacApi {
     this.baseUrl = baseUrl;
   }
 
+  fixBboxCoordinateOrder(bbox?: Bbox): Bbox | undefined {
+    if (!bbox) {
+      return undefined;
+    }
+
+    const [lonMin, latMin, lonMax, latMax] = bbox;
+    const sortedBbox: Bbox = [lonMin, latMin, lonMax, latMax];
+
+    if (lonMin > lonMax) {
+      sortedBbox[0] = lonMax;
+      sortedBbox[2] = lonMin;
+    }
+
+    if (latMin > latMax) {
+      sortedBbox[1] = latMax;
+      sortedBbox[3] = latMin;
+    }
+
+    return sortedBbox;
+  }
+
   makeDatetimePayload(dateRange?: DateRange): string | undefined {
     if (!dateRange) {
       return undefined;
@@ -30,7 +51,7 @@ class StacApi {
   }
 
   fetch(url: string, method: string, payload: RequestPayload): Promise<Response> {
-    const { dateRange, ...restPayload } = payload;
+    const { bbox, dateRange, ...restPayload } = payload;
 
     return fetch(url, {
       method,
@@ -39,6 +60,7 @@ class StacApi {
       },
       body: JSON.stringify({
         ...restPayload,
+        bbox: this.fixBboxCoordinateOrder(bbox),
         datetime: this.makeDatetimePayload(dateRange)
       })
     });

@@ -30,6 +30,22 @@ describe('useStacSearch', () => {
     expect(result.current.results).toEqual({ data: '12345' });
   });
 
+  it('includes Bbox in search in correct order', async () => {
+    fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useStacSearch(stacApi)
+    );
+
+    act(() => result.current.setBbox([0.30, 51.74, -0.59, 51.24]));
+    act(() => result.current.submit());
+    await waitForNextUpdate();
+
+    const postPayload = parseRequestPayload(fetch.mock.calls[0][1]);
+    expect(postPayload).toEqual({ bbox: [-0.59, 51.24, 0.30, 51.74] });
+    expect(result.current.results).toEqual({ data: '12345' });
+  });
+
   it('includes Collections in search', async () => {
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
 
