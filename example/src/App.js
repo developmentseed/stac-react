@@ -3,9 +3,9 @@ import Main from "./pages/Main";
 
 function App() {
   return (
-    <div className="App">
+    <div className="App h-screen grid grid-rows-[min-content_1fr]">
       <Header />
-      <main>
+      <main className="flex items-stretch">
         <Main />
       </main>
     </div>

@@ -7,6 +7,8 @@ import StaticMode from '@mapbox/mapbox-gl-draw-static-mode';
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
+import { TItemList } from './proptypes';
+
 
 mapbox.accessToken = process.env.REACT_APP_MAPBOX_TOKEN || '';
 
@@ -34,7 +36,7 @@ const addDrawControl = (map, drawingCompleted) => {
   return draw;
 };
 
-function Map ({ className, isBboxDrawEnabled, handleDrawComplete }) {
+function Map ({ className, isBboxDrawEnabled, handleDrawComplete, items }) {
   const mapContainerRef = useRef();
   const drawControleRef = useRef();
   const [ map, setMap ] = useState();
@@ -50,9 +52,26 @@ function Map ({ className, isBboxDrawEnabled, handleDrawComplete }) {
       attributionControl: true,
     });
 
-    const onLoad = () => setMap(m);
+    const onLoad = () => {
+      setMap(m);
+        m.addSource('items', {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: []}
+      });
+
+      m.addLayer({
+        'id': 'items',
+        'type': 'line',
+        'source': 'items',
+        'layout': {},
+        'paint': {
+          'line-color': '#0080ff',
+          'line-width': 1
+        }
+      });
+    };
     m.on('load', onLoad);
-    drawControleRef.current = addDrawControl(m, handleDrawComplete)
+    drawControleRef.current = addDrawControl(m, handleDrawComplete);
 
     return () => {
       m.off('load', onLoad);
@@ -70,13 +89,24 @@ function Map ({ className, isBboxDrawEnabled, handleDrawComplete }) {
     }
   }, [isBboxDrawEnabled, map]);
 
-  return <div ref={mapContainerRef} id='map' className={`h-screen ${className}`}>Map</div>
+  useEffect(() => {
+    if(map) {
+      if(items) {
+        map.getSource('items').setData(items)
+      } else {
+        map.getSource('items').setData({ type: 'FeatureCollection', features: []})
+      }
+    }
+  }, [items, map]);
+
+  return <div ref={mapContainerRef} id='map' className={`flex items-stretch ${className}`}>Map</div>
 }
 
 Map.propTypes = {
   className: T.string,
   isBboxDrawEnabled: T.bool,
-  handleDrawComplete: T.func.isRequired
+  handleDrawComplete: T.func.isRequired,
+  item: TItemList
 };
 
 export default Map;

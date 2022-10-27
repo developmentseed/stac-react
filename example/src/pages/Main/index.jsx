@@ -28,8 +28,6 @@ function Main() {
     setBbox(bbox);
   }, [setBbox]);
 
-  console.log(results);
-
   return (
     <div className='grid grid-cols-4 gap-4 m-4'>
       <QueryBuilder
@@ -42,11 +40,12 @@ function Main() {
         dateRangeTo={dateRangeTo}
         setDateRangeTo={setDateRangeTo}
       />
-      <ItemList />
+      <ItemList items={results} />
       <Map
         className='col-span-2'
         isBboxDrawEnabled={isBboxDrawEnabled}
         handleDrawComplete={handleDrawComplete}
+        items={results}
       />
     </div>
   );
