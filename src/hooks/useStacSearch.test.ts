@@ -110,4 +110,19 @@ describe('useStacSearch', () => {
     expect(postPayload).toEqual({ datetime: '../2022-05-17' });
     expect(result.current.results).toEqual({ data: '12345' });
   });
+
+  it('sets state', async () => {
+    fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useStacSearch(stacApi)
+    );
+
+    act(() => result.current.setDateRangeTo('2022-05-17'));
+    act(() => result.current.submit());
+    expect(result.current.state).toEqual('LOADING');
+    await waitForNextUpdate();
+    expect(result.current.results).toEqual({ data: '12345' });
+    expect(result.current.state).toEqual('IDLE');
+  });
 });

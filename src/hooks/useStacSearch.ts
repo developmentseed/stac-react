@@ -9,6 +9,8 @@ type SearchResponse = {
   links: Link[]
 }
 
+type LoadingState = 'IDLE' | 'LOADING';
+
 type StacSearchHook = {
   bbox?: Bbox
   setBbox: (bbox: Bbox) => void
@@ -20,6 +22,7 @@ type StacSearchHook = {
   setDateRangeTo: (date: string) => void
   submit: () => void
   results?: SearchResponse
+  state: LoadingState;
 }
 
 function useStacSearch(stacApi: StacApi): StacSearchHook {
@@ -28,6 +31,7 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
   const [ collections, setCollections ] = useState<CollectionIdList>();
   const [ dateRangeFrom, setDateRangeFrom ] = useState<string>('');
   const [ dateRangeTo, setDateRangeTo ] = useState<string>('');
+  const [ state, setState ] = useState<LoadingState>('IDLE');
   
   const submit = useCallback(
     () => {
@@ -37,9 +41,12 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
         dateRange: { from: dateRangeFrom, to: dateRangeTo }
       };
   
+      setResults(undefined);
+      setState('LOADING');
       stacApi.search(payload)
         .then(response => response.json())
-        .then(data => setResults(data));
+        .then(data => setResults(data))
+        .finally(() => setState('IDLE'));
     }, [stacApi, bbox, collections, dateRangeFrom, dateRangeTo]
   );
 
@@ -53,7 +60,8 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
     setDateRangeFrom,
     dateRangeTo,
     setDateRangeTo,
-    results
+    results,
+    state
   };
 }
 
