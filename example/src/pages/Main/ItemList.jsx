@@ -6,11 +6,12 @@ import Panel from "../../layout/Panel";
 
 
 
-function ItemList ({ items, isLoading }) {
+function ItemList ({ items, isLoading, error }) {
   return (
     <Panel>
       <H2>Item List</H2>
       {isLoading && (<p>Loading...</p>)}
+      {error && (<p>{ error }</p>)}
       {items && (
         <ul>
           {items.features.map(({ id }) => (
@@ -24,7 +25,8 @@ function ItemList ({ items, isLoading }) {
 
 ItemList.propTypes = {
   items: TItemList,
-  isLoading: T.bool
+  isLoading: T.bool,
+  error: T.string
 }
 
 export default ItemList;

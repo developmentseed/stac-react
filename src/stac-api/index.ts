@@ -1,4 +1,4 @@
-import type { Bbox, CollectionIdList, DateRange } from '../types';
+import type { Bbox, CollectionIdList, DateRange, ApiError } from '../types';
 
 type SearchPayload = {
   bbox?: Bbox,
@@ -50,6 +50,24 @@ class StacApi {
     }
   }
 
+  async handleError(response: Response) {
+    const { status, statusText } = response;
+    const e: ApiError = {
+      status,
+      statusText
+    };
+
+    // Some STAC APIs return errors as JSON others as string. 
+    // Clone the response so we can read the body as text if json fails. 
+    const clone = response.clone();
+    try {
+      e.detail = await response.json(); 
+    } catch (err) {
+      e.detail = await clone.text();
+    }      
+    return Promise.reject(e);
+  }
+
   fetch(url: string, method: string, payload: RequestPayload): Promise<Response> {
     const { bbox, dateRange, ...restPayload } = payload;
 
@@ -63,6 +81,12 @@ class StacApi {
         bbox: this.fixBboxCoordinateOrder(bbox),
         datetime: this.makeDatetimePayload(dateRange)
       })
+    }).then(async (response) => {
+      if (response.ok) {
+        return response;
+      }
+
+      return this.handleError(response);
     });
   }
 

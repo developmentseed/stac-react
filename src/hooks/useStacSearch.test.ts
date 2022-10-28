@@ -125,4 +125,36 @@ describe('useStacSearch', () => {
     expect(result.current.results).toEqual({ data: '12345' });
     expect(result.current.state).toEqual('IDLE');
   });
+
+  it('handles error with JSON response', async () => {
+    fetch.mockResponseOnce(JSON.stringify({ error: 'Wrong query' }), { status: 400, statusText: 'Bad Request' });
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useStacSearch(stacApi)
+    );
+
+    act(() => result.current.submit());
+    await waitForNextUpdate();
+    expect(result.current.error).toEqual({
+      status: 400,
+      statusText: 'Bad Request',
+      detail: { error: 'Wrong query' }
+    });
+  });
+
+  it('handles error with JSON response', async () => {
+    fetch.mockResponseOnce('Wrong query', { status: 400, statusText: 'Bad Request' });
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useStacSearch(stacApi)
+    );
+
+    act(() => result.current.submit());
+    await waitForNextUpdate();
+    expect(result.current.error).toEqual({
+      status: 400,
+      statusText: 'Bad Request',
+      detail: 'Wrong query'
+    });
+  });
 });

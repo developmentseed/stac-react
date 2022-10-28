@@ -41,3 +41,9 @@ export type Item = {
   links: Link[]
   assets: ItemAsset[]
 }
+
+export type ApiError = {
+  detail?: GenericObject | string
+  status: number,
+  statusText: string
+}

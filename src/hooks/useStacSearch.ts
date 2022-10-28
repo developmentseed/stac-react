@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import StacApi from '../stac-api';
 
-import type { Link, Item, Bbox, CollectionIdList } from '../types';
+import type { Link, Item, Bbox, CollectionIdList, ApiError } from '../types';
 
 type SearchResponse = {
   type: 'FeatureCollection'
@@ -23,6 +23,7 @@ type StacSearchHook = {
   submit: () => void
   results?: SearchResponse
   state: LoadingState;
+  error: ApiError | undefined
 }
 
 function useStacSearch(stacApi: StacApi): StacSearchHook {
@@ -32,6 +33,7 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
   const [ dateRangeFrom, setDateRangeFrom ] = useState<string>('');
   const [ dateRangeTo, setDateRangeTo ] = useState<string>('');
   const [ state, setState ] = useState<LoadingState>('IDLE');
+  const [ error, setError ] = useState<ApiError>();
   
   const submit = useCallback(
     () => {
@@ -43,9 +45,11 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
   
       setResults(undefined);
       setState('LOADING');
+      setError(undefined);
       stacApi.search(payload)
         .then(response => response.json())
         .then(data => setResults(data))
+        .catch((err) => setError(err))
         .finally(() => setState('IDLE'));
     }, [stacApi, bbox, collections, dateRangeFrom, dateRangeTo]
   );
@@ -61,7 +65,8 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
     dateRangeTo,
     setDateRangeTo,
     results,
-    state
+    state,
+    error
   };
 }
 
