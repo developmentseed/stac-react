@@ -20,7 +20,7 @@ export type Link = {
   length?: number
   method?: string
   headers?: GenericObject
-  body?: GenericObject
+  body?: SearchPayload
   merge?: boolean
 }
 
@@ -46,4 +46,10 @@ export type ApiError = {
   detail?: GenericObject | string
   status: number,
   statusText: string
+}
+
+export type SearchPayload = {
+  bbox?: Bbox,
+  collections?: CollectionIdList,
+  dateRange?: DateRange
 }

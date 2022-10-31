@@ -1,10 +1,4 @@
-import type { Bbox, CollectionIdList, DateRange, ApiError } from '../types';
-
-type SearchPayload = {
-  bbox?: Bbox,
-  collections?: CollectionIdList,
-  dateRange?: DateRange
-}
+import type { Bbox, SearchPayload, DateRange, ApiError } from '../types';
 
 type RequestPayload = SearchPayload;
 
@@ -79,7 +73,8 @@ class StacApi {
       body: JSON.stringify({
         ...restPayload,
         bbox: this.fixBboxCoordinateOrder(bbox),
-        datetime: this.makeDatetimePayload(dateRange)
+        datetime: this.makeDatetimePayload(dateRange),
+        limit: 25
       })
     }).then(async (response) => {
       if (response.ok) {

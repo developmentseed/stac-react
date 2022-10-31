@@ -26,7 +26,7 @@ describe('useStacSearch', () => {
     await waitForNextUpdate();
 
     const postPayload = parseRequestPayload(fetch.mock.calls[0][1]);
-    expect(postPayload).toEqual({ bbox: [-0.59, 51.24, 0.30, 51.74] });
+    expect(postPayload).toEqual({ bbox: [-0.59, 51.24, 0.30, 51.74], limit: 25 });
     expect(result.current.results).toEqual({ data: '12345' });
   });
 
@@ -42,7 +42,7 @@ describe('useStacSearch', () => {
     await waitForNextUpdate();
 
     const postPayload = parseRequestPayload(fetch.mock.calls[0][1]);
-    expect(postPayload).toEqual({ bbox: [-0.59, 51.24, 0.30, 51.74] });
+    expect(postPayload).toEqual({ bbox: [-0.59, 51.24, 0.30, 51.74], limit: 25 });
     expect(result.current.results).toEqual({ data: '12345' });
   });
 
@@ -58,7 +58,7 @@ describe('useStacSearch', () => {
     await waitForNextUpdate();
 
     const postPayload = parseRequestPayload(fetch.mock.calls[0][1]);
-    expect(postPayload).toEqual({ collections: ['wildfire', 'surface_temp'] });
+    expect(postPayload).toEqual({ collections: ['wildfire', 'surface_temp'], limit: 25 });
     expect(result.current.results).toEqual({ data: '12345' });
   });
 
@@ -75,7 +75,7 @@ describe('useStacSearch', () => {
     await waitForNextUpdate();
 
     const postPayload = parseRequestPayload(fetch.mock.calls[0][1]);
-    expect(postPayload).toEqual({ datetime: '2022-01-17/2022-05-17' });
+    expect(postPayload).toEqual({ datetime: '2022-01-17/2022-05-17', limit: 25 });
     expect(result.current.results).toEqual({ data: '12345' });
   });
 
@@ -91,7 +91,7 @@ describe('useStacSearch', () => {
     await waitForNextUpdate();
 
     const postPayload = parseRequestPayload(fetch.mock.calls[0][1]);
-    expect(postPayload).toEqual({ datetime: '2022-01-17/..' });
+    expect(postPayload).toEqual({ datetime: '2022-01-17/..', limit: 25 });
     expect(result.current.results).toEqual({ data: '12345' });
   });
 
@@ -107,7 +107,7 @@ describe('useStacSearch', () => {
     await waitForNextUpdate();
 
     const postPayload = parseRequestPayload(fetch.mock.calls[0][1]);
-    expect(postPayload).toEqual({ datetime: '../2022-05-17' });
+    expect(postPayload).toEqual({ datetime: '../2022-05-17', limit: 25 });
     expect(result.current.results).toEqual({ data: '12345' });
   });
 
@@ -156,5 +156,73 @@ describe('useStacSearch', () => {
       statusText: 'Bad Request',
       detail: 'Wrong query'
     });
+  });
+
+  it('includes nextPage callback', async () => {
+    const response = {
+      links: [{
+        rel: 'next',
+        type: 'application/geo+json',
+        method: 'POST',
+        href: 'https://example.com/stac/search',
+        body: {
+          limit: 25,
+          token: 'next:abc123'
+        }
+      }]
+    };
+    fetch.mockResponseOnce(JSON.stringify(response));
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useStacSearch(stacApi)
+    );
+
+    act(() => result.current.setDateRangeTo('2022-05-17'));
+    act(() => result.current.submit());
+    await waitForNextUpdate(); // wait to set results
+    expect(result.current.results).toEqual(response);
+    expect(result.current.nextPage).toBeDefined();
+
+    fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
+    act(() => result.current.nextPage && result.current.nextPage());
+    await waitForNextUpdate();
+
+    const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
+    expect(result.current.results).toEqual({ data: '12345' });
+    expect(postPayload).toEqual(response.links[0].body);
+  });
+
+  it('includes nextPage callback', async () => {
+    const response = {
+      links: [{
+        rel: 'prev',
+        type: 'application/geo+json',
+        method: 'POST',
+        href: 'https://example.com/stac/search',
+        body: {
+          limit: 25,
+          token: 'prev:abc123'
+        }
+      }]
+    };
+    fetch.mockResponseOnce(JSON.stringify(response));
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useStacSearch(stacApi)
+    );
+
+    act(() => result.current.setDateRangeTo('2022-05-17'));
+    act(() => result.current.submit());
+    await waitForNextUpdate(); // wait to set results
+    expect(result.current.results).toEqual(response);
+    expect(result.current.previousPage).toBeDefined();
+
+    fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
+    act(() => result.current.previousPage && result.current.previousPage());
+    await waitForNextUpdate();
+
+    const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
+    expect(result.current.results).toEqual({ data: '12345' });
+    expect(postPayload).toEqual(response.links[0].body);
   });
 });
