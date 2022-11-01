@@ -69,7 +69,8 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
         setNextPage(() => () => loadNewPage(nextPageLink));
       }
 
-      const previousPageLink = links.find(({ rel }) => rel === 'prev');
+      // Turns not all STAC APIs implement the spec correctly, some advertise the prev link as previous
+      const previousPageLink = links.find(({ rel }) => ['prev', 'previous'].includes(rel));
       if (previousPageLink) {
         setPreviousPage(() => () => loadNewPage(previousPageLink));
       }

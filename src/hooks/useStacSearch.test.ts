@@ -192,10 +192,44 @@ describe('useStacSearch', () => {
     expect(postPayload).toEqual(response.links[0].body);
   });
 
-  it('includes nextPage callback', async () => {
+  it('includes previousPage callback', async () => {
     const response = {
       links: [{
         rel: 'prev',
+        type: 'application/geo+json',
+        method: 'POST',
+        href: 'https://example.com/stac/search',
+        body: {
+          limit: 25,
+          token: 'prev:abc123'
+        }
+      }]
+    };
+    fetch.mockResponseOnce(JSON.stringify(response));
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useStacSearch(stacApi)
+    );
+
+    act(() => result.current.setDateRangeTo('2022-05-17'));
+    act(() => result.current.submit());
+    await waitForNextUpdate(); // wait to set results
+    expect(result.current.results).toEqual(response);
+    expect(result.current.previousPage).toBeDefined();
+
+    fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
+    act(() => result.current.previousPage && result.current.previousPage());
+    await waitForNextUpdate();
+
+    const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
+    expect(result.current.results).toEqual({ data: '12345' });
+    expect(postPayload).toEqual(response.links[0].body);
+  });
+
+  it('includes previousPage callback (previous edition)', async () => {
+    const response = {
+      links: [{
+        rel: 'previous',
         type: 'application/geo+json',
         method: 'POST',
         href: 'https://example.com/stac/search',
