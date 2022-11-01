@@ -11,7 +11,7 @@ const DefaultButtonType = {
   className: T.string,
 }
 
-function Button({ type, className, children, onClick }) {
+export function Button({ type, className, children, onClick }) {
   return (
     <button
       type={type}

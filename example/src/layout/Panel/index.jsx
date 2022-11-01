@@ -1,7 +1,7 @@
 import T from 'prop-types';
 
 function Panel({ children, className }) {
-  return <div className={`bg-slate-100 p-4 overflow-x-clip overflow-y-auto ${className}`}>{ children }</div>;
+  return <div className={`bg-slate-100 p-4 ${className}`}>{ children }</div>;
 }
 
 Panel.propTypes = {

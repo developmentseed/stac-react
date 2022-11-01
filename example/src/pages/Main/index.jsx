@@ -19,7 +19,9 @@ function Main() {
     submit,
     results,
     state,
-    error
+    error,
+    nextPage,
+    previousPage
   } = useStacSearch(stacApi);
 
   const handleDrawComplete = useCallback((feature) => {
@@ -42,7 +44,13 @@ function Main() {
         dateRangeTo={dateRangeTo}
         setDateRangeTo={setDateRangeTo}
       />
-      <ItemList items={results} isLoading={state === 'LOADING'} error={error && 'Error loading results'} />
+      <ItemList
+        items={results}
+        isLoading={state === 'LOADING'}
+        error={error && 'Error loading results'}
+        nextPage={nextPage}
+        previousPage={previousPage}
+      />
       <Map
         className='col-span-2'
         isBboxDrawEnabled={isBboxDrawEnabled}
