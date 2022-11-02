@@ -38,43 +38,55 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
   const [ dateRangeTo, setDateRangeTo ] = useState<string>('');
   const [ state, setState ] = useState<LoadingState>('IDLE');
   const [ error, setError ] = useState<ApiError>();
-  const [ nextPage, setNextPage ] = useState<PaginationHandler>();
-  const [ previousPage, setPreviousPage ] = useState<PaginationHandler>();
 
-  const loadNewPage = useCallback(
-    (link: Link) => {
-      const payload = link.body as SearchPayload;
-  
+  const [ nextPageConfig, setNextPageConfig ] = useState<Link>();
+  const [ previousPageConfig, setPreviousPageConfig ] = useState<Link>();
+
+  const setPaginationConfig = useCallback(
+    (links: Link[]) => {
+      setNextPageConfig(links.find(({ rel }) => rel === 'next'));
+      setPreviousPageConfig(links.find(({ rel }) => ['prev', 'previous'].includes(rel)));
+    }, []
+  );
+
+  const executeSearch = useCallback(
+    (payload: SearchPayload) => {
       setResults(undefined);
       setState('LOADING');
       setError(undefined);
-      setNextPage(undefined);
-      setPreviousPage(undefined);
+      setNextPageConfig(undefined);
+      setPreviousPageConfig(undefined);
+
       stacApi.search(payload)
         .then(response => response.json())
         .then(data => {
           setResults(data);
-          parsePagination(data.links);
+          setPaginationConfig(data.links);
         })
         .catch((err) => setError(err))
         .finally(() => setState('IDLE'));
     },
-    []
+    [stacApi, setPaginationConfig]
   );
 
-  const parsePagination = useCallback(
-    (links: Link[]) => {
-      const nextPageLink = links.find(({ rel }) => rel === 'next');
-      if (nextPageLink) {
-        setNextPage(() => () => loadNewPage(nextPageLink));
+  const flipPage = useCallback(
+    (link?: Link) => {
+      if (link) {
+        const payload = link.body as SearchPayload;
+        executeSearch(payload);
       }
+    },
+    [executeSearch]
+  );
 
-      // Turns not all STAC APIs implement the spec correctly, some advertise the prev link as previous
-      const previousPageLink = links.find(({ rel }) => ['prev', 'previous'].includes(rel));
-      if (previousPageLink) {
-        setPreviousPage(() => () => loadNewPage(previousPageLink));
-      }
-    }, [loadNewPage]
+  const nextPageFn = useCallback(
+    () => flipPage(nextPageConfig),
+    [flipPage, nextPageConfig]
+  );
+
+  const previousPageFn = useCallback(
+    () => flipPage(previousPageConfig),
+    [flipPage, previousPageConfig]
   );
   
   const submit = useCallback(
@@ -84,21 +96,8 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
         collections,
         dateRange: { from: dateRangeFrom, to: dateRangeTo }
       };
-  
-      setResults(undefined);
-      setState('LOADING');
-      setError(undefined);
-      setNextPage(undefined);
-      setPreviousPage(undefined);
-      stacApi.search(payload)
-        .then(response => response.json())
-        .then(data => {
-          setResults(data);
-          parsePagination(data.links);
-        })
-        .catch((err) => setError(err))
-        .finally(() => setState('IDLE'));
-    }, [stacApi, bbox, collections, dateRangeFrom, dateRangeTo, parsePagination]
+      executeSearch(payload); 
+    }, [executeSearch, bbox, collections, dateRangeFrom, dateRangeTo]
   );
 
   return {
@@ -114,8 +113,8 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
     results,
     state,
     error,
-    nextPage,
-    previousPage
+    nextPage: nextPageConfig ? nextPageFn : undefined,
+    previousPage: previousPageConfig ? previousPageFn : undefined
   };
 }
 
