@@ -1,7 +1,15 @@
 import { useCallback, useState } from 'react';
 import StacApi from '../stac-api';
 
-import type { Link, Item, Bbox, CollectionIdList, ApiError, SearchPayload } from '../types';
+import type {
+  Link,
+  Item,
+  Bbox,
+  CollectionIdList,
+  ApiError,
+  SearchPayload,
+  LinkBody
+} from '../types';
 
 type SearchResponse = {
   type: 'FeatureCollection'
@@ -49,6 +57,15 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
     }, []
   );
 
+  const getSearchPayload = useCallback(
+    () => ({
+      bbox,
+      collections,
+      dateRange: { from: dateRangeFrom, to: dateRangeTo }
+    }),
+    [ bbox, collections, dateRangeFrom, dateRangeTo ]
+  );
+
   const executeSearch = useCallback(
     (payload: SearchPayload) => {
       setResults(undefined);
@@ -72,11 +89,17 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
   const flipPage = useCallback(
     (link?: Link) => {
       if (link) {
-        const payload = link.body as SearchPayload;
+        let payload = link.body as LinkBody;
+        if (payload.merge) {
+          payload = {
+            ...payload,
+            ...getSearchPayload()
+          };
+        }
         executeSearch(payload);
       }
     },
-    [executeSearch]
+    [executeSearch, getSearchPayload]
   );
 
   const nextPageFn = useCallback(
@@ -91,13 +114,9 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
   
   const submit = useCallback(
     () => {
-      const payload = {
-        bbox,
-        collections,
-        dateRange: { from: dateRangeFrom, to: dateRangeTo }
-      };
+      const payload = getSearchPayload();
       executeSearch(payload); 
-    }, [executeSearch, bbox, collections, dateRangeFrom, dateRangeTo]
+    }, [executeSearch, getSearchPayload]
   );
 
   return {

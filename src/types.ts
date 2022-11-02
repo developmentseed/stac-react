@@ -11,6 +11,16 @@ export type DateRange = {
   to?: string
 }
 
+export type SearchPayload = {
+  bbox?: Bbox,
+  collections?: CollectionIdList,
+  dateRange?: DateRange,
+}
+
+export type LinkBody = SearchPayload & {
+  merge?: boolean
+}
+
 export type Link = {
   href: string
   rel: string
@@ -20,7 +30,7 @@ export type Link = {
   length?: number
   method?: string
   headers?: GenericObject
-  body?: SearchPayload
+  body?: LinkBody
   merge?: boolean
 }
 
@@ -46,10 +56,4 @@ export type ApiError = {
   detail?: GenericObject | string
   status: number,
   statusText: string
-}
-
-export type SearchPayload = {
-  bbox?: Bbox,
-  collections?: CollectionIdList,
-  dateRange?: DateRange
 }
