@@ -1,6 +1,6 @@
 import type { Geometry } from 'geojson';
 
-type GenericObject = {
+export type GenericObject = {
   [key: string]: any  // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 

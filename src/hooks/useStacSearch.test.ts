@@ -297,4 +297,41 @@ describe('useStacSearch', () => {
       ...response.links[0].body
     });
   });
+
+  it('sends pagination header', async () => {
+    const response = {
+      links: [{
+        rel: 'previous',
+        type: 'application/geo+json',
+        method: 'POST',
+        href: 'https://example.com/stac/search',
+        body: {
+          limit: 25,
+          token: 'prev:abc123'
+        },
+        headers: {
+          next: '123abc'
+        }
+      }]
+    };
+    fetch.mockResponseOnce(JSON.stringify(response));
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useStacSearch(stacApi)
+    );
+
+    act(() => result.current.setBbox([-0.59, 51.24, 0.30, 51.74]));
+    act(() => result.current.submit());
+    await waitForNextUpdate(); // wait to set results
+    expect(result.current.results).toEqual(response);
+    expect(result.current.previousPage).toBeDefined();
+
+    fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
+    act(() => result.current.previousPage && result.current.previousPage());
+    await waitForNextUpdate();
+
+    expect(result.current.results).toEqual({ data: '12345' });
+    const postHeader = fetch.mock.calls[1][1]?.headers;
+    expect(postHeader).toEqual({ 'Content-Type': 'application/json', next: '123abc' });
+  });
 });

@@ -67,14 +67,14 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
   );
 
   const executeSearch = useCallback(
-    (payload: SearchPayload) => {
+    (payload: SearchPayload, headers = {}) => {
       setResults(undefined);
       setState('LOADING');
       setError(undefined);
       setNextPageConfig(undefined);
       setPreviousPageConfig(undefined);
 
-      stacApi.search(payload)
+      stacApi.search(payload, headers)
         .then(response => response.json())
         .then(data => {
           setResults(data);
@@ -96,7 +96,7 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
             ...getSearchPayload()
           };
         }
-        executeSearch(payload);
+        executeSearch(payload, link.headers);
       }
     },
     [executeSearch, getSearchPayload]

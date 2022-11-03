@@ -1,6 +1,11 @@
-import type { Bbox, SearchPayload, DateRange, ApiError } from '../types';
+import type { Bbox, SearchPayload, DateRange, ApiError, GenericObject } from '../types';
 
 type RequestPayload = SearchPayload;
+type FetchOptions = {
+  method: string,
+  payload: RequestPayload,
+  headers: GenericObject
+}
 
 class StacApi {
   baseUrl: string;
@@ -62,13 +67,15 @@ class StacApi {
     return Promise.reject(e);
   }
 
-  fetch(url: string, method: string, payload: RequestPayload): Promise<Response> {
+  fetch(url: string, options: FetchOptions): Promise<Response> {
+    const { method, payload, headers } = options;
     const { bbox, dateRange, ...restPayload } = payload;
 
     return fetch(url, {
       method,
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        ...headers
       },
       body: JSON.stringify({
         ...restPayload,
@@ -85,8 +92,8 @@ class StacApi {
     });
   }
 
-  search(payload: SearchPayload): Promise<Response> {
-    return this.fetch(`${this.baseUrl}/search`, 'POST', payload);
+  search(payload: SearchPayload, headers = {}): Promise<Response> {
+    return this.fetch(`${this.baseUrl}/search`, { method: 'POST', payload, headers });
   }
 }
 
