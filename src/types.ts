@@ -57,3 +57,5 @@ export type ApiError = {
   status: number,
   statusText: string
 }
+
+export type LoadingState = 'IDLE' | 'LOADING';

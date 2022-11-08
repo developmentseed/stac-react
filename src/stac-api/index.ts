@@ -2,9 +2,9 @@ import type { Bbox, SearchPayload, DateRange, ApiError, GenericObject } from '..
 
 type RequestPayload = SearchPayload;
 type FetchOptions = {
-  method: string,
-  payload: RequestPayload,
-  headers: GenericObject
+  method?: string,
+  payload?: RequestPayload,
+  headers?: GenericObject
 }
 
 class StacApi {
@@ -67,9 +67,8 @@ class StacApi {
     return Promise.reject(e);
   }
 
-  fetch(url: string, options: FetchOptions): Promise<Response> {
-    const { method, payload, headers } = options;
-    const { bbox, dateRange, ...restPayload } = payload;
+  fetch(url: string, options: Partial<FetchOptions> = {}): Promise<Response> {
+    const { method = 'GET', payload = {}, headers = {} } = options;
 
     return fetch(url, {
       method,
@@ -77,12 +76,7 @@ class StacApi {
         'Content-Type': 'application/json',
         ...headers
       },
-      body: JSON.stringify({
-        ...restPayload,
-        bbox: this.fixBboxCoordinateOrder(bbox),
-        datetime: this.makeDatetimePayload(dateRange),
-        limit: 25
-      })
+      body: JSON.stringify(payload)
     }).then(async (response) => {
       if (response.ok) {
         return response;
@@ -93,7 +87,17 @@ class StacApi {
   }
 
   search(payload: SearchPayload, headers = {}): Promise<Response> {
-    return this.fetch(`${this.baseUrl}/search`, { method: 'POST', payload, headers });
+    const { bbox, dateRange, ...restPayload } = payload;
+    const requestPayload = {
+      ...restPayload,
+      bbox: this.fixBboxCoordinateOrder(bbox),
+      datetime: this.makeDatetimePayload(dateRange),
+      limit: 25
+    };
+    return this.fetch(
+      `${this.baseUrl}/search`,
+      { method: 'POST', payload: requestPayload, headers }
+    );
   }
 }
 

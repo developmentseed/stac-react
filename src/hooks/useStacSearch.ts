@@ -8,7 +8,8 @@ import type {
   CollectionIdList,
   ApiError,
   SearchPayload,
-  LinkBody
+  LinkBody,
+  LoadingState
 } from '../types';
 
 type SearchResponse = {
@@ -16,8 +17,6 @@ type SearchResponse = {
   features: Item[]
   links: Link[]
 }
-
-type LoadingState = 'IDLE' | 'LOADING';
 
 type PaginationHandler = () => void;
 
