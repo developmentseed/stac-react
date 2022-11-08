@@ -68,7 +68,7 @@ class StacApi {
   }
 
   fetch(url: string, options: Partial<FetchOptions> = {}): Promise<Response> {
-    const { method = 'GET', payload = {}, headers = {} } = options;
+    const { method = 'GET', payload, headers = {} } = options;
 
     return fetch(url, {
       method,
@@ -76,7 +76,7 @@ class StacApi {
         'Content-Type': 'application/json',
         ...headers
       },
-      body: JSON.stringify(payload)
+      body: payload ? JSON.stringify(payload) : undefined
     }).then(async (response) => {
       if (response.ok) {
         return response;
@@ -98,6 +98,10 @@ class StacApi {
       `${this.baseUrl}/search`,
       { method: 'POST', payload: requestPayload, headers }
     );
+  }
+
+  getCollections(): Promise<Response> {
+    return this.fetch(`${this.baseUrl}/collections`);
   }
 }
 
