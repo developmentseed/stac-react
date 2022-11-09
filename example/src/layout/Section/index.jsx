@@ -1,7 +1,7 @@
 import T from 'prop-types';
 
 function Section({ children, className }) {
-  return <div className={`my-8 ${className}`}>{ children }</div>;
+  return <div className={`${className}`}>{ children }</div>;
 }
 
 Section.propTypes = {

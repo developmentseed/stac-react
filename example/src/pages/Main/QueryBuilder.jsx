@@ -1,5 +1,7 @@
 import T from 'prop-types';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
+
+import { useCollections, StacApi } from "stac-react";
 
 import { PrimaryButton } from "../../components/buttons";
 import { Checkbox, Legend } from '../../components/form';
@@ -7,11 +9,9 @@ import { H2 } from "../../components/headers";
 import Panel from "../../layout/Panel";
 import Section from '../../layout/Section';
 
-import { collectionsOptions } from '../../config';
-
 function QueryBuilder ({
   setIsBboxDrawEnabled,
-  collections,
+  collections: selectedCollections,
   setCollections,
   handleSubmit,
   dateRangeFrom,
@@ -20,25 +20,33 @@ function QueryBuilder ({
   setDateRangeTo
 }) {
   const handleEnableBbox = useCallback(() => setIsBboxDrawEnabled(true), [setIsBboxDrawEnabled]);
-
+  
   const handleRangeFromChange = useCallback((e) => setDateRangeFrom(e.target.value), [setDateRangeFrom]);
   const handleRangeToChange = useCallback((e) => setDateRangeTo(e.target.value), [setDateRangeTo]);
+  
+  const stacApi = useMemo(() => new StacApi(process.env.REACT_APP_STAC_API), []);
+  const { collections } = useCollections(stacApi);
+
+  const collectionOptions = useMemo(
+    () => collections ? collections.collections.map(({ id, title }) => ({ value: id, label: title})) : [],
+    [collections]
+  );
 
   return (
-    <Panel>
-      <H2>Query Builder</H2>
+    <Panel className="py-4 grid grid-rows-[min-content_auto_min-content_min-content_min-content] gap-4 h-[calc(100vh_-_90px)]">
+      <H2 className="px-4">Query Builder</H2>
 
-      <Section>
+      <Section className="px-4 overflow-x-hidden overflow-y-auto">
         <Checkbox
           label="Select Collections"
           name="collections"
-          options={collectionsOptions}
-          values={collections}
+          options={collectionOptions}
+          values={selectedCollections}
           onChange={setCollections}
         />
       </Section>
 
-      <Section>
+      <Section className="px-4">
         <fieldset>
           <Legend>Select Date Range</Legend>
           <label htmlFor='date_from'>From</label>
@@ -48,11 +56,11 @@ function QueryBuilder ({
         </fieldset>
       </Section>
 
-      <Section>
+      <Section className="px-4">
         <PrimaryButton onClick={handleEnableBbox}>Set bbox</PrimaryButton>
       </Section>
 
-      <Section>
+      <Section className="px-4">
         <PrimaryButton onClick={handleSubmit}>Submit</PrimaryButton>
       </Section>
     </Panel>

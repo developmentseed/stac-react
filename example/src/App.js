@@ -3,7 +3,7 @@ import Main from "./pages/Main";
 
 function App() {
   return (
-    <div className="App h-screen grid grid-rows-[min-content_1fr]">
+    <div className="App grid grid-rows-[min-content_1fr]">
       <Header />
       <main className="flex items-stretch">
         <Main />

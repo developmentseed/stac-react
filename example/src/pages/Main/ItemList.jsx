@@ -29,7 +29,7 @@ PaginationButton.propTypes = {
 
 function ItemList ({ items, isLoading, error, nextPage, previousPage }) {
   return (
-    <Panel className="grid grid-rows-[1fr_min-content]">
+    <Panel className="grid grid-rows-[1fr_min-content] p-4">
       <div className="overflow-x-clip">
         <H2>Item List</H2>
         {isLoading && (<p>Loading...</p>)}

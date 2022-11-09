@@ -7,7 +7,7 @@ import QueryBuilder from "./QueryBuilder";
 
 function Main() {
   const [isBboxDrawEnabled, setIsBboxDrawEnabled] = useState(false);
-  const stacApi = new StacApi(process.env.REACT_APP_STAC_API)
+  const stacApi = new StacApi(process.env.REACT_APP_STAC_API);
   const {
     setBbox,
     collections,
