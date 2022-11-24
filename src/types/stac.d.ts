@@ -1,8 +1,5 @@
 import type { Geometry } from 'geojson';
-
-export type GenericObject = {
-  [key: string]: any  // eslint-disable-line @typescript-eslint/no-explicit-any
-}
+import type { GenericObject } from '.';
 
 export type Bbox = [number, number, number, number];
 export type CollectionIdList = string[];
@@ -19,6 +16,12 @@ export type SearchPayload = {
 
 export type LinkBody = SearchPayload & {
   merge?: boolean
+}
+
+export type SearchResponse = {
+  type: 'FeatureCollection'
+  features: Item[]
+  links: Link[]
 }
 
 export type Link = {
@@ -51,11 +54,3 @@ export type Item = {
   links: Link[]
   assets: ItemAsset[]
 }
-
-export type ApiError = {
-  detail?: GenericObject | string
-  status: number,
-  statusText: string
-}
-
-export type LoadingState = 'IDLE' | 'LOADING';

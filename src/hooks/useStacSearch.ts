@@ -1,22 +1,15 @@
 import { useCallback, useState } from 'react';
 import StacApi from '../stac-api';
 
+import type { ApiError, LoadingState } from '../types';
 import type {
   Link,
-  Item,
   Bbox,
   CollectionIdList,
-  ApiError,
   SearchPayload,
+  SearchResponse,
   LinkBody,
-  LoadingState
-} from '../types';
-
-type SearchResponse = {
-  type: 'FeatureCollection'
-  features: Item[]
-  links: Link[]
-}
+} from '../types/stac';
 
 type PaginationHandler = () => void;
 

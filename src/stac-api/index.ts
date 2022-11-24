@@ -1,4 +1,5 @@
-import type { Bbox, SearchPayload, DateRange, ApiError, GenericObject } from '../types';
+import type { ApiError, GenericObject } from '../types';
+import type { Bbox, SearchPayload, DateRange } from '../types/stac';
 
 type RequestPayload = SearchPayload;
 type FetchOptions = {
