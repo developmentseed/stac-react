@@ -6,8 +6,8 @@
   "author": "Oliver Roick <oliver@roick.email>",
   "license": "MIT",
   "private": false,
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.es.mjs",
   "types": "./dist/index.d.ts",
   "source": "./src/index.ts",
   "peerDependencies": {
@@ -15,6 +15,7 @@
     "react-dom": "^18.1.0"
   },
   "devDependencies": {
+    "@rollup/plugin-typescript": "^9.0.2",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.1.1",
     "@testing-library/react-hooks": "^8.0.0",
@@ -31,13 +32,15 @@
     "jest-fetch-mock": "^3.0.3",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
+    "rollup": "^3.4.0",
+    "rollup-plugin-dts": "^5.0.0",
     "ts-jest": "^27.1.4",
     "typescript": "^4.6.4"
   },
   "scripts": {
     "test": "jest",
     "lint": "eslint 'src/**/*.ts'",
-    "build": "tsc"
+    "build": "rollup -c rollup.config.mjs"
   },
   "dependencies": {}
 }
