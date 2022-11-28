@@ -44,11 +44,9 @@ const stacApi = new StacApi(url);
 
 #### Options
 
-```
 Option          | Type      | Default | Description
 --------------- | --------- | ------- | -------------
 `url`           | `string`  |         | Required. The endpoint of the STAC API you want to connect to. 
-```
 
 ### useCollections
 
@@ -63,21 +61,17 @@ const { collections } = useCollections(stacApi);
 
 #### Options
 
-```
 Option          | Type      | Default  | Description
 --------------- | --------- | -------- | -------------
 `stacApi`       | Instance of `StacApi`| Required. The STAC API you want to connect to. 
-```
 
 #### Return values
 
-```
 Option          | Type      | Description
 --------------- | --------- | -------------
 `collections`   | `array`   | A list of collections available from the STAC catalog. Is `null` if collections have not been retrieved.
 `status`        | `str` .   | The status of the request. `IDLE` before and after the request is sent or received. `LOADING` when the request is in progress. 
 `reload`        | `function`| Callback function to trigger a reload of collections.
-```
 
 #### Example
 
@@ -122,15 +116,12 @@ const { collections } = useCollections(stacApi);
 
 #### Options
 
-```
 Option          | Type      | Default  | Description
 --------------- | --------- | -------- | -------------
 `stacApi`       | Instance of `StacApi`| Required. The STAC API you want to connect to. 
-```
 
 #### Return values
 
-```
 Option             | Type      | Description
 ------------------ | --------- | -------------
 `submit`           | `function` | Callback to submit the search using the current filter parameters. Excecutes an API call to the specified STAC API.
@@ -147,7 +138,6 @@ Option             | Type      | Description
 `error`            | [`Error`](#error)   | Error information if the last request was unsuccessful. `undefined` if the last request was successful. 
 `nextPage`         | `function` | Callback function to load the next page of results. Is `undefined` if the last page is the currently loaded.
 `previousPage`     | `function` | Callback function to load the previous page of results. Is `undefined` if the first page is the currently loaded.
-```
 
 #### Examples
 
