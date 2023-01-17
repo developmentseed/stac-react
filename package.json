@@ -6,8 +6,8 @@
   "author": "Oliver Roick <oliver@roick.email>",
   "license": "MIT",
   "private": false,
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.es.mjs",
+  "main": "./dist/stac-react.cjs",
+  "module": "./dist/stac-react.es.mjs",
   "types": "./dist/index.d.ts",
   "source": "./src/index.ts",
   "peerDependencies": {
