@@ -13,7 +13,6 @@ describe('useCollections', () => {
     const { result, waitForNextUpdate } = renderHook(
       () => useCollections(stacApi)
     );
-    expect(result.current.state).toEqual('LOADING');
     await waitForNextUpdate();
     expect(fetch.mock.calls[0][0]).toEqual('https://fake-stac-api.net/collections');
     expect(result.current.collections).toEqual({ data: '12345' });

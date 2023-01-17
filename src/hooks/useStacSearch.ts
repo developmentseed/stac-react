@@ -1,6 +1,6 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import StacApi from '../stac-api';
-
+import debounce from '../utils/debounce';
 import type { ApiError, LoadingState } from '../types';
 import type {
   Link,
@@ -104,12 +104,13 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
     [flipPage, previousPageConfig]
   );
   
-  const submit = useCallback(
+  const _submit = useCallback(
     () => {
       const payload = getSearchPayload();
       executeSearch(payload); 
     }, [executeSearch, getSearchPayload]
   );
+  const submit = useMemo(() => debounce(_submit), [_submit]);
 
   return {
     submit,

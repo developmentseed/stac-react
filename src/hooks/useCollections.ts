@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import StacApi from '../stac-api';
 import type { GenericObject, LoadingState } from '../types';
+import debounce from '../utils/debounce';
 
 type StacCollectionsHook = {
   collections?: GenericObject,
@@ -12,7 +13,7 @@ function useCollections(stacApi: StacApi): StacCollectionsHook {
   const [ collections, setCollections ] = useState<GenericObject>();
   const [ state, setState ] = useState<LoadingState>('IDLE');
 
-  const getCollections = useCallback(
+  const _getCollections = useCallback(
     () => {
       setState('LOADING');
       setCollections(undefined);
@@ -24,8 +25,9 @@ function useCollections(stacApi: StacApi): StacCollectionsHook {
     },
     [stacApi]
   );
+  const getCollections = useMemo(() => debounce(_getCollections), [_getCollections]);
 
-  useEffect(() => getCollections() ,[getCollections]);
+  useEffect(() => getCollections(), [getCollections]);
 
   return {
     collections,
