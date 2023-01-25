@@ -62,6 +62,22 @@ describe('useStacSearch', () => {
     expect(result.current.results).toEqual({ data: '12345' });
   });
 
+  it('clears collections when array is empty', async () => {
+    fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useStacSearch(stacApi)
+    );
+
+    act(() => result.current.setCollections([]));
+    act(() => result.current.submit());
+    await waitForNextUpdate();
+
+    const postPayload = parseRequestPayload(fetch.mock.calls[0][1]);
+    expect(postPayload).toEqual({ limit: 25 });
+    expect(result.current.results).toEqual({ data: '12345' });
+  });
+
   it('includes date range in search', async () => {
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
 
