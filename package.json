@@ -1,6 +1,6 @@
 {
   "name": "@developmentseed/stac-react",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0-alpha.3",
   "description": "React components and hooks for building STAC-API front-ends",
   "repository": "git@github.com:developmentseed/stac-react.git",
   "author": "Oliver Roick <oliver@roick.email>",
