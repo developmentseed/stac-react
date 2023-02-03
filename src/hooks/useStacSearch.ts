@@ -42,6 +42,9 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
   const [ nextPageConfig, setNextPageConfig ] = useState<Link>();
   const [ previousPageConfig, setPreviousPageConfig ] = useState<Link>();
 
+  /**
+   * Extracts the pagination config from the the links array of the items response
+   */
   const setPaginationConfig = useCallback(
     (links: Link[]) => {
       setNextPageConfig(links.find(({ rel }) => rel === 'next'));
@@ -49,6 +52,9 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
     }, []
   );
 
+  /**
+   * Returns the search payload based on the current application state
+   */
   const getSearchPayload = useCallback(
     () => ({
       bbox,
@@ -58,40 +64,65 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
     [ bbox, collections, dateRangeFrom, dateRangeTo ]
   );
 
-  const executeSearch = useCallback(
-    (payload: SearchPayload, headers = {}) => {
-      setResults(undefined);
-      setState('LOADING');
-      setError(undefined);
-      setNextPageConfig(undefined);
-      setPreviousPageConfig(undefined);
+  /**
+   * Resets the state and processes the results from the provided request
+   */
+  const processRequest = useCallback((request: Promise<Response>) => {
+    setResults(undefined);
+    setState('LOADING');
+    setError(undefined);
+    setNextPageConfig(undefined);
+    setPreviousPageConfig(undefined);
 
-      stacApi.search(payload, headers)
-        .then(response => response.json())
-        .then(data => {
-          setResults(data);
-          setPaginationConfig(data.links);
-        })
-        .catch((err) => setError(err))
-        .finally(() => setState('IDLE'));
-    },
-    [stacApi, setPaginationConfig]
+    request
+      .then(response => response.json())
+      .then(data => {
+        setResults(data);
+        setPaginationConfig(data.links);
+      })
+      .catch((err) => setError(err))
+      .finally(() => setState('IDLE'));
+  }, [setPaginationConfig]);
+
+  /**
+   * Executes a POST request against the `search` endpoint using the provided payload and headers
+   */
+  const executeSearch = useCallback(
+    (payload: SearchPayload, headers = {}) => processRequest(stacApi.search(payload, headers)),
+    [stacApi, processRequest]
   );
 
+  /**
+   * Execute a GET request against the provided URL
+   */
+  const getItems = useCallback(
+    (url: string) => processRequest(stacApi.get(url)),
+    [stacApi, processRequest]
+  );
+
+  /**
+   * Retreives a page from a paginatied item set using the provided link config.
+   * Executes a POST request against the `search` endpoint if pagination uses POST
+   * or retrieves the page items using GET against the link href
+   */
   const flipPage = useCallback(
     (link?: Link) => {
       if (link) {
         let payload = link.body as LinkBody;
-        if (payload.merge) {
-          payload = {
-            ...payload,
-            ...getSearchPayload()
-          };
+        if (payload) {
+          if (payload.merge) {
+            payload = {
+              ...payload,
+              ...getSearchPayload()
+            };
+          }
+          executeSearch(payload, link.headers);
+        } else {
+          getItems(link.href);
         }
-        executeSearch(payload, link.headers);
       }
     },
-    [executeSearch, getSearchPayload]
+    [executeSearch, getItems, getSearchPayload]
   );
 
   const nextPageFn = useCallback(

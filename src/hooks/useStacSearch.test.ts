@@ -335,4 +335,60 @@ describe('useStacSearch', () => {
     const postHeader = fetch.mock.calls[1][1]?.headers;
     expect(postHeader).toEqual({ 'Content-Type': 'application/json', next: '123abc' });
   });
+
+  it('loads next-page from GET request', async () => {
+    const response = {
+      links: [{
+        rel: 'next',
+        href: 'https://fake-stac-api.net/?page=2'
+      }]
+    };
+    fetch.mockResponseOnce(JSON.stringify(response));
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useStacSearch(stacApi)
+    );
+
+    act(() => result.current.setDateRangeTo('2022-05-17'));
+    act(() => result.current.submit());
+    await waitForNextUpdate(); // wait to set results
+    expect(result.current.results).toEqual(response);
+    expect(result.current.nextPage).toBeDefined();
+
+    fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
+    act(() => result.current.nextPage && result.current.nextPage());
+    await waitForNextUpdate();
+
+    expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/?page=2');
+    expect(fetch.mock.calls[1][1]?.method).toEqual('GET');
+    expect(result.current.results).toEqual({ data: '12345' });
+  });
+
+  it('loads prev-page from GET request', async () => {
+    const response = {
+      links: [{
+        rel: 'prev',
+        href: 'https://fake-stac-api.net/?page=2'
+      }]
+    };
+    fetch.mockResponseOnce(JSON.stringify(response));
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useStacSearch(stacApi)
+    );
+
+    act(() => result.current.setDateRangeTo('2022-05-17'));
+    act(() => result.current.submit());
+    await waitForNextUpdate(); // wait to set results
+    expect(result.current.results).toEqual(response);
+    expect(result.current.previousPage).toBeDefined();
+
+    fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
+    act(() => result.current.previousPage && result.current.previousPage());
+    await waitForNextUpdate();
+
+    expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/?page=2');
+    expect(fetch.mock.calls[1][1]?.method).toEqual('GET');
+    expect(result.current.results).toEqual({ data: '12345' });
+  });
 });

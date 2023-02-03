@@ -109,6 +109,10 @@ class StacApi {
   getCollections(): Promise<Response> {
     return this.fetch(`${this.baseUrl}/collections`);
   }
+
+  get(href: string, headers = {}): Promise<Response> {
+    return this.fetch(href, { headers });
+  }
 }
 
 export default StacApi;
