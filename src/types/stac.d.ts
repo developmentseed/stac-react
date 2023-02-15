@@ -54,3 +54,44 @@ export type Item = {
   links: Link[]
   assets: ItemAsset[]
 }
+
+type Role = 'licensor' | 'producer' | 'processor' | 'host';
+
+export type Provider = {
+  name: string,
+  description?: string,
+  roles?: Role[],
+  url: string
+}
+
+type SpatialExtent = {
+  bbox: number[][]
+}
+
+type TemporalExtent = {
+  interval: string | null[][]
+}
+
+export type Extent = {
+  spatial: SpatialExtent,
+  temporal: TemporalExtent,
+}
+
+export type Collection = {
+  type: 'Collection',
+  stac_version: string,
+  stac_extensions?: string[],
+  id: string,
+  title?: string,
+  keywords?: string[],
+  license: string,
+  providers: Provider[],
+  extent: Extent,
+  links: Link[]
+  assets: GenericObject,
+}
+
+export type CollectionsResponse = {
+  collections: Collection[],
+  links: Link[]
+}
