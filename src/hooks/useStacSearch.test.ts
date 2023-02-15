@@ -2,6 +2,7 @@ import fetch from 'jest-fetch-mock';
 import { renderHook, act } from '@testing-library/react-hooks';
 import useStacSearch from './useStacSearch';
 import StacApi from '../stac-api';
+import { Bbox } from '../types/stac';
 
 function parseRequestPayload(mockApiCall?: RequestInit) {
   if (!mockApiCall) {
@@ -390,5 +391,28 @@ describe('useStacSearch', () => {
     expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/?page=2');
     expect(fetch.mock.calls[1][1]?.method).toEqual('GET');
     expect(result.current.results).toEqual({ data: '12345' });
+  });
+
+  it('should reset state with each new StacApi instance', async () => {
+    const bbox: Bbox = [-0.59, 51.24, 0.30, 51.74];
+    fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
+
+    const { result, rerender, waitForNextUpdate } = renderHook(
+      ({ stacApi }) => useStacSearch(stacApi), {
+        initialProps: { stacApi },
+      }
+    );
+
+    act(() => result.current.setBbox(bbox));
+    act(() => result.current.submit());
+    await waitForNextUpdate();
+
+    expect(result.current.results).toEqual({ data: '12345' });
+    expect(result.current.bbox).toEqual(bbox);
+
+    const newStac = new StacApi('https://otherstack.com');
+    rerender({ stacApi: newStac });
+    expect(result.current.results).toBeUndefined();
+    expect(result.current.bbox).toBeUndefined();
   });
 });

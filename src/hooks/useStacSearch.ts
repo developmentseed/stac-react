@@ -1,4 +1,4 @@
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState, useMemo, useEffect } from 'react';
 import StacApi from '../stac-api';
 import debounce from '../utils/debounce';
 import type { ApiError, LoadingState } from '../types';
@@ -41,6 +41,19 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
 
   const [ nextPageConfig, setNextPageConfig ] = useState<Link>();
   const [ previousPageConfig, setPreviousPageConfig ] = useState<Link>();
+
+  const reset = () => {
+    setResults(undefined);
+    setBbox(undefined);
+    setCollections(undefined);
+    setDateRangeFrom('');
+    setDateRangeTo('');
+  };
+
+  /**
+   * Reset state when stacApu changes
+   */
+  useEffect(reset, [stacApi]);
 
   /**
    * Extracts the pagination config from the the links array of the items response
