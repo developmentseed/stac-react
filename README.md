@@ -7,7 +7,17 @@ React hooks to build front-end applications for STAC APIs.
 
 ## Installation
 
-TBD
+With NPM:
+
+```sh
+npm i @developmentseed/stac-react
+```
+
+With Yarn:
+
+```sh
+yarn add @developmentseed/stac-react
+```
 
 
 ## API
