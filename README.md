@@ -358,3 +358,24 @@ Option             | Type      | Description
 `detail`           | `string` | `object | The error return from the API. Either a `string` or and `object` depending on the response. 
 `status`           | `number` | HTTP status code of the response.
 `statusText`       | `string` | Status text for the response. 
+
+
+## Development
+
+Run tests
+
+```sh
+yarn test
+```
+
+Lint
+
+```sh
+yarn lint
+```
+
+Build
+
+```
+yarn build
+```
