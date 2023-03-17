@@ -23,8 +23,12 @@ function QueryBuilder ({
   
   const handleRangeFromChange = useCallback((e) => setDateRangeFrom(e.target.value), [setDateRangeFrom]);
   const handleRangeToChange = useCallback((e) => setDateRangeTo(e.target.value), [setDateRangeTo]);
+
+  const headers = useMemo(() => ({
+    Authorization: "Basic " + btoa(process.env.REACT_APP_STAC_API_TOKEN + ":")
+  }), []);
   
-  const stacApi = useMemo(() => new StacApi(process.env.REACT_APP_STAC_API), []);
+  const stacApi = useMemo(() => new StacApi(process.env.REACT_APP_STAC_API, { headers }), [headers]);
   const { collections } = useCollections(stacApi);
 
   const collectionOptions = useMemo(

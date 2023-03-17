@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 import { useStacSearch, StacApi } from "stac-react";
 
 import ItemList from "./ItemList";
@@ -7,7 +7,11 @@ import QueryBuilder from "./QueryBuilder";
 
 function Main() {
   const [isBboxDrawEnabled, setIsBboxDrawEnabled] = useState(false);
-  const stacApi = new StacApi(process.env.REACT_APP_STAC_API);
+  const headers = useMemo(() => ({
+    Authorization: "Basic " + btoa(process.env.REACT_APP_STAC_API_TOKEN + ":")
+  }), []);
+
+  const stacApi = new StacApi(process.env.REACT_APP_STAC_API, { headers });
   const {
     setBbox,
     collections,
