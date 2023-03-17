@@ -11,7 +11,8 @@ function Main() {
     Authorization: "Basic " + btoa(process.env.REACT_APP_STAC_API_TOKEN + ":")
   }), []);
 
-  const stacApi = new StacApi(process.env.REACT_APP_STAC_API, { headers });
+  const stacApi = useMemo(() => new StacApi(process.env.REACT_APP_STAC_API, { headers }), [headers]);
+
   const {
     setBbox,
     collections,

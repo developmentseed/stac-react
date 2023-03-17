@@ -4,6 +4,7 @@ import useCollections from './useCollections';
 import StacApi from '../stac-api';
 
 describe('useCollections', () => {
+  fetch.mockResponseOnce(JSON.stringify({ links: [] }));
   const stacApi = new StacApi('https://fake-stac-api.net');
   beforeEach(() => fetch.resetMocks());
 

@@ -91,7 +91,9 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
       .then(response => response.json())
       .then(data => {
         setResults(data);
-        setPaginationConfig(data.links);
+        if (data.links) {
+          setPaginationConfig(data.links);
+        }
       })
       .catch((err) => setError(err))
       .finally(() => setState('IDLE'));

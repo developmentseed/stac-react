@@ -1,5 +1,5 @@
 import type { ApiError, GenericObject } from '../types';
-import type { Bbox, SearchPayload, DateRange, CollectionIdList } from '../types/stac';
+import type { Bbox, SearchPayload, DateRange, CollectionIdList, Link } from '../types/stac';
 
 type RequestPayload = SearchPayload;
 type FetchOptions = {
@@ -11,10 +11,23 @@ type FetchOptions = {
 class StacApi {
   baseUrl: string;
   options?: GenericObject;
+  searchMode = 'GET';
 
   constructor(baseUrl: string, options?: GenericObject) {
     this.baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
     this.options = options;
+    this.fetchApiMeta();
+  }
+
+  fetchApiMeta(): void {
+    this.fetch(this.baseUrl)
+      .then(r => r.json())
+      .then(r => {
+        const doesPost = r.links.find(({ rel, method }: Link) => rel === 'search' && method === 'POST');
+        if (doesPost) {
+          this.searchMode = 'POST';
+        }
+      });
   }
 
   fixBboxCoordinateOrder(bbox?: Bbox): Bbox | undefined {
@@ -54,6 +67,20 @@ class StacApi {
     } else {
       return undefined;
     }
+  }
+
+  payloadToQuery(payload: SearchPayload): string {
+    const queryObj = {};
+    for (const [key, value] of Object.entries(payload)) {
+      if (!value) continue;
+
+      if (Array.isArray(value)) {
+        queryObj[key] = value.join(',');
+      } else {
+        queryObj[key] = value;
+      }
+    }
+    return new URLSearchParams(queryObj).toString();
   }
 
   async handleError(response: Response) {
@@ -103,10 +130,19 @@ class StacApi {
       datetime: this.makeDatetimePayload(dateRange),
       limit: 25
     };
-    return this.fetch(
-      `${this.baseUrl}/search`,
-      { method: 'POST', payload: requestPayload, headers }
-    );
+
+    if (this.searchMode === 'POST') {
+      return this.fetch(
+        `${this.baseUrl}/search`,
+        { method: 'POST', payload: requestPayload, headers }
+      );
+    } else {
+      const query = this.payloadToQuery(requestPayload);
+      return this.fetch(
+        `${this.baseUrl}/search?${query}`,
+        { method: 'GET', headers }
+      );
+    }
   }
 
   getCollections(): Promise<Response> {
