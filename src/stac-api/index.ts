@@ -10,9 +10,11 @@ type FetchOptions = {
 
 class StacApi {
   baseUrl: string;
+  options?: GenericObject;
 
-  constructor(baseUrl: string) {
+  constructor(baseUrl: string, options?: GenericObject) {
     this.baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    this.options = options;
   }
 
   fixBboxCoordinateOrder(bbox?: Bbox): Bbox | undefined {
@@ -79,7 +81,8 @@ class StacApi {
       method,
       headers: {
         'Content-Type': 'application/json',
-        ...headers
+        ...headers,
+        ...this.options?.headers
       },
       body: payload ? JSON.stringify(payload) : undefined
     }).then(async (response) => {
