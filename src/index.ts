@@ -1,9 +1,9 @@
 import useStacSearch from './hooks/useStacSearch';
 import useCollections from './hooks/useCollections';
-import StacApi from './stac-api';
+import useStacApi from './hooks/useStacApi';
 
 export {
   useCollections,
   useStacSearch,
-  StacApi
+  useStacApi
 };

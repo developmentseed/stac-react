@@ -51,7 +51,7 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
   };
 
   /**
-   * Reset state when stacApu changes
+   * Reset state when stacApi changes
    */
   useEffect(reset, [stacApi]);
 
@@ -103,7 +103,7 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
    * Executes a POST request against the `search` endpoint using the provided payload and headers
    */
   const executeSearch = useCallback(
-    (payload: SearchPayload, headers = {}) => processRequest(stacApi.search(payload, headers)),
+    (payload: SearchPayload, headers = {}) => stacApi && processRequest(stacApi.search(payload, headers)),
     [stacApi, processRequest]
   );
 
@@ -111,7 +111,7 @@ function useStacSearch(stacApi: StacApi): StacSearchHook {
    * Execute a GET request against the provided URL
    */
   const getItems = useCallback(
-    (url: string) => processRequest(stacApi.get(url)),
+    (url: string) => stacApi && processRequest(stacApi.get(url)),
     [stacApi, processRequest]
   );
 

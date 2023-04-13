@@ -1,21 +1,25 @@
-import { useCallback, useState, useMemo } from "react";
-import { useStacSearch, StacApi } from "stac-react";
+import { useCallback, useState } from "react";
+import { useStacSearch, useCollections, useStacApi } from "stac-react";
 
 import ItemList from "./ItemList";
 import Map from "./Map";
 import QueryBuilder from "./QueryBuilder";
 
+const options = {
+  headers: {
+    Authorization: "Basic " + btoa(process.env.REACT_APP_STAC_API_TOKEN + ":")
+  }
+};
+
 function Main() {
   const [isBboxDrawEnabled, setIsBboxDrawEnabled] = useState(false);
-  const headers = useMemo(() => ({
-    Authorization: "Basic " + btoa(process.env.REACT_APP_STAC_API_TOKEN + ":")
-  }), []);
+  const { stacApi } = useStacApi(process.env.REACT_APP_STAC_API, options);
 
-  const stacApi = useMemo(() => new StacApi(process.env.REACT_APP_STAC_API, { headers }), [headers]);
+  const { collections } = useCollections(stacApi);
 
   const {
     setBbox,
-    collections,
+    collections: selectedCollections,
     setCollections,
     dateRangeFrom,
     setDateRangeFrom,
@@ -43,6 +47,7 @@ function Main() {
         setIsBboxDrawEnabled={setIsBboxDrawEnabled}
         handleSubmit={submit}
         collections={collections}
+        selectedCollections={selectedCollections}
         setCollections={setCollections}
         dateRangeFrom={dateRangeFrom}
         setDateRangeFrom={setDateRangeFrom}

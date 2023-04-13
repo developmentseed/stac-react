@@ -1,7 +1,7 @@
 import fetch from 'jest-fetch-mock';
 import { renderHook, act } from '@testing-library/react-hooks';
 import useStacSearch from './useStacSearch';
-import StacApi from '../stac-api';
+import StacApi, { SearchMode } from '../stac-api';
 import { Bbox } from '../types/stac';
 
 function parseRequestPayload(mockApiCall?: RequestInit) {
@@ -12,8 +12,7 @@ function parseRequestPayload(mockApiCall?: RequestInit) {
 }
 
 describe('useStacSearch — API supports POST', () => {
-  fetch.mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }));
-  const stacApi = new StacApi('https://fake-stac-api.net');
+  const stacApi = new StacApi('https://fake-stac-api.net', SearchMode.POST);
   beforeEach(() => fetch.resetMocks());
 
   it('includes Bbox in search', async () => {
@@ -411,8 +410,7 @@ describe('useStacSearch — API supports POST', () => {
     expect(result.current.results).toEqual({ data: '12345' });
     expect(result.current.bbox).toEqual(bbox);
 
-    fetch.mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }));
-    const newStac = new StacApi('https://otherstack.com');
+    const newStac = new StacApi('https://otherstack.com', SearchMode.POST);
     rerender({ stacApi: newStac });
     expect(result.current.results).toBeUndefined();
     expect(result.current.bbox).toBeUndefined();
@@ -420,8 +418,7 @@ describe('useStacSearch — API supports POST', () => {
 });
 
 describe('useStacSearch — API supports GET', () => {
-  fetch.mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'GET' }] }));
-  const stacApi = new StacApi('https://fake-stac-api.net');
+  const stacApi = new StacApi('https://fake-stac-api.net', SearchMode.GET);
   beforeEach(() => fetch.resetMocks());
 
   it('includes Bbox in search', async () => {

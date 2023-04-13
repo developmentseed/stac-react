@@ -10,19 +10,21 @@ type StacCollectionsHook = {
   state: LoadingState
 };
 
-function useCollections(stacApi: StacApi): StacCollectionsHook {
+function useCollections(stacApi?: StacApi): StacCollectionsHook {
   const [ collections, setCollections ] = useState<CollectionsResponse>();
   const [ state, setState ] = useState<LoadingState>('IDLE');
 
   const _getCollections = useCallback(
     () => {
-      setState('LOADING');
-      setCollections(undefined);
+      if (stacApi) {
+        setState('LOADING');
+        setCollections(undefined);
 
-      stacApi.getCollections()
-        .then(response => response.json())
-        .then(setCollections)
-        .finally(() => setState('IDLE'));
+        stacApi.getCollections()
+          .then(response => response.json())
+          .then(setCollections)
+          .finally(() => setState('IDLE'));
+      }
     },
     [stacApi]
   );

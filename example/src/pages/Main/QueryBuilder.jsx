@@ -1,8 +1,6 @@
 import T from 'prop-types';
 import { useCallback, useMemo } from 'react';
 
-import { useCollections, StacApi } from "stac-react";
-
 import { PrimaryButton } from "../../components/buttons";
 import { Checkbox, Legend } from '../../components/form';
 import { H2 } from "../../components/headers";
@@ -11,7 +9,8 @@ import Section from '../../layout/Section';
 
 function QueryBuilder ({
   setIsBboxDrawEnabled,
-  collections: selectedCollections,
+  collections,
+  selectedCollections,
   setCollections,
   handleSubmit,
   dateRangeFrom,
@@ -24,15 +23,8 @@ function QueryBuilder ({
   const handleRangeFromChange = useCallback((e) => setDateRangeFrom(e.target.value), [setDateRangeFrom]);
   const handleRangeToChange = useCallback((e) => setDateRangeTo(e.target.value), [setDateRangeTo]);
 
-  const headers = useMemo(() => ({
-    Authorization: "Basic " + btoa(process.env.REACT_APP_STAC_API_TOKEN + ":")
-  }), []);
-  
-  const stacApi = useMemo(() => new StacApi(process.env.REACT_APP_STAC_API, { headers }), [headers]);
-  const { collections } = useCollections(stacApi);
-
   const collectionOptions = useMemo(
-    () => collections ? collections.collections.map(({ id, title }) => ({ value: id, label: title})) : [],
+    () => collections.collections ? collections.collections.map(({ id, title }) => ({ value: id, label: title})) : [],
     [collections]
   );
 
@@ -45,7 +37,7 @@ function QueryBuilder ({
           label="Select Collections"
           name="collections"
           options={collectionOptions}
-          values={selectedCollections}
+          values={selectedCollections || []}
           onChange={setCollections}
         />
       </Section>
@@ -74,7 +66,8 @@ function QueryBuilder ({
 QueryBuilder.propTypes = {
   setIsBboxDrawEnabled: T.func.isRequired,
   handleSubmit: T.func.isRequired,
-  collections: T.arrayOf(T.string),
+  collections: T.object,
+  selectedCollections: T.arrayOf(T.string),
   setCollections: T.func.isRequired,
   dateRangeFrom: T.string.isRequired,
   setDateRangeFrom: T.func.isRequired,

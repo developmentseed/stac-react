@@ -1,16 +1,15 @@
 import fetch from 'jest-fetch-mock';
 import { renderHook, act } from '@testing-library/react-hooks';
 import useCollections from './useCollections';
-import StacApi from '../stac-api';
+import StacApi, { SearchMode } from '../stac-api';
 
 describe('useCollections', () => {
   fetch.mockResponseOnce(JSON.stringify({ links: [] }));
-  const stacApi = new StacApi('https://fake-stac-api.net');
+  const stacApi = new StacApi('https://fake-stac-api.net', SearchMode.POST);
   beforeEach(() => fetch.resetMocks());
 
   it('queries collections', async () => {
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
-
     const { result, waitForNextUpdate } = renderHook(
       () => useCollections(stacApi)
     );
@@ -22,7 +21,6 @@ describe('useCollections', () => {
 
   it('reloads collections', async () => {
     fetch.mockResponseOnce(JSON.stringify({ data: 'original' }));
-
     const { result, waitForNextUpdate } = renderHook(
       () => useCollections(stacApi)
     );
