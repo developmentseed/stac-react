@@ -24,6 +24,8 @@ yarn add @developmentseed/stac-react
 
 ### StacApi
 
+**Removed in 0.1.0-alpha.6:** Do not instanciate `StacApi` directly. Use the `useStacApi` hook instead. 
+
 Initialises a STAC-API client. Pass the instance to the React hooks as documented below.
 
 #### Example
@@ -113,6 +115,57 @@ function CollectionList() {
 }
 ```
 
+### useStacApi
+
+Initialises a StacAPI instance. 
+
+#### Initialization
+
+```js
+import { useStacApi } from "stac-react";
+const { stacApi } = useStacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
+```
+
+#### Options
+
+Option          | Type      | Default  | Description
+--------------- | --------- | -------- | -------------
+`url`           | `string`  |          | Required. The endpoint of the STAC API you want to connect to. 
+
+#### Return values
+
+Option          | Type      | Description
+--------------- | --------- | -------------
+`stacApi`       | Instance of `StacApi`   | An object that you can pass to `useCollections` and `useStacSearch` hooks. 
+
+#### Example
+
+```jsx
+import { useCallback } from "react";
+import { useStacApi, useStacSearch } from "stac-react";
+
+import Map from "./map";
+
+function StacComponent() {
+  const { stacApi } = useStacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
+  const { result } = useStacSearch(stacApi);
+
+  return (
+    <>
+      <div class="item-list">
+        {results && (
+          <ul>
+            {results.features.map(({ id }) => (
+              <li key={id}>{ id }</li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </>
+  )
+}
+```
+
 ### useStacSearch
 
 Executes a search against a STAC API using the provided search parameters.
@@ -155,12 +208,12 @@ Option             | Type      | Description
 
 ```jsx
 import { useCallback } from "react";
-import { StacApi, useStacSearch } from "stac-react";
+import { useStacApi, useStacSearch } from "stac-react";
 
 import Map from "./map";
 
 function StacComponent() {
-  const stacApi = new StacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
+  const { stacApi } = useStacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
   const { result } = useStacSearch(stacApi);
 
   return (
@@ -183,12 +236,12 @@ function StacComponent() {
 
 ```jsx
 import { useCallback } from "react";
-import { StacApi, useStacSearch } from "stac-react";
+import { useStacApi, useStacSearch } from "stac-react";
 
 import Map from "./map";
 
 function StacComponent() {
-  const stacApi = new StacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
+  const { stacApi } = useStacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
   const { error, result } = useStacSearch(stacApi);
 
   return (
@@ -212,12 +265,12 @@ function StacComponent() {
 
 ```jsx
 import { useCallback } from "react";
-import { StacApi, useStacSearch } from "stac-react";
+import { useStacApi, useStacSearch } from "stac-react";
 
 import Map from "./map";
 
 function StacComponent() {
-  const stacApi = new StacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
+  const { stacApi } = useStacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
   const {
     nextPage,
     previousPage,
@@ -244,10 +297,10 @@ function StacComponent() {
 
 ```jsx
 import { useCallback } from "react";
-import { StacApi, useStacSearch } from "stac-react";
+import { useStacApi, useStacSearch } from "stac-react";
 
 function StacComponent() {
-  const stacApi = new StacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
+  const { stacApi } = useStacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
   const { collections } = useCollections(stacApi);
   const { collections: selectedCollections, setCollections, results, submit } = useStacSearch(stacApi);
 
@@ -291,12 +344,12 @@ function StacComponent() {
 
 ```jsx
 import { useCallback } from "react";
-import { StacApi, useStacSearch } from "stac-react";
+import { useStacApi, useStacSearch } from "stac-react";
 
 import Map from "./map";
 
 function StacComponent() {
-  const stacApi = new StacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
+  const { stacApi } = useStacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
   const { bbox, setBbox, submit } = useStacSearch(stacApi);
 
   const handleDrawComplete = useCallback((feature) => {
@@ -317,12 +370,12 @@ This example assumes that a `Map` component handles drawing and calls `handleDra
 
 ```jsx
 import { useCallback } from "react";
-import { StacApi, useStacSearch } from "stac-react";
+import { useStacApi, useStacSearch } from "stac-react";
 
 import Map from "./map";
 
 function StacComponent() {
-  const stacApi = new StacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
+  const { stacApi } = useStacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
   const {
     dateRangeFrom,
     setDateRangeFrom,
