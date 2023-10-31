@@ -12,7 +12,9 @@ export default [
       format: "es",
       sourcemap,
     },
-    plugins: [typescript()],
+    plugins: [
+      typescript({ exclude: ["**/*.test.ts"] })
+    ],
   },
   {
     input,
@@ -29,6 +31,8 @@ export default [
       format: "cjs",
       sourcemap,
     },
-    plugins: [typescript()],
+    plugins: [
+      typescript({ exclude: ["**/*.test.ts"] })
+    ],
   },
 ];

@@ -1,5 +1,4 @@
 import { useCallback, useState, useMemo, useEffect } from 'react';
-import StacApi from '../stac-api';
 import debounce from '../utils/debounce';
 import type { ApiError, LoadingState } from '../types';
 import type {
@@ -10,6 +9,7 @@ import type {
   SearchResponse,
   LinkBody,
 } from '../types/stac';
+import { useStacApiContext } from '../context';
 
 type PaginationHandler = () => void;
 
@@ -30,7 +30,8 @@ type StacSearchHook = {
   previousPage: PaginationHandler | undefined
 }
 
-function useStacSearch(stacApi: StacApi): StacSearchHook {
+function useStacSearch(): StacSearchHook {
+  const { stacApi } = useStacApiContext();
   const [ results, setResults ] = useState<SearchResponse>();
   const [ bbox, setBbox ] = useState<Bbox>();
   const [ collections, setCollections ] = useState<CollectionIdList>();

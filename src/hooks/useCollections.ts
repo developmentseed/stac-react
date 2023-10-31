@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
-import StacApi from '../stac-api';
 import type { LoadingState } from '../types';
 import type { CollectionsResponse } from '../types/stac';
 import debounce from '../utils/debounce';
+import { useStacApiContext } from '../context';
 
 type StacCollectionsHook = {
   collections?: CollectionsResponse,
@@ -10,8 +10,8 @@ type StacCollectionsHook = {
   state: LoadingState
 };
 
-function useCollections(stacApi?: StacApi): StacCollectionsHook {
-  const [ collections, setCollections ] = useState<CollectionsResponse>();
+function useCollections(): StacCollectionsHook {
+  const { stacApi, collections, setCollections } = useStacApiContext();
   const [ state, setState ] = useState<LoadingState>('IDLE');
 
   const _getCollections = useCallback(
@@ -26,11 +26,18 @@ function useCollections(stacApi?: StacApi): StacCollectionsHook {
           .finally(() => setState('IDLE'));
       }
     },
-    [stacApi]
+    [setCollections, stacApi]
   );
   const getCollections = useMemo(() => debounce(_getCollections), [_getCollections]);
 
-  useEffect(() => getCollections(), [getCollections]);
+  useEffect(
+    () => {
+      if (stacApi && !collections) {
+        getCollections();
+      }
+    },
+    [getCollections, stacApi, collections]
+  );
 
   return {
     collections,

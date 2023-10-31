@@ -4,6 +4,7 @@ module.exports = {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['./jest.setup.ts'],
   testMatch: [
-    '**/*.test.ts'
+    '**/*.test.ts',
+    '**/*.test.tsx'
   ]
 };

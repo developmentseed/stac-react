@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useStacSearch, useCollections, useStacApi } from "stac-react";
+import { useStacSearch, useCollections, useStacApi, StacApiProvider } from "stac-react";
 
 import ItemList from "./ItemList";
 import Map from "./Map";
@@ -13,10 +13,7 @@ const options = {
 
 function Main() {
   const [isBboxDrawEnabled, setIsBboxDrawEnabled] = useState(false);
-  const { stacApi } = useStacApi(process.env.REACT_APP_STAC_API, options);
-
-  const { collections } = useCollections(stacApi);
-
+  const { collections } = useCollections();
   const {
     setBbox,
     collections: selectedCollections,
@@ -31,7 +28,7 @@ function Main() {
     error,
     nextPage,
     previousPage
-  } = useStacSearch(stacApi);
+  } = useStacSearch();
 
   const handleDrawComplete = useCallback((feature) => {
     setIsBboxDrawEnabled(false);

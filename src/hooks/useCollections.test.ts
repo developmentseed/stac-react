@@ -1,34 +1,44 @@
 import fetch from 'jest-fetch-mock';
 import { renderHook, act } from '@testing-library/react-hooks';
 import useCollections from './useCollections';
-import StacApi, { SearchMode } from '../stac-api';
+import wrapper from './wrapper';
 
 describe('useCollections', () => {
-  fetch.mockResponseOnce(JSON.stringify({ links: [] }));
-  const stacApi = new StacApi('https://fake-stac-api.net', SearchMode.POST);
-  beforeEach(() => fetch.resetMocks());
+  beforeEach(() => {
+    fetch.resetMocks();
+  });
 
   it('queries collections', async () => {
-    fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
+    fetch
+      .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
+      .mockResponseOnce(JSON.stringify({ data: '12345' }));
+
     const { result, waitForNextUpdate } = renderHook(
-      () => useCollections(stacApi)
+      () => useCollections(),
+      { wrapper }
     );
     await waitForNextUpdate();
-    expect(fetch.mock.calls[0][0]).toEqual('https://fake-stac-api.net/collections');
+    await waitForNextUpdate();
+    expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/collections');
     expect(result.current.collections).toEqual({ data: '12345' });
     expect(result.current.state).toEqual('IDLE');
   });
 
   it('reloads collections', async () => {
-    fetch.mockResponseOnce(JSON.stringify({ data: 'original' }));
+    fetch
+      .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
+      .mockResponseOnce(JSON.stringify({ data: 'original' }))
+      .mockResponseOnce(JSON.stringify({ data: 'reloaded' }));
+
     const { result, waitForNextUpdate } = renderHook(
-      () => useCollections(stacApi)
+      () => useCollections(),
+      { wrapper }
     );
+    await waitForNextUpdate();
     await waitForNextUpdate();
     expect(result.current.collections).toEqual({ data: 'original' });
     
     expect(result.current.state).toEqual('IDLE');
-    fetch.mockResponseOnce(JSON.stringify({ data: 'reloaded' }));
     act(() => result.current.reload());
     await waitForNextUpdate();
     expect(result.current.collections).toEqual({ data: 'reloaded' });

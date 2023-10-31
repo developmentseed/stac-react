@@ -76,7 +76,7 @@ QueryBuilder.propTypes = {
 }
 
 QueryBuilder.defaultProps = {
-  collections: []
+  collections: {}
 }
 
 export default QueryBuilder;
