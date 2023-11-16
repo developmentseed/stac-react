@@ -4,6 +4,7 @@ import { createContext } from 'react';
 import StacApi from '../stac-api';
 import useStacApi from '../hooks/useStacApi';
 import type { CollectionsResponse } from '../types/stac';
+import { GenericObject } from '../types';
 
 type StacApiContextType = {
   stacApi?: StacApi;
@@ -13,13 +14,14 @@ type StacApiContextType = {
 
 type StacApiProviderType = {
   apiUrl: string;
-  children: React.ReactNode
+  children: React.ReactNode;
+  options?: GenericObject;
 }
 
 export const StacApiContext = createContext<StacApiContextType>({} as StacApiContextType);
 
-export function StacApiProvider({ children, apiUrl }: StacApiProviderType) {
-  const { stacApi } = useStacApi(apiUrl);
+export function StacApiProvider({ children, apiUrl, options }: StacApiProviderType) {
+  const { stacApi } = useStacApi(apiUrl, options);
   const [ collections, setCollections ] = useState<CollectionsResponse>();
 
   const contextValue = useMemo(() => ({
