@@ -19,46 +19,76 @@ With Yarn:
 yarn add @developmentseed/stac-react
 ```
 
+## Getting started
 
-## API
+Stac-react's hooks must be used inside children of a React context that provides access to the stac-react's core functionality. 
 
-### StacApi
+To get started, initialize `StacApiProvider` with the base URL of the STAC catalog. 
 
-**Removed in 0.1.0-alpha.6:** Do not instanciate `StacApi` directly. Use the `useStacApi` hook instead. 
+```jsx
+import { StacApiProvider } from "stac-react";
 
-Initialises a STAC-API client. Pass the instance to the React hooks as documented below.
-
-#### Example
-
-```js
-import { StacApi, useCollections } from "stac-react";
-
-function CollectionList() {
-  const stacApi = new StacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
-  const { collections } = useCollections(stacApi);
-
+function StacApp() {
   return (
-    <ul>
-      {collections.map(({ id, title }) => (
-        <li key={id}>{title}</li>
-      ))}
-    </ul>
+    <StacApiProvider apiUrl="https://my-stac-api.com">
+      // Other components
+    </StacApiProvide>
   );
 }
 ```
 
-#### Initialization
+Now you can start using stac-react hooks in child components of `StacApiProvider`
 
-```js
-import { StacApi } from "stac-react";
-const stacApi = new StacApi(url);
+```jsx
+import { StacApiProvider, useCollections } from "stac-react";
+
+function Collections() {
+  const { collections } = useCollections();
+  
+  return (
+	  <ul>
+	    {collections.collections.map(({ id, title }) => (
+	      <li key={id}>{ title }</li>
+	    ))}
+	  </ul>
+    
+  )
+}
+
+function StacApp() {
+  return (
+    <StacApiProvider apiUrl="https://my-stac-api.com">
+      <Collections />
+    </StacApiProvide>
+  );
+}
 ```
 
-#### Options
+## API
 
-Option          | Type      | Default | Description
---------------- | --------- | ------- | -------------
-`url`           | `string`  |         | Required. The endpoint of the STAC API you want to connect to. 
+### StacApiProvider
+
+Provides the React context required for stac-react hooks. 
+
+#### Initialization
+
+```jsx
+import { StacApiProvider } from "stac-react";
+
+function StacApp() {
+  return (
+    <StacApiProvider apiUrl="https://my-stac-api.com">
+      // Other components
+    </StacApiProvide>
+  );
+}
+```
+
+##### Component Properties
+
+Option          | Type      | Description
+--------------- | --------- | -------------
+`apiUrl`.       | `string`  | The base url of the STAC catalog.
 
 ### useCollections
 
@@ -68,33 +98,26 @@ Retrieves collections from a STAC catalog.
 
 ```js
 import { useCollections } from "stac-react";
-const { collections } = useCollections(stacApi);
+const { collections } = useCollections();
 ```
-
-#### Options
-
-Option          | Type      | Default  | Description
---------------- | --------- | -------- | -------------
-`stacApi`       | Instance of `StacApi`| Required. The STAC API you want to connect to. 
 
 #### Return values
 
 Option          | Type      | Description
 --------------- | --------- | -------------
 `collections`   | `array`   | A list of collections available from the STAC catalog. Is `null` if collections have not been retrieved.
-`status`        | `str`     | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress. 
+`state`        | `str`     | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress. 
 `reload`        | `function`| Callback function to trigger a reload of collections.
 
 #### Example
 
 ```js
-import { StacApi, useCollections } from "stac-react";
+import { useCollections } from "stac-react";
 
 function CollectionList() {
-  const stacApi = new StacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
-  const { collections, status } = useCollections(stacApi);
+  const { collections, state } = useCollections();
 
-  if (status === "LOADING") {
+  if (state === "LOADING") {
     return <p>Loading collections...</p>
   }
 
@@ -102,7 +125,7 @@ function CollectionList() {
     <>
     {collections ? (
       <ul>
-        {collections.map(({ id, title }) => (
+        {collections.collections.map(({ id, title }) => (
           <li key={id}>{title}</li>
         ))}
       </ul>
@@ -115,54 +138,105 @@ function CollectionList() {
 }
 ```
 
-### useStacApi
+### useCollection
 
-Initialises a StacAPI instance. 
+Retrieves a single collection from the STAC catalog. 
 
 #### Initialization
 
 ```js
-import { useStacApi } from "stac-react";
-const { stacApi } = useStacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
+import { useCollection } from "stac-react";
+const { collection } = useCollection(id);
 ```
 
-#### Options
+#### Parameters
 
-Option          | Type      | Default  | Description
---------------- | --------- | -------- | -------------
-`url`           | `string`  |          | Required. The endpoint of the STAC API you want to connect to. 
+Option          | Type      | Description
+--------------- | --------- | -------------
+`id`            | `string`  | The collection ID. 
 
 #### Return values
 
 Option          | Type      | Description
 --------------- | --------- | -------------
-`stacApi`       | Instance of `StacApi`   | An object that you can pass to `useCollections` and `useStacSearch` hooks. 
+`collection`   | `object`   | The collection matching the provided ID. Is `null` if collection has not been retrieved.
+`state`        | `str`     | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress. 
 
 #### Example
 
-```jsx
-import { useCallback } from "react";
-import { useStacApi, useStacSearch } from "stac-react";
+```js
+import { useCollection } from "stac-react";
 
-import Map from "./map";
+function Collection() {
+  const { collection, state } = useCollection("collection_id");
 
-function StacComponent() {
-  const { stacApi } = useStacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
-  const { result } = useStacSearch(stacApi);
+  if (state === "LOADING") {
+    return <p>Loading collection...</p>
+  }
 
   return (
     <>
-      <div class="item-list">
-        {results && (
-          <ul>
-            {results.features.map(({ id }) => (
-              <li key={id}>{ id }</li>
-            ))}
-          </ul>
-        )}
-      </div>
+    {collection ? (
+      <>
+        <h2>{collection.id}</h2>
+        <p>{collection.description}</p>
+      </>
+    ) : (
+      <p>Not found</p>
+    )}
     </>
-  )
+  );
+}
+```
+
+### useItem
+
+Retrieves an item from the STAC catalog. To retrieve an item, provide its full url to the `useItem` hook.
+
+#### Initialization
+
+```js
+import { useItem } from "stac-react";
+const { item } = useItem(url);
+```
+
+#### Parameters
+
+Option          | Type      | Description
+--------------- | --------- | -------------
+`url`           | `string`  | The URL of the item you want to retrieve.  
+
+#### Return values
+
+Option          | Type      | Description
+--------------- | --------- | -------------
+`item`          | `object`  | The item matching the provided URL.
+`state`         | `str`     | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress. 
+
+#### Examples
+
+```js
+import { useItem } from "stac-react";
+
+function Item() {
+  const { item, state } = useItem("https://stac-catalog.com/items/abc123");
+
+  if (state === "LOADING") {
+    return <p>Loading item...</p>
+  }
+
+  return (
+    <>
+    {item ? (
+      <>
+        <h2>{item.id}</h2>
+        <p>{items.description}</p>
+      </>
+    ) : (
+      <p>Not found</p>
+    )}
+    </>
+  );
 }
 ```
 
@@ -174,14 +248,8 @@ Executes a search against a STAC API using the provided search parameters.
 
 ```js
 import { useStacSearch } from "stac-react";
-const { collections } = useStacSearch(stacApi);
+const { results } = useStacSearch();
 ```
-
-#### Options
-
-Option          | Type      | Default  | Description
---------------- | --------- | -------- | -------------
-`stacApi`       | Instance of `StacApi`| | Required. The STAC API you want to connect to. 
 
 #### Return values
 
@@ -207,14 +275,10 @@ Option             | Type      | Description
 ##### Render results
 
 ```jsx
-import { useCallback } from "react";
-import { useStacApi, useStacSearch } from "stac-react";
-
-import Map from "./map";
+import { useStacSearch } from "stac-react";
 
 function StacComponent() {
-  const { stacApi } = useStacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
-  const { result } = useStacSearch(stacApi);
+  const { result } = useStacSearch();
 
   return (
     <>
@@ -236,13 +300,12 @@ function StacComponent() {
 
 ```jsx
 import { useCallback } from "react";
-import { useStacApi, useStacSearch } from "stac-react";
+import { useStacSearch } from "stac-react";
 
 import Map from "./map";
 
 function StacComponent() {
-  const { stacApi } = useStacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
-  const { error, result } = useStacSearch(stacApi);
+  const { error, result } = useStacSearch();
 
   return (
     <>
@@ -264,18 +327,14 @@ function StacComponent() {
 ##### Pagination
 
 ```jsx
-import { useCallback } from "react";
-import { useStacApi, useStacSearch } from "stac-react";
-
-import Map from "./map";
+import { useStacSearch } from "stac-react";
 
 function StacComponent() {
-  const { stacApi } = useStacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
   const {
     nextPage,
     previousPage,
     result
-  } = useStacSearch(stacApi);
+  } = useStacSearch();
 
   return (
     <>
@@ -296,13 +355,11 @@ function StacComponent() {
 ##### Set collections
 
 ```jsx
-import { useCallback } from "react";
-import { useStacApi, useStacSearch } from "stac-react";
+import { useStacSearch } from "stac-react";
 
 function StacComponent() {
-  const { stacApi } = useStacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
-  const { collections } = useCollections(stacApi);
-  const { collections: selectedCollections, setCollections, results, submit } = useStacSearch(stacApi);
+  const { collections } = useCollections();
+  const { collections: selectedCollections, setCollections, results, submit } = useStacSearch();
 
   const handleChange = useCallback((event) => {
     const { value } = event.target;
@@ -344,13 +401,10 @@ function StacComponent() {
 
 ```jsx
 import { useCallback } from "react";
-import { useStacApi, useStacSearch } from "stac-react";
-
-import Map from "./map";
+import { useStacSearch } from "stac-react";
 
 function StacComponent() {
-  const { stacApi } = useStacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
-  const { bbox, setBbox, submit } = useStacSearch(stacApi);
+  const { bbox, setBbox, submit } = useStacSearch();
 
   const handleDrawComplete = useCallback((feature) => {
     setIsBboxDrawEnabled(false);
@@ -369,20 +423,16 @@ This example assumes that a `Map` component handles drawing and calls `handleDra
 ##### Set date range
 
 ```jsx
-import { useCallback } from "react";
-import { useStacApi, useStacSearch } from "stac-react";
-
-import Map from "./map";
+import { useStacSearch } from "stac-react";
 
 function StacComponent() {
-  const { stacApi } = useStacApi("https://planetarycomputer.microsoft.com/api/stac/v1");
   const {
     dateRangeFrom,
     setDateRangeFrom,
     dateRangeTo,
     setDateRangeTo,
     submit
-  } = useStacSearch(stacApi);
+  } = useStacSearch();
 
   return (
     <>
