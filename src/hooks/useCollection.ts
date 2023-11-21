@@ -7,11 +7,12 @@ import useCollections from './useCollections';
 type StacCollectionHook = {
   collection?: Collection,
   state: LoadingState,
-  error?: ApiError
+  error?: ApiError,
+  reload: () => void
 };
 
 function useCollection(collectionId: string): StacCollectionHook {
-  const { collections, state, error: requestError } = useCollections();
+  const { collections, state, error: requestError, reload } = useCollections();
   const [ error, setError ] = useState<ApiError>();
 
   useEffect(() => {
@@ -36,7 +37,8 @@ function useCollection(collectionId: string): StacCollectionHook {
   return {
     collection,
     state,
-    error
+    error,
+    reload
   };
 }
 

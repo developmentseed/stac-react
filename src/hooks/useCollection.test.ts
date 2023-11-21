@@ -1,5 +1,5 @@
 import fetch from 'jest-fetch-mock';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
 import useCollection from './useCollection';
 import wrapper from './wrapper';
 
@@ -87,5 +87,35 @@ describe('useCollection' ,() => {
       statusText: 'Bad Request',
       detail: 'Wrong query'
     });
+  });
+
+  it('reloads collection', async () => {
+    fetch
+      .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
+      .mockResponseOnce(JSON.stringify({
+        collections: [
+          {id: 'abc', title: 'Collection A'},
+          {id: 'def', title: 'Collection B'}
+        ]
+      }))
+      .mockResponseOnce(JSON.stringify({
+        collections: [
+          {id: 'abc', title: 'Collection A - Updated'},
+          {id: 'def', title: 'Collection B'}
+        ]
+      }));
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useCollection('abc'),
+      { wrapper }
+    );
+    await waitForNextUpdate();
+    await waitForNextUpdate();
+    expect(result.current.collection).toEqual({id: 'abc', title: 'Collection A'});
+
+    act(() => result.current.reload());
+
+    await waitForNextUpdate();
+    expect(result.current.collection).toEqual({id: 'abc', title: 'Collection A - Updated'});
   });
 });
