@@ -12,6 +12,7 @@ type StacApiContextType = {
   setCollections: (collections?: CollectionsResponse) => void;
   getItem: (id: string) => Item | undefined;
   addItem: (id: string, item: Item) => void;
+  deleteItem: (id: string) => void;
 }
 
 type StacApiProviderType = {
@@ -33,13 +34,20 @@ export function StacApiProvider({ children, apiUrl, options }: StacApiProviderTy
     setItems(new Map(items.set(itemPath, item)));
   }, [items]);
 
+  const deleteItem = useCallback((itemPath: string) => {
+    const tempItems = new Map(items);
+    items.delete(itemPath);
+    setItems(tempItems);
+  }, [items]);
+
   const contextValue = useMemo(() => ({
     stacApi,
     collections,
     setCollections,
     getItem,
-    addItem
-  }), [addItem, collections, getItem, stacApi]);
+    addItem,
+    deleteItem
+  }), [addItem, collections, deleteItem, getItem, stacApi]);
 
   return (
     <StacApiContext.Provider value={contextValue}>
@@ -54,7 +62,8 @@ export function useStacApiContext() {
     collections,
     setCollections, 
     getItem,
-    addItem
+    addItem,
+    deleteItem
   } = useContext(StacApiContext);
 
   return {
@@ -62,6 +71,7 @@ export function useStacApiContext() {
     collections,
     setCollections,
     getItem,
-    addItem
+    addItem,
+    deleteItem
   };
 }
