@@ -106,8 +106,9 @@ const { collections } = useCollections();
 Option          | Type      | Description
 --------------- | --------- | -------------
 `collections`   | `array`   | A list of collections available from the STAC catalog. Is `null` if collections have not been retrieved.
-`state`        | `str`     | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress. 
+`state`         | `str`     | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress. 
 `reload`        | `function`| Callback function to trigger a reload of collections.
+`error`         | [`Error`](#error)   | Error information if the last request was unsuccessful. `undefined` if the last request was successful. 
 
 #### Example
 
@@ -159,8 +160,10 @@ Option          | Type      | Description
 
 Option          | Type      | Description
 --------------- | --------- | -------------
-`collection`   | `object`   | The collection matching the provided ID. Is `null` if collection has not been retrieved.
-`state`        | `str`     | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress. 
+`collection`    | `object`  | The collection matching the provided ID. Is `null` if collection has not been retrieved.
+`state`         | `str`     | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress. 
+`reload`        | `function`| Callback function to trigger a reload of the collection.
+`error`         | [`Error`](#error)   | Error information if the last request was unsuccessful. `undefined` if the last request was successful. 
 
 #### Example
 
@@ -212,6 +215,8 @@ Option          | Type      | Description
 --------------- | --------- | -------------
 `item`          | `object`  | The item matching the provided URL.
 `state`         | `str`     | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress. 
+`reload`        | `function`| Callback function to trigger a reload of the item.
+`error`         | [`Error`](#error)   | Error information if the last request was unsuccessful. `undefined` if the last request was successful. 
 
 #### Examples
 
