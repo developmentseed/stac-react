@@ -24,6 +24,27 @@ describe('useCollections', () => {
     expect(result.current.state).toEqual('IDLE');
   });
 
+  it('reloads collections', async () => {
+    fetch
+      .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
+      .mockResponseOnce(JSON.stringify({ data: 'original' }))
+      .mockResponseOnce(JSON.stringify({ data: 'reloaded' }));
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useCollections(),
+      { wrapper }
+    );
+    await waitForNextUpdate();
+    await waitForNextUpdate();
+    expect(result.current.collections).toEqual({ data: 'original' });
+    
+    expect(result.current.state).toEqual('IDLE');
+    act(() => result.current.reload());
+ 
+    await waitForNextUpdate();
+    expect(result.current.collections).toEqual({ data: 'reloaded' });
+  });
+
   it('handles error with JSON response', async () => {
     fetch
       .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
@@ -60,26 +81,5 @@ describe('useCollections', () => {
       statusText: 'Bad Request',
       detail: 'Wrong query'
     });
-  });
-
-  it('reloads collections', async () => {
-    fetch
-      .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
-      .mockResponseOnce(JSON.stringify({ data: 'original' }))
-      .mockResponseOnce(JSON.stringify({ data: 'reloaded' }));
-
-    const { result, waitForNextUpdate } = renderHook(
-      () => useCollections(),
-      { wrapper }
-    );
-    await waitForNextUpdate();
-    await waitForNextUpdate();
-    expect(result.current.collections).toEqual({ data: 'original' });
-    
-    expect(result.current.state).toEqual('IDLE');
-    act(() => result.current.reload());
- 
-    await waitForNextUpdate();
-    expect(result.current.collections).toEqual({ data: 'reloaded' });
   });
 });

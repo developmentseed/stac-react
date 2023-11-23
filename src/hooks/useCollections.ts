@@ -36,11 +36,11 @@ function useCollections(): StacCollectionsHook {
 
   useEffect(
     () => {
-      if (stacApi && !collections) {
+      if (stacApi) {
         getCollections();
       }
     },
-    [getCollections, stacApi, collections]
+    [getCollections, stacApi]
   );
 
   return {
