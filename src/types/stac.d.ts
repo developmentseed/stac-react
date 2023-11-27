@@ -2,6 +2,7 @@ import type { Geometry } from 'geojson';
 import type { GenericObject } from '.';
 
 export type Bbox = [number, number, number, number];
+export type IdList = string[];
 export type CollectionIdList = string[];
 export type DateRange = {
   from?: string,
@@ -9,6 +10,7 @@ export type DateRange = {
 }
 
 export type SearchPayload = {
+  ids?: IdList,
   bbox?: Bbox,
   collections?: CollectionIdList,
   dateRange?: DateRange,

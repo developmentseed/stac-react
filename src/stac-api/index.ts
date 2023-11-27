@@ -1,5 +1,5 @@
 import type { ApiError, GenericObject } from '../types';
-import type { Bbox, SearchPayload, DateRange, CollectionIdList } from '../types/stac';
+import type { Bbox, SearchPayload, DateRange } from '../types/stac';
 
 type RequestPayload = SearchPayload;
 type FetchOptions = {
@@ -45,8 +45,8 @@ class StacApi {
     return sortedBbox;
   }
 
-  makeCollectionsPayload(collections?: CollectionIdList) {
-    return collections?.length ? collections : undefined;
+  makeArrayPayload(arr?: any[]) { /* eslint-disable-line @typescript-eslint/no-explicit-any */
+    return arr?.length ? arr : undefined;
   }
 
   makeDatetimePayload(dateRange?: DateRange): string | undefined {
@@ -116,10 +116,11 @@ class StacApi {
   }
 
   search(payload: SearchPayload, headers = {}): Promise<Response> {
-    const { bbox, dateRange, collections, ...restPayload } = payload;
+    const { ids, bbox, dateRange, collections, ...restPayload } = payload;
     const requestPayload = {
       ...restPayload,
-      collections: this.makeCollectionsPayload(collections),
+      ids: this.makeArrayPayload(ids),
+      collections: this.makeArrayPayload(collections),
       bbox: this.fixBboxCoordinateOrder(bbox),
       datetime: this.makeDatetimePayload(dateRange),
       limit: 25

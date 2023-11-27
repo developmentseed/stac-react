@@ -14,6 +14,8 @@ import { useStacApiContext } from '../context';
 type PaginationHandler = () => void;
 
 type StacSearchHook = {
+  ids?: string[]
+  setIds: (ids: string[]) => void
   bbox?: Bbox
   setBbox: (bbox: Bbox) => void
   collections?: CollectionIdList
@@ -33,6 +35,7 @@ type StacSearchHook = {
 function useStacSearch(): StacSearchHook {
   const { stacApi } = useStacApiContext();
   const [ results, setResults ] = useState<SearchResponse>();
+  const [ ids, setIds ] = useState<string[]>();
   const [ bbox, setBbox ] = useState<Bbox>();
   const [ collections, setCollections ] = useState<CollectionIdList>();
   const [ dateRangeFrom, setDateRangeFrom ] = useState<string>('');
@@ -47,6 +50,7 @@ function useStacSearch(): StacSearchHook {
     setResults(undefined);
     setBbox(undefined);
     setCollections(undefined);
+    setIds(undefined);
     setDateRangeFrom('');
     setDateRangeTo('');
   };
@@ -71,11 +75,12 @@ function useStacSearch(): StacSearchHook {
    */
   const getSearchPayload = useCallback(
     () => ({
+      ids,
       bbox,
       collections,
       dateRange: { from: dateRangeFrom, to: dateRangeTo }
     }),
-    [ bbox, collections, dateRangeFrom, dateRangeTo ]
+    [ ids, bbox, collections, dateRangeFrom, dateRangeTo ]
   );
 
   /**
@@ -161,6 +166,8 @@ function useStacSearch(): StacSearchHook {
 
   return {
     submit,
+    ids,
+    setIds,
     bbox,
     setBbox,
     collections,

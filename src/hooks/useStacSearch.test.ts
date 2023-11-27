@@ -13,6 +13,30 @@ function parseRequestPayload(mockApiCall?: RequestInit) {
 describe('useStacSearch — API supports POST', () => {
   beforeEach(() => fetch.resetMocks());
 
+  it('includes IDs in search', async () => {
+    fetch
+      .mockResponseOnce(
+        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
+        { url: 'https://fake-stac-api.net' }
+      )
+      .mockResponseOnce(JSON.stringify({ data: '12345' }));
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useStacSearch(),
+      { wrapper }
+    );
+    await waitForNextUpdate();
+
+    act(() => result.current.setIds(['collection_1', 'collection_2']));
+    act(() => result.current.submit());
+    
+    await waitForNextUpdate();
+
+    const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
+    expect(postPayload).toEqual({ ids: ['collection_1', 'collection_2'], limit: 25 });
+    expect(result.current.results).toEqual({ data: '12345' });
+  });
+
   it('includes Bbox in search', async () => {
     fetch
       .mockResponseOnce(
