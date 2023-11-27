@@ -261,10 +261,12 @@ const { results } = useStacSearch();
 Option             | Type      | Description
 ------------------ | --------- | -------------
 `submit`           | `function` | Callback to submit the search using the current filter parameters. Excecutes an API call to the specified STAC API.
+`ids`              | `array<string>`   | List of item IDs to match in the search, `undefined` if unset.
+`setIds(itemIds)`     | `function` | Callback to set `ids`. `itemIds` must be an `array` of `string` with the IDs of the selected items, or `undefined` to reset.
 `bbox`             | `array<number>`   | Array of coordinates `[northWestLon, northWestLat, southEastLon, southEastLat]`, `undefined` if unset.
-`setBbox(bbox)`          | `function` | Callback to set `bbox`. `bbox` must be an array of coordinates `[northWestLon, northWestLat, southEastLon, southEastLat]`, or `undefined` to reset.
+`setBbox(bbox)`    | `function` | Callback to set `bbox`. `bbox` must be an array of coordinates `[northWestLon, northWestLat, southEastLon, southEastLat]`, or `undefined` to reset.
 `collections`      | `array<string>`   | List of select collection IDs included in the search query. `undefined` if unset.
-`setCollections(collectionIDs)`   | `function` | Callback to set `collections`. `collectionIDs` must be an `array` of `string` with the IDs of the selection collections, or `undefined` to reset. 
+`setCollections(collectionIDs)`   | `function` | Callback to set `collections`. `collectionIDs` must be an `array` of `string` with the IDs of the selected collections, or `undefined` to reset. 
 `dateRangeFrom`    | `string` | The from-date of the search query. `undefined` if unset.
 `setDateRangeFrom(fromDate)` | `function` | Callback to set `dateRangeFrom`. `fromDate` must be ISO representation of a date, ie. `2022-05-18`, or `undefined` to reset.
 `dateRangeTo`      | `string` | The to-date of the search query. `undefined` if unset.
