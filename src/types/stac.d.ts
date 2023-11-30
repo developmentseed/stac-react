@@ -8,12 +8,17 @@ export type DateRange = {
   from?: string,
   to?: string
 }
+type Sortby = {
+  field: string;
+  direction: 'asc' | 'desc';
+}
 
 export type SearchPayload = {
   ids?: IdList,
   bbox?: Bbox,
   collections?: CollectionIdList,
   dateRange?: DateRange,
+  sortby?: Sortby[]
 }
 
 export type LinkBody = SearchPayload & {

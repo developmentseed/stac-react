@@ -8,6 +8,7 @@ import type {
   SearchPayload,
   SearchResponse,
   LinkBody,
+  Sortby
 } from '../types/stac';
 import { useStacApiContext } from '../context';
 
@@ -24,6 +25,8 @@ type StacSearchHook = {
   setDateRangeFrom: (date: string) => void
   dateRangeTo?: string
   setDateRangeTo: (date: string) => void
+  sortby?: Sortby[]
+  setSortby: (sort: Sortby[]) => void
   submit: () => void
   results?: SearchResponse
   state: LoadingState;
@@ -40,6 +43,7 @@ function useStacSearch(): StacSearchHook {
   const [ collections, setCollections ] = useState<CollectionIdList>();
   const [ dateRangeFrom, setDateRangeFrom ] = useState<string>('');
   const [ dateRangeTo, setDateRangeTo ] = useState<string>('');
+  const [ sortby, setSortby ] = useState<Sortby[]>();
   const [ state, setState ] = useState<LoadingState>('IDLE');
   const [ error, setError ] = useState<ApiError>();
 
@@ -53,6 +57,7 @@ function useStacSearch(): StacSearchHook {
     setIds(undefined);
     setDateRangeFrom('');
     setDateRangeTo('');
+    setSortby(undefined);
   };
 
   /**
@@ -78,9 +83,10 @@ function useStacSearch(): StacSearchHook {
       ids,
       bbox,
       collections,
-      dateRange: { from: dateRangeFrom, to: dateRangeTo }
+      dateRange: { from: dateRangeFrom, to: dateRangeTo },
+      sortby
     }),
-    [ ids, bbox, collections, dateRangeFrom, dateRangeTo ]
+    [ ids, bbox, collections, dateRangeFrom, dateRangeTo, sortby ]
   );
 
   /**
@@ -179,6 +185,8 @@ function useStacSearch(): StacSearchHook {
     results,
     state,
     error,
+    sortby,
+    setSortby,
     nextPage: nextPageConfig ? nextPageFn : undefined,
     previousPage: previousPageConfig ? previousPageFn : undefined
   };

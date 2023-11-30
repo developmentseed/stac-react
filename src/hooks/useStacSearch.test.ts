@@ -528,6 +528,30 @@ describe('useStacSearch — API supports POST', () => {
     expect(result.current.results).toEqual({ data: '12345' });
   });
 
+  it('includes sortBy in search', async () => {
+    fetch
+      .mockResponseOnce(
+        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
+        { url: 'https://fake-stac-api.net' }
+      )
+      .mockResponseOnce(JSON.stringify({ data: '12345' }));
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useStacSearch(),
+      { wrapper }
+    );
+    await waitForNextUpdate();
+
+    act(() => result.current.setSortby([{ field: 'id', direction: 'asc'}]));
+    act(() => result.current.submit());
+    
+    await waitForNextUpdate();
+
+    const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
+    expect(postPayload).toEqual({ sortby: [{ field: 'id', direction: 'asc'}], limit: 25 });
+    expect(result.current.results).toEqual({ data: '12345' });
+  });
+
   // it('should reset state with each new StacApi instance', async () => {
   //   const bbox: Bbox = [-0.59, 51.24, 0.30, 51.74];
   //   fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
@@ -663,6 +687,31 @@ describe('useStacSearch — API supports GET', () => {
     await waitForNextUpdate();
 
     expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/search?datetime=..%2F2022-05-17&limit=25');
+    expect(result.current.results).toEqual({ data: '12345' });
+  });
+
+  it('includes sortby', async () => {
+    fetch
+      .mockResponseOnce(
+        JSON.stringify({ links: [] }),
+        { url: 'https://fake-stac-api.net' }
+      )
+      .mockResponseOnce(JSON.stringify({ data: '12345' }));
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useStacSearch(),
+      { wrapper }
+    );
+    await waitForNextUpdate();
+
+    act(() => result.current.setSortby([
+      { field: 'id', direction: 'asc' },
+      { field: 'properties.cloud', direction: 'desc' },
+    ]));
+    act(() => result.current.submit());
+    await waitForNextUpdate();
+
+    expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/search?limit=25&sortby=%2Bid%2C-properties.cloud');
     expect(result.current.results).toEqual({ data: '12345' });
   });
 });

@@ -271,6 +271,8 @@ Option             | Type      | Description
 `setDateRangeFrom(fromDate)` | `function` | Callback to set `dateRangeFrom`. `fromDate` must be ISO representation of a date, ie. `2022-05-18`, or `undefined` to reset.
 `dateRangeTo`      | `string` | The to-date of the search query. `undefined` if unset.
 `setDateRangeTo(toDate)`   | `function` | Callback to set `dateRangeto`. `toDate` must be ISO representation of a date, ie. `2022-05-18`, or `undefined` to reset.
+`sortby`             | `array`   | Specifies the order of results. Array of `{ field: string, direction: 'asc' | 'desc' }`
+`setSortby(sort)`          | `function` | Callback to set `sortby`. `sort` must be an array of `{ field: string, direction: 'asc' | 'desc' }`, or `undefined` to reset.
 `results`          | `object`   | The result of the last search query; a [GeoJSON `FeatureCollection` with additional members](https://github.com/radiantearth/stac-api-spec/blob/v1.0.0-rc.2/fragments/itemcollection/README.md). `undefined` if the search request has not been submitted, or if there was an error. 
 `state`            | `string` | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress. 
 `error`            | [`Error`](#error)   | Error information if the last request was unsuccessful. `undefined` if the last request was successful. 

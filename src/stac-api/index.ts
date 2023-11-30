@@ -63,7 +63,7 @@ class StacApi {
     }
   }
 
-  payloadToQuery(payload: SearchPayload): string {
+  payloadToQuery({ sortby, ...payload }: SearchPayload): string {
     const queryObj = {};
     for (const [key, value] of Object.entries(payload)) {
       if (!value) continue;
@@ -74,6 +74,13 @@ class StacApi {
         queryObj[key] = value;
       }
     }
+
+    if(sortby) {
+      queryObj['sortby'] = sortby
+        .map(( { field, direction } ) => `${direction === 'asc' ? '+' : '-'}${field}`)
+        .join(',');
+    }
+
     return new URLSearchParams(queryObj).toString();
   }
 
