@@ -39,7 +39,7 @@
   },
   "scripts": {
     "test": "jest",
-    "lint": "eslint 'src/**/*.ts'",
+    "lint": "eslint 'src/**/*.ts' 'src/**/*.tsx'",
     "build": "rollup -c rollup.config.mjs"
   },
   "dependencies": {}
