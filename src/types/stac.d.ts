@@ -8,7 +8,7 @@ export type DateRange = {
   from?: string,
   to?: string
 }
-type Sortby = {
+export type Sortby = {
   field: string;
   direction: 'asc' | 'desc';
 }

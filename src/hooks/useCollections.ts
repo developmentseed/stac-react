@@ -16,17 +16,18 @@ function useCollections(): StacCollectionsHook {
   const [ state, setState ] = useState<LoadingState>('IDLE');
   const [ error, setError ] = useState<ApiError>();
 
-
   const _getCollections = useCallback(
     () => {
       if (stacApi) {
         setState('LOADING');
-        setCollections(undefined);
 
         stacApi.getCollections()
           .then(response => response.json())
           .then(setCollections)
-          .catch((err) => setError(err))
+          .catch((err) => {
+            setError(err);
+            setCollections(undefined);
+          })
           .finally(() => setState('IDLE'));
       }
     },
@@ -36,11 +37,11 @@ function useCollections(): StacCollectionsHook {
 
   useEffect(
     () => {
-      if (stacApi) {
+      if (stacApi && !error && !collections) {
         getCollections();
       }
     },
-    [getCollections, stacApi]
+    [getCollections, stacApi, collections, error]
   );
 
   return {
