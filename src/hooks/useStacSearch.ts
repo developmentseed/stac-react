@@ -25,6 +25,8 @@ type StacSearchHook = {
   setDateRangeFrom: (date: string) => void
   dateRangeTo?: string
   setDateRangeTo: (date: string) => void
+  limit?: number;
+  setLimit: (limit: number) => void;
   sortby?: Sortby[]
   setSortby: (sort: Sortby[]) => void
   submit: () => void
@@ -43,6 +45,7 @@ function useStacSearch(): StacSearchHook {
   const [ collections, setCollections ] = useState<CollectionIdList>();
   const [ dateRangeFrom, setDateRangeFrom ] = useState<string>('');
   const [ dateRangeTo, setDateRangeTo ] = useState<string>('');
+  const [ limit, setLimit ] = useState<number>(25);
   const [ sortby, setSortby ] = useState<Sortby[]>();
   const [ state, setState ] = useState<LoadingState>('IDLE');
   const [ error, setError ] = useState<ApiError>();
@@ -58,6 +61,7 @@ function useStacSearch(): StacSearchHook {
     setDateRangeFrom('');
     setDateRangeTo('');
     setSortby(undefined);
+    setLimit(25);
   };
 
   /**
@@ -84,9 +88,10 @@ function useStacSearch(): StacSearchHook {
       bbox,
       collections,
       dateRange: { from: dateRangeFrom, to: dateRangeTo },
-      sortby
+      sortby,
+      limit
     }),
-    [ ids, bbox, collections, dateRangeFrom, dateRangeTo, sortby ]
+    [ ids, bbox, collections, dateRangeFrom, dateRangeTo, sortby, limit ]
   );
 
   /**
@@ -187,6 +192,8 @@ function useStacSearch(): StacSearchHook {
     error,
     sortby,
     setSortby,
+    limit,
+    setLimit,
     nextPage: nextPageConfig ? nextPageFn : undefined,
     previousPage: previousPageConfig ? previousPageFn : undefined
   };

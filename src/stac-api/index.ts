@@ -130,7 +130,6 @@ class StacApi {
       collections: this.makeArrayPayload(collections),
       bbox: this.fixBboxCoordinateOrder(bbox),
       datetime: this.makeDatetimePayload(dateRange),
-      limit: 25
     };
 
     if (this.searchMode === 'POST') {
