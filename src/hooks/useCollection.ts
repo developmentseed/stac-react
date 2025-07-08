@@ -1,44 +1,70 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import type { ApiError, LoadingState } from '../types';
 import type { Collection } from '../types/stac';
-import useCollections from './useCollections';
+import { useStacApiContext } from '../context';
 
 type StacCollectionHook = {
-  collection?: Collection,
-  state: LoadingState,
-  error?: ApiError,
-  reload: () => void
+  collection?: Collection;
+  state: LoadingState;
+  error?: ApiError;
+  reload: () => void;
 };
 
 function useCollection(collectionId: string): StacCollectionHook {
-  const { collections, state, error: requestError, reload } = useCollections();
-  const [ error, setError ] = useState<ApiError>();
+  if (!collectionId) {
+    throw new Error('Collection ID is required');
+  }
+
+  const { stacApi, collections } = useStacApiContext();
+
+  const [collection, setCollection] = useState<Collection>();
+  const [state, setState] = useState<LoadingState>('IDLE');
+  const [error, setError] = useState<ApiError>();
+
+  const load = useCallback(
+    (id: string) => {
+      if (stacApi) {
+        setError(undefined);
+        setState('LOADING');
+        stacApi
+          .getCollection(id)
+          .then(async (res) => {
+            const data: Collection = await res.json();
+            setCollection(data);
+          })
+          .catch((err: ApiError) => {
+            setError(err);
+          })
+          .finally(() => {
+            setState('IDLE');
+          });
+      }
+    },
+    [stacApi]
+  );
 
   useEffect(() => {
-    setError(requestError);
-  }, [requestError]);
+    setState('LOADING');
+    // Check if the collection is already in the collections list.
+    const coll = collections?.collections.find(({ id }) => id === collectionId);
+    if (coll) {
+      setCollection(coll);
+      setState('IDLE');
+      return;
+    }
 
-  const collection = useMemo(
-    () => {
-      const coll = collections?.collections.find(({ id }) => id === collectionId);
-      if (!coll) {
-        setError({
-          status: 404,
-          statusText: 'Not found',
-          detail: 'Collection does not exist'
-        });
-      }
-      return coll;
-    },
-    [collectionId, collections]
-  );
+    // If not, request the collection directly from the API.
+    load(collectionId);
+  }, [collectionId, collections, load]);
 
   return {
     collection,
     state,
     error,
-    reload
+    reload: useCallback(() => {
+      load(collectionId);
+    }, [collectionId, load])
   };
 }
 

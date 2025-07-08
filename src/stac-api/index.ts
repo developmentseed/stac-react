@@ -3,10 +3,10 @@ import type { Bbox, SearchPayload, DateRange } from '../types/stac';
 
 type RequestPayload = SearchPayload;
 type FetchOptions = {
-  method?: string,
-  payload?: RequestPayload,
-  headers?: GenericObject
-}
+  method?: string;
+  payload?: RequestPayload;
+  headers?: GenericObject;
+};
 
 export enum SearchMode {
   GET = 'GET',
@@ -18,10 +18,20 @@ class StacApi {
   options?: GenericObject;
   searchMode = SearchMode.GET;
 
-  constructor(baseUrl: string, searchMode: SearchMode, options?: GenericObject) {
+  constructor(
+    baseUrl: string,
+    searchMode: SearchMode,
+    options?: GenericObject
+  ) {
     this.baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
     this.searchMode = searchMode;
-    this.options = options;
+    this.options = options || {};
+
+    if (!options?.headers) {
+      this.options.headers = {
+        'Content-Type': 'application/json'
+      };
+    }
   }
 
   fixBboxCoordinateOrder(bbox?: Bbox): Bbox | undefined {
@@ -45,7 +55,8 @@ class StacApi {
     return sortedBbox;
   }
 
-  makeArrayPayload(arr?: any[]) { /* eslint-disable-line @typescript-eslint/no-explicit-any */
+  makeArrayPayload(arr?: any[]) {
+    /* eslint-disable-line @typescript-eslint/no-explicit-any */
     return arr?.length ? arr : undefined;
   }
 
@@ -56,7 +67,7 @@ class StacApi {
 
     const { from, to } = dateRange;
 
-    if (from || to ) {
+    if (from || to) {
       return `${from || '..'}/${to || '..'}`;
     } else {
       return undefined;
@@ -64,7 +75,7 @@ class StacApi {
   }
 
   payloadToQuery({ sortby, ...payload }: SearchPayload): string {
-    const queryObj = {};
+    const queryObj: Record<string, any> = {};
     for (const [key, value] of Object.entries(payload)) {
       if (!value) continue;
 
@@ -75,9 +86,11 @@ class StacApi {
       }
     }
 
-    if(sortby) {
+    if (sortby) {
       queryObj['sortby'] = sortby
-        .map(( { field, direction } ) => `${direction === 'asc' ? '+' : '-'}${field}`)
+        .map(
+          ({ field, direction }) => `${direction === 'asc' ? '+' : '-'}${field}`
+        )
         .join(',');
     }
 
@@ -91,14 +104,14 @@ class StacApi {
       statusText
     };
 
-    // Some STAC APIs return errors as JSON others as string. 
-    // Clone the response so we can read the body as text if json fails. 
+    // Some STAC APIs return errors as JSON others as string.
+    // Clone the response so we can read the body as text if json fails.
     const clone = response.clone();
     try {
-      e.detail = await response.json(); 
+      e.detail = await response.json();
     } catch (err) {
       e.detail = await clone.text();
-    }      
+    }
     return Promise.reject(e);
   }
 
@@ -108,9 +121,8 @@ class StacApi {
     return fetch(url, {
       method,
       headers: {
-        'Content-Type': 'application/json',
-        ...headers,
-        ...this.options?.headers
+        ...this.options?.headers,
+        ...headers
       },
       body: payload ? JSON.stringify(payload) : undefined
     }).then(async (response) => {
@@ -129,25 +141,41 @@ class StacApi {
       ids: this.makeArrayPayload(ids),
       collections: this.makeArrayPayload(collections),
       bbox: this.fixBboxCoordinateOrder(bbox),
-      datetime: this.makeDatetimePayload(dateRange),
+      datetime: this.makeDatetimePayload(dateRange)
     };
 
     if (this.searchMode === 'POST') {
-      return this.fetch(
-        `${this.baseUrl}/search`,
-        { method: 'POST', payload: requestPayload, headers }
-      );
+      return this.fetch(`${this.baseUrl}/search`, {
+        method: 'POST',
+        payload: requestPayload,
+        headers
+      });
     } else {
       const query = this.payloadToQuery(requestPayload);
-      return this.fetch(
-        `${this.baseUrl}/search?${query}`,
-        { method: 'GET', headers }
-      );
+      return this.fetch(`${this.baseUrl}/search?${query}`, {
+        method: 'GET',
+        headers
+      });
     }
   }
 
-  getCollections(): Promise<Response> {
-    return this.fetch(`${this.baseUrl}/collections`);
+  getCollections(options?: {
+    limit: number;
+    offset: number;
+  }): Promise<Response> {
+    const { limit, offset } = options || {};
+    const query = new URLSearchParams();
+    if (limit) query.set('limit', limit.toString());
+    if (offset) query.set('offset', offset.toString());
+    return this.fetch(
+      `${this.baseUrl}/collections${
+        query.toString() ? `?${query.toString()}` : ''
+      }`
+    );
+  }
+
+  getCollection(id: string): Promise<Response> {
+    return this.fetch(`${this.baseUrl}/collections/${id}`);
   }
 
   get(href: string, headers = {}): Promise<Response> {
