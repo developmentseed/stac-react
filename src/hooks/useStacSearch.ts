@@ -15,43 +15,43 @@ import { useStacApiContext } from '../context';
 type PaginationHandler = () => void;
 
 type StacSearchHook = {
-  ids?: string[]
-  setIds: (ids: string[]) => void
-  bbox?: Bbox
-  setBbox: (bbox: Bbox) => void
-  collections?: CollectionIdList
-  setCollections: (collectionIds: CollectionIdList) => void
-  dateRangeFrom?: string
-  setDateRangeFrom: (date: string) => void
-  dateRangeTo?: string
-  setDateRangeTo: (date: string) => void
+  ids?: string[];
+  setIds: (ids: string[]) => void;
+  bbox?: Bbox;
+  setBbox: (bbox: Bbox) => void;
+  collections?: CollectionIdList;
+  setCollections: (collectionIds: CollectionIdList) => void;
+  dateRangeFrom?: string;
+  setDateRangeFrom: (date: string) => void;
+  dateRangeTo?: string;
+  setDateRangeTo: (date: string) => void;
   limit?: number;
   setLimit: (limit: number) => void;
-  sortby?: Sortby[]
-  setSortby: (sort: Sortby[]) => void
-  submit: () => void
-  results?: SearchResponse
+  sortby?: Sortby[];
+  setSortby: (sort: Sortby[]) => void;
+  submit: () => void;
+  results?: SearchResponse;
   state: LoadingState;
-  error: ApiError | undefined
-  nextPage: PaginationHandler | undefined
-  previousPage: PaginationHandler | undefined
-}
+  error: ApiError | undefined;
+  nextPage: PaginationHandler | undefined;
+  previousPage: PaginationHandler | undefined;
+};
 
 function useStacSearch(): StacSearchHook {
   const { stacApi } = useStacApiContext();
-  const [ results, setResults ] = useState<SearchResponse>();
-  const [ ids, setIds ] = useState<string[]>();
-  const [ bbox, setBbox ] = useState<Bbox>();
-  const [ collections, setCollections ] = useState<CollectionIdList>();
-  const [ dateRangeFrom, setDateRangeFrom ] = useState<string>('');
-  const [ dateRangeTo, setDateRangeTo ] = useState<string>('');
-  const [ limit, setLimit ] = useState<number>(25);
-  const [ sortby, setSortby ] = useState<Sortby[]>();
-  const [ state, setState ] = useState<LoadingState>('IDLE');
-  const [ error, setError ] = useState<ApiError>();
+  const [results, setResults] = useState<SearchResponse>();
+  const [ids, setIds] = useState<string[]>();
+  const [bbox, setBbox] = useState<Bbox>();
+  const [collections, setCollections] = useState<CollectionIdList>();
+  const [dateRangeFrom, setDateRangeFrom] = useState<string>('');
+  const [dateRangeTo, setDateRangeTo] = useState<string>('');
+  const [limit, setLimit] = useState<number>(25);
+  const [sortby, setSortby] = useState<Sortby[]>();
+  const [state, setState] = useState<LoadingState>('IDLE');
+  const [error, setError] = useState<ApiError>();
 
-  const [ nextPageConfig, setNextPageConfig ] = useState<Link>();
-  const [ previousPageConfig, setPreviousPageConfig ] = useState<Link>();
+  const [nextPageConfig, setNextPageConfig] = useState<Link>();
+  const [previousPageConfig, setPreviousPageConfig] = useState<Link>();
 
   const reset = () => {
     setResults(undefined);
@@ -72,12 +72,12 @@ function useStacSearch(): StacSearchHook {
   /**
    * Extracts the pagination config from the the links array of the items response
    */
-  const setPaginationConfig = useCallback(
-    (links: Link[]) => {
-      setNextPageConfig(links.find(({ rel }) => rel === 'next'));
-      setPreviousPageConfig(links.find(({ rel }) => ['prev', 'previous'].includes(rel)));
-    }, []
-  );
+  const setPaginationConfig = useCallback((links: Link[]) => {
+    setNextPageConfig(links.find(({ rel }) => rel === 'next'));
+    setPreviousPageConfig(
+      links.find(({ rel }) => ['prev', 'previous'].includes(rel))
+    );
+  }, []);
 
   /**
    * Returns the search payload based on the current application state
@@ -91,36 +91,40 @@ function useStacSearch(): StacSearchHook {
       sortby,
       limit
     }),
-    [ ids, bbox, collections, dateRangeFrom, dateRangeTo, sortby, limit ]
+    [ids, bbox, collections, dateRangeFrom, dateRangeTo, sortby, limit]
   );
 
   /**
    * Resets the state and processes the results from the provided request
    */
-  const processRequest = useCallback((request: Promise<Response>) => {
-    setResults(undefined);
-    setState('LOADING');
-    setError(undefined);
-    setNextPageConfig(undefined);
-    setPreviousPageConfig(undefined);
+  const processRequest = useCallback(
+    (request: Promise<Response>) => {
+      setResults(undefined);
+      setState('LOADING');
+      setError(undefined);
+      setNextPageConfig(undefined);
+      setPreviousPageConfig(undefined);
 
-    request
-      .then(response => response.json())
-      .then(data => {
-        setResults(data);
-        if (data.links) {
-          setPaginationConfig(data.links);
-        }
-      })
-      .catch((err) => setError(err))
-      .finally(() => setState('IDLE'));
-  }, [setPaginationConfig]);
+      request
+        .then((response) => response.json())
+        .then((data) => {
+          setResults(data);
+          if (data.links) {
+            setPaginationConfig(data.links);
+          }
+        })
+        .catch((err) => setError(err))
+        .finally(() => setState('IDLE'));
+    },
+    [setPaginationConfig]
+  );
 
   /**
    * Executes a POST request against the `search` endpoint using the provided payload and headers
    */
   const executeSearch = useCallback(
-    (payload: SearchPayload, headers = {}) => stacApi && processRequest(stacApi.search(payload, headers)),
+    (payload: SearchPayload, headers = {}) =>
+      stacApi && processRequest(stacApi.search(payload, headers)),
     [stacApi, processRequest]
   );
 
@@ -166,13 +170,11 @@ function useStacSearch(): StacSearchHook {
     () => flipPage(previousPageConfig),
     [flipPage, previousPageConfig]
   );
-  
-  const _submit = useCallback(
-    () => {
-      const payload = getSearchPayload();
-      executeSearch(payload); 
-    }, [executeSearch, getSearchPayload]
-  );
+
+  const _submit = useCallback(() => {
+    const payload = getSearchPayload();
+    executeSearch(payload);
+  }, [executeSearch, getSearchPayload]);
   const submit = useMemo(() => debounce(_submit), [_submit]);
 
   return {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback} from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Item } from '../types/stac';
 import { ApiError, LoadingState } from '../types';
 import { useStacApiContext } from '../context';
@@ -8,13 +8,13 @@ type ItemHook = {
   state: LoadingState;
   error?: ApiError;
   reload: () => void;
-}
+};
 
 function useItem(url: string): ItemHook {
   const { stacApi, getItem, addItem, deleteItem } = useStacApiContext();
-  const [ state, setState ] = useState<LoadingState>('IDLE');
-  const [ item, setItem ] = useState<Item>();
-  const [ error, setError ] = useState<ApiError>();
+  const [state, setState] = useState<LoadingState>('IDLE');
+  const [item, setItem] = useState<Item>();
+  const [error, setError] = useState<ApiError>();
 
   useEffect(() => {
     if (!stacApi) return;
@@ -25,9 +25,10 @@ function useItem(url: string): ItemHook {
       if (i) {
         resolve(i);
       } else {
-        stacApi.fetch(url)
-          .then(r => r.json())
-          .then(r => {
+        stacApi
+          .fetch(url)
+          .then((r) => r.json())
+          .then((r) => {
             addItem(url, r);
             resolve(r);
           })
@@ -48,9 +49,10 @@ function useItem(url: string): ItemHook {
       if (i) {
         resolve(i);
       } else {
-        stacApi.fetch(url)
-          .then(r => r.json())
-          .then(r => {
+        stacApi
+          .fetch(url)
+          .then((r) => r.json())
+          .then((r) => {
             addItem(url, r);
             resolve(r);
           })
@@ -67,7 +69,7 @@ function useItem(url: string): ItemHook {
     fetchItem();
   }, [deleteItem, fetchItem, url]);
 
-  return { 
+  return {
     item,
     state,
     error,
