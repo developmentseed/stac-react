@@ -1,14 +1,25 @@
-name: Checks
-on:  
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+# This workflow performs basic checks:
+#
+#   1. run a preparation step to install and cache node modules
+#   2. once prep succeeds, lint and test run in parallel
+#
+# The checks only run on non-draft Pull Requests. They don't run on the main
+# branch prior to deploy. It's recommended to use branch protection to avoid
+# pushes straight to 'main'.
 
-env:
-  NODE: 16
+name: Checks
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   prep:
@@ -16,25 +27,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.8.0
-        with:
-          access_token: ${{ github.token }}
-
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Use Node.js ${{ env.NODE }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE }}
+          node-version-file: '.nvmrc'
 
       - name: Cache node_modules
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         id: cache-node-modules
         with:
           path: node_modules
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package.json') }}
+          key: ${{ runner.os }}-build-${{ hashFiles('**/package.json') }}
 
       - name: Install
         run: yarn install
@@ -45,25 +51,25 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Use Node.js ${{ env.NODE }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE }}
+          node-version-file: '.nvmrc'
 
       - name: Cache node_modules
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         id: cache-node-modules
         with:
           path: node_modules
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package.json') }}
+          key: ${{ runner.os }}-build-${{ hashFiles('**/package.json') }}
 
       - name: Install
         run: yarn install
 
       - name: Lint
-        run: yarn lint
+        run: yarn run lint
 
   test:
     needs: prep
@@ -71,25 +77,25 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Use Node.js ${{ env.NODE }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE }}
+          node-version-file: '.nvmrc'
 
       - name: Cache node_modules
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         id: cache-node-modules
         with:
           path: node_modules
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package.json') }}
+          key: ${{ runner.os }}-build-${{ hashFiles('**/package.json') }}
 
       - name: Install
         run: yarn install
 
       - name: Test
-        run: yarn test
+        run: yarn run test
 
   build:
     needs: test
@@ -97,22 +103,22 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Use Node.js ${{ env.NODE }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE }}
+          node-version-file: '.nvmrc'
 
       - name: Cache node_modules
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         id: cache-node-modules
         with:
           path: node_modules
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package.json') }}
+          key: ${{ runner.os }}-build-${{ hashFiles('**/package.json') }}
 
       - name: Install
         run: yarn install
 
-      - name: Test
-        run: yarn build
+      - name: Build
+        run: yarn run build
