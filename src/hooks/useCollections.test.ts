@@ -131,7 +131,6 @@ describe('useCollections', () => {
         JSON.stringify(mockPage2)
       );
 
-
     const { result, waitForNextUpdate } = renderHook(() => useCollections(), {
       wrapper
     });
@@ -175,5 +174,52 @@ describe('useCollections', () => {
     expect(result.current.state).toEqual('IDLE');
     expect(typeof result.current.prevPage).toBe('function');
     expect(typeof result.current.nextPage).toBe('function');
+  });
+
+  it('queries collections with query params', async () => {
+    fetch
+      .mockResponseOnce(JSON.stringify({ links: [] }), {
+        url: 'https://fake-stac-api.net'
+      })
+      .mockResponseOnce(
+        JSON.stringify({
+          data: '12345',
+          links: [
+            {
+              rel: 'next',
+              href: 'https://fake-stac-api.net/collections?page=2?limit=20'
+            }
+          ]
+        })
+      );
+
+    const { result, waitForNextUpdate } = renderHook(
+      () =>
+        useCollections(
+          new URLSearchParams({
+            limit: '20'
+          })
+        ),
+      {
+        wrapper
+      }
+    );
+    await waitForNextUpdate();
+    await waitForNextUpdate();
+    expect(fetch.mock.calls[1][0]).toEqual(
+      'https://fake-stac-api.net/collections?limit=20'
+    );
+    expect(result.current.collections).toEqual({
+      data: '12345',
+      links: [
+        {
+          rel: 'next',
+          href: 'https://fake-stac-api.net/collections?page=2?limit=20'
+        }
+      ]
+    });
+    expect(result.current.state).toEqual('IDLE');
+    expect(typeof result.current.nextPage).toBe('function');
+    expect(result.current.prevPage).toEqual(undefined);
   });
 });

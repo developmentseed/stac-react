@@ -55,6 +55,20 @@ class StacApi {
     return sortedBbox;
   }
 
+  addQueryParamsToURL(url: URL, qs: URLSearchParams) {
+    const newUrl = new URL(url);
+    const params = new URLSearchParams(newUrl.search);
+    for (const [key, value] of Array.from(qs.entries())) {
+      if (params.has(key)) {
+        params.set(key, value);
+      } else {
+        params.append(key, value);
+      }
+    }
+    newUrl.search = params.toString();
+    return newUrl;
+  }
+
   makeArrayPayload(arr?: any[]) {
     /* eslint-disable-line @typescript-eslint/no-explicit-any */
     return arr?.length ? arr : undefined;
@@ -159,8 +173,14 @@ class StacApi {
     }
   }
 
-  getCollections(url?: string): Promise<Response> {
-    return this.fetch(url || `${this.baseUrl}/collections`);
+  getCollections(url?: string, qs?: URLSearchParams): Promise<Response> {
+    const newUrl = this.addQueryParamsToURL(
+      new URL(url || `${this.baseUrl}/collections`),
+      qs || new URLSearchParams()
+    );
+    url = newUrl.toString();
+
+    return this.fetch(url);
   }
 
   getCollection(id: string): Promise<Response> {
