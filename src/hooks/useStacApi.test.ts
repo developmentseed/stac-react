@@ -18,7 +18,7 @@ describe('useStacApi', () => {
     await waitForNextUpdate();
     await waitForNextUpdate();
     expect(fetch.mock.calls[1][0]).toEqual(
-      'https://fake-stac-api.net/collections?limit=10'
+      'https://fake-stac-api.net/collections'
     );
   });
 
@@ -35,7 +35,7 @@ describe('useStacApi', () => {
     await waitForNextUpdate();
     await waitForNextUpdate();
     expect(fetch.mock.calls[1][0]).toEqual(
-      'https://fake-stac-api.net/redirect/collections?limit=10'
+      'https://fake-stac-api.net/redirect/collections'
     );
   });
 });

@@ -159,19 +159,8 @@ class StacApi {
     }
   }
 
-  getCollections(options?: {
-    limit: number;
-    offset: number;
-  }): Promise<Response> {
-    const { limit, offset } = options || {};
-    const query = new URLSearchParams();
-    if (limit) query.set('limit', limit.toString());
-    if (offset) query.set('offset', offset.toString());
-    return this.fetch(
-      `${this.baseUrl}/collections${
-        query.toString() ? `?${query.toString()}` : ''
-      }`
-    );
+  getCollections(url?: string): Promise<Response> {
+    return this.fetch(url || `${this.baseUrl}/collections`);
   }
 
   getCollection(id: string): Promise<Response> {

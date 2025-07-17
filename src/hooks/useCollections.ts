@@ -11,36 +11,31 @@ type StacCollectionsHook = {
   error?: ApiError;
   nextPage?: () => void;
   prevPage?: () => void;
-  setOffset: (newOffset: number) => void;
+  setCurrentUrl: (url: string | undefined) => void;
 };
 
-export default function useCollections(opts?: {
-  limit?: number;
-  initialOffset?: number;
-}): StacCollectionsHook {
-  const { limit = 10, initialOffset = 0 } = opts || {};
-
+export default function useCollections(): StacCollectionsHook {
   const { stacApi, collections, setCollections } = useStacApiContext();
   const [state, setState] = useState<LoadingState>('IDLE');
   const [error, setError] = useState<ApiError>();
 
-  const [offset, setOffset] = useState(initialOffset);
+  const [nextUrl, setNextUrl] = useState<string | undefined>();
+  const [prevUrl, setPrevUrl] = useState<string | undefined>();
+  const [currentUrl, setCurrentUrl] = useState<string | undefined>();
 
-  const [hasNext, setHasNext] = useState(false);
-  const [hasPrev, setHasPrev] = useState(false);
 
   const _getCollections = useCallback(
-    async (offset: number, limit: number) => {
+    async (url?: string) => {
       if (stacApi) {
         setState('LOADING');
 
         try {
-          const res = await stacApi.getCollections({ limit, offset });
+          const res = await stacApi.getCollections(url);
           const data: CollectionsResponse = await res.json();
 
-          setHasNext(!!data.links?.find((l) => l.rel === 'next'));
-          setHasPrev(
-            !!data.links?.find((l) => ['prev', 'previous'].includes(l.rel))
+          setNextUrl(data.links?.find((l) => l.rel === 'next')?.href);
+          setPrevUrl(
+            data.links?.find((l) => ['prev', 'previous'].includes(l.rel))?.href
           );
 
           setCollections(data);
@@ -56,34 +51,28 @@ export default function useCollections(opts?: {
   );
 
   const getCollections = useCallback(
-    (offset: number, limit: number) =>
-      debounce(() => _getCollections(offset, limit))(),
+    (url?: string) => debounce(() => _getCollections(url))(),
     [_getCollections]
   );
 
-  const nextPage = useCallback(() => {
-    setOffset(offset + limit);
-  }, [offset, limit]);
-
-  const prevPage = useCallback(() => {
-    setOffset(offset - limit);
-  }, [offset, limit]);
+  const nextPage = useCallback(() => setCurrentUrl(nextUrl), [nextUrl]);
+  const prevPage = useCallback(() => setCurrentUrl(prevUrl), [prevUrl]);
 
   useEffect(() => {
-    if (stacApi && !error && !collections) {
-      getCollections(offset, limit);
+    if (stacApi && !error) {
+      getCollections(currentUrl);
     }
-  }, [getCollections, stacApi, collections, error, offset, limit]);
+  }, [getCollections, stacApi, error, currentUrl]);
 
   return {
     collections,
     reload: useCallback(
-      () => getCollections(offset, limit),
-      [getCollections, offset, limit]
+      () => getCollections(currentUrl),
+      [getCollections, currentUrl]
     ),
-    nextPage: hasNext ? nextPage : undefined,
-    prevPage: hasPrev ? prevPage : undefined,
-    setOffset,
+    nextPage: nextUrl ? nextPage : undefined,
+    prevPage: prevUrl ? prevPage : undefined,
+    setCurrentUrl,
     state,
     error
   };
