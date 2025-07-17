@@ -12,7 +12,7 @@ describe('useItem', () => {
     fetch
       .mockResponseOnce(JSON.stringify({ id: 'abc', links: [] }))
       .mockResponseOnce(JSON.stringify({ id: 'abc' }));
-    
+
     const { result, waitForNextUpdate } = renderHook(
       () => useItem('https://fake-stac-api.net/items/abc'),
       { wrapper }
@@ -25,7 +25,10 @@ describe('useItem', () => {
   it('handles error with JSON response', async () => {
     fetch
       .mockResponseOnce(JSON.stringify({ id: 'abc', links: [] }))
-      .mockResponseOnce(JSON.stringify({ error: 'Wrong query' }), { status: 400, statusText: 'Bad Request' });
+      .mockResponseOnce(JSON.stringify({ error: 'Wrong query' }), {
+        status: 400,
+        statusText: 'Bad Request'
+      });
 
     const { result, waitForNextUpdate } = renderHook(
       () => useItem('https://fake-stac-api.net/items/abc'),
@@ -43,7 +46,10 @@ describe('useItem', () => {
   it('handles error with non-JSON response', async () => {
     fetch
       .mockResponseOnce(JSON.stringify({ id: 'abc', links: [] }))
-      .mockResponseOnce('Wrong query', { status: 400, statusText: 'Bad Request' });
+      .mockResponseOnce('Wrong query', {
+        status: 400,
+        statusText: 'Bad Request'
+      });
 
     const { result, waitForNextUpdate } = renderHook(
       () => useItem('https://fake-stac-api.net/items/abc'),
@@ -63,7 +69,7 @@ describe('useItem', () => {
       .mockResponseOnce(JSON.stringify({ id: 'abc', links: [] }))
       .mockResponseOnce(JSON.stringify({ id: 'abc' }))
       .mockResponseOnce(JSON.stringify({ id: 'abc', description: 'Updated' }));
-    
+
     const { result, waitForNextUpdate } = renderHook(
       () => useItem('https://fake-stac-api.net/items/abc'),
       { wrapper }

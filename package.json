@@ -1,6 +1,6 @@
 {
   "name": "@developmentseed/stac-react",
-  "version": "0.1.0-alpha.10",
+  "version": "0.1.0-alpha.11",
   "description": "React components and hooks for building STAC-API front-ends",
   "repository": "git@github.com:developmentseed/stac-react.git",
   "author": "Oliver Roick <oliver@roick.email>",
@@ -11,8 +11,8 @@
   "types": "./dist/index.d.ts",
   "source": "./src/index.ts",
   "peerDependencies": {
-    "react": "^18.1.0",
-    "react-dom": "^18.1.0"
+    "react": ">=18.1.0",
+    "react-dom": ">=18.1.0"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^9.0.2",
@@ -42,5 +42,5 @@
     "lint": "eslint 'src/**/*.ts' 'src/**/*.tsx'",
     "build": "rollup -c rollup.config.mjs"
   },
-  "dependencies": {}
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

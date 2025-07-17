@@ -5,100 +5,102 @@ export type Bbox = [number, number, number, number];
 export type IdList = string[];
 export type CollectionIdList = string[];
 export type DateRange = {
-  from?: string,
-  to?: string
-}
+  from?: string;
+  to?: string;
+};
 export type Sortby = {
   field: string;
   direction: 'asc' | 'desc';
-}
+};
 
 export type SearchPayload = {
-  ids?: IdList,
-  bbox?: Bbox,
-  collections?: CollectionIdList,
-  dateRange?: DateRange,
-  sortby?: Sortby[]
-}
+  ids?: IdList;
+  bbox?: Bbox;
+  collections?: CollectionIdList;
+  dateRange?: DateRange;
+  sortby?: Sortby[];
+};
 
 export type LinkBody = SearchPayload & {
-  merge?: boolean
-}
+  merge?: boolean;
+};
 
 export type SearchResponse = {
-  type: 'FeatureCollection'
-  features: Item[]
-  links: Link[]
-}
+  type: 'FeatureCollection';
+  features: Item[];
+  links: Link[];
+};
 
 export type Link = {
-  href: string
-  rel: string
-  type?: string
-  hreflang?: string
-  title?: string
-  length?: number
-  method?: string
-  headers?: GenericObject
-  body?: LinkBody
-  merge?: boolean
-}
+  href: string;
+  rel: string;
+  type?: string;
+  hreflang?: string;
+  title?: string;
+  length?: number;
+  method?: string;
+  headers?: GenericObject;
+  body?: LinkBody;
+  merge?: boolean;
+};
 
 export type ItemAsset = {
-  href: string
-  title?: string
-  description?: string
-  type?: string
-  roles?: string[]
-}
+  href: string;
+  title?: string;
+  description?: string;
+  type?: string;
+  roles?: string[];
+};
 
 export type Item = {
-  id: string,
-  bbox: Bbox,
-  geometry: Geometry,
-  type: 'Feature'
-  properties: GenericObject
-  links: Link[]
-  assets: ItemAsset[]
-}
+  id: string;
+  bbox: Bbox;
+  geometry: Geometry;
+  type: 'Feature';
+  properties: GenericObject;
+  links: Link[];
+  assets: ItemAsset[];
+};
 
 type Role = 'licensor' | 'producer' | 'processor' | 'host';
 
 export type Provider = {
-  name: string,
-  description?: string,
-  roles?: Role[],
-  url: string
-}
+  name: string;
+  description?: string;
+  roles?: Role[];
+  url: string;
+};
 
 type SpatialExtent = {
-  bbox: number[][]
-}
+  bbox: number[][];
+};
 
 type TemporalExtent = {
-  interval: string | null[][]
-}
+  interval: string | null[][];
+};
 
 export type Extent = {
-  spatial: SpatialExtent,
-  temporal: TemporalExtent,
-}
+  spatial: SpatialExtent;
+  temporal: TemporalExtent;
+};
 
 export type Collection = {
-  type: 'Collection',
-  stac_version: string,
-  stac_extensions?: string[],
-  id: string,
-  title?: string,
-  keywords?: string[],
-  license: string,
-  providers: Provider[],
-  extent: Extent,
-  links: Link[]
-  assets: GenericObject,
-}
+  type: 'Collection';
+  stac_version: string;
+  stac_extensions?: string[];
+  id: string;
+  title?: string;
+  keywords?: string[];
+  license: string;
+  providers: Provider[];
+  extent: Extent;
+  links: Link[];
+  assets: GenericObject;
+};
 
 export type CollectionsResponse = {
-  collections: Collection[],
-  links: Link[]
-}
+  collections: Collection[];
+  links: Link[];
+  numberMatched: number;
+  numberReturned: number;
+};
