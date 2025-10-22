@@ -1,5 +1,5 @@
 name: Checks
-on:  
+on:
   push:
     branches:
       - main

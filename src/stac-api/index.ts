@@ -3,14 +3,14 @@ import type { Bbox, SearchPayload, DateRange } from '../types/stac';
 
 type RequestPayload = SearchPayload;
 type FetchOptions = {
-  method?: string,
-  payload?: RequestPayload,
-  headers?: GenericObject
-}
+  method?: string;
+  payload?: RequestPayload;
+  headers?: GenericObject;
+};
 
 export enum SearchMode {
   GET = 'GET',
-  POST = 'POST'
+  POST = 'POST',
 }
 
 class StacApi {
@@ -45,7 +45,8 @@ class StacApi {
     return sortedBbox;
   }
 
-  makeArrayPayload(arr?: any[]) { /* eslint-disable-line @typescript-eslint/no-explicit-any */
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  makeArrayPayload(arr?: any[]) {
     return arr?.length ? arr : undefined;
   }
 
@@ -56,7 +57,7 @@ class StacApi {
 
     const { from, to } = dateRange;
 
-    if (from || to ) {
+    if (from || to) {
       return `${from || '..'}/${to || '..'}`;
     } else {
       return undefined;
@@ -76,9 +77,9 @@ class StacApi {
       }
     }
 
-    if(sortby) {
+    if (sortby) {
       queryObj['sortby'] = sortby
-        .map(( { field, direction } ) => `${direction === 'asc' ? '+' : '-'}${field}`)
+        .map(({ field, direction }) => `${direction === 'asc' ? '+' : '-'}${field}`)
         .join(',');
     }
 
@@ -89,7 +90,7 @@ class StacApi {
     const { status, statusText } = response;
     const e: ApiError = {
       status,
-      statusText
+      statusText,
     };
 
     // Some STAC APIs return errors as JSON others as string.
@@ -97,7 +98,8 @@ class StacApi {
     const clone = response.clone();
     try {
       e.detail = await response.json();
-    } catch (err) { // eslint-disable-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (err) {
       e.detail = await clone.text();
     }
     return Promise.reject(e);
@@ -111,9 +113,9 @@ class StacApi {
       headers: {
         'Content-Type': 'application/json',
         ...headers,
-        ...this.options?.headers
+        ...this.options?.headers,
       },
-      body: payload ? JSON.stringify(payload) : undefined
+      body: payload ? JSON.stringify(payload) : undefined,
     }).then(async (response) => {
       if (response.ok) {
         return response;
@@ -134,16 +136,14 @@ class StacApi {
     };
 
     if (this.searchMode === 'POST') {
-      return this.fetch(
-        `${this.baseUrl}/search`,
-        { method: 'POST', payload: requestPayload, headers }
-      );
+      return this.fetch(`${this.baseUrl}/search`, {
+        method: 'POST',
+        payload: requestPayload,
+        headers,
+      });
     } else {
       const query = this.payloadToQuery(requestPayload);
-      return this.fetch(
-        `${this.baseUrl}/search?${query}`,
-        { method: 'GET', headers }
-      );
+      return this.fetch(`${this.baseUrl}/search?${query}`, { method: 'GET', headers });
     }
   }
 

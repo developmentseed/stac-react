@@ -1,14 +1,16 @@
-import { useCallback, useState } from "react";
-import { useStacSearch, useCollections, useStacApi, StacApiProvider } from "stac-react";
+import { useCallback, useState } from 'react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+import { useStacSearch, useCollections, useStacApi, StacApiProvider } from 'stac-react';
 
-import ItemList from "./ItemList";
-import Map from "./Map";
-import QueryBuilder from "./QueryBuilder";
+import ItemList from './ItemList';
+import Map from './Map';
+import QueryBuilder from './QueryBuilder';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
 const options = {
   headers: {
-    Authorization: "Basic " + btoa(process.env.REACT_APP_STAC_API_TOKEN + ":")
-  }
+    Authorization: 'Basic ' + btoa(process.env.REACT_APP_STAC_API_TOKEN + ':'),
+  },
 };
 
 function Main() {
@@ -27,19 +29,22 @@ function Main() {
     state,
     error,
     nextPage,
-    previousPage
+    previousPage,
   } = useStacSearch();
 
-  const handleDrawComplete = useCallback((feature) => {
-    setIsBboxDrawEnabled(false);
-    
-    const { coordinates } = feature.geometry;
-    const bbox = [...coordinates[0][0], ...coordinates[0][2]];
-    setBbox(bbox);
-  }, [setBbox]);
+  const handleDrawComplete = useCallback(
+    (feature) => {
+      setIsBboxDrawEnabled(false);
+
+      const { coordinates } = feature.geometry;
+      const bbox = [...coordinates[0][0], ...coordinates[0][2]];
+      setBbox(bbox);
+    },
+    [setBbox]
+  );
 
   return (
-    <div className='grid grid-cols-4 gap-4 m-4'>
+    <div className="grid grid-cols-4 gap-4 m-4">
       <QueryBuilder
         setIsBboxDrawEnabled={setIsBboxDrawEnabled}
         handleSubmit={submit}
@@ -59,7 +64,7 @@ function Main() {
         previousPage={previousPage}
       />
       <Map
-        className='col-span-2'
+        className="col-span-2"
         isBboxDrawEnabled={isBboxDrawEnabled}
         handleDrawComplete={handleDrawComplete}
         items={results}

@@ -4,20 +4,16 @@ const ButtonType = {
   type: T.oneOf(['submit', 'button']),
   onClick: T.func.isRequired,
   children: T.node.isRequired,
-}
+};
 
 const DefaultButtonType = {
   ...ButtonType,
   className: T.string,
-}
+};
 
 export function Button({ type, className, children, onClick }) {
   return (
-    <button
-      type={type}
-      className={`${className} px-2 py-1 rounded`}
-      onClick={onClick}
-    >
+    <button type={type} className={`${className} px-2 py-1 rounded`} onClick={onClick}>
       {children}
     </button>
   );
@@ -25,11 +21,15 @@ export function Button({ type, className, children, onClick }) {
 
 Button.propTypes = DefaultButtonType;
 Button.defaultProps = {
-  type: 'button'
-}
+  type: 'button',
+};
 
 export function PrimaryButton({ children, ...rest }) {
-  return <Button {...rest} className='bg-slate-600 text-white active:bg-slate-700'>{children}</Button>;
+  return (
+    <Button {...rest} className="bg-slate-600 text-white active:bg-slate-700">
+      {children}
+    </Button>
+  );
 }
 
 PrimaryButton.propTypes = ButtonType;

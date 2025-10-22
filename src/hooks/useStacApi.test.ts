@@ -10,22 +10,22 @@ describe('useStacApi', () => {
       .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    renderHook(
-      () => useCollections(),
-      { wrapper }
+    renderHook(() => useCollections(), { wrapper });
+    await waitFor(() =>
+      expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/collections')
     );
-    await waitFor(() => expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/collections'));
   });
 
   it('initilises StacAPI with redirect URL', async () => {
     fetch
-      .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net/redirect/' })
+      .mockResponseOnce(JSON.stringify({ links: [] }), {
+        url: 'https://fake-stac-api.net/redirect/',
+      })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    renderHook(
-      () => useCollections(),
-      { wrapper }
+    renderHook(() => useCollections(), { wrapper });
+    await waitFor(() =>
+      expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/redirect/collections')
     );
-    await waitFor(() => expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/redirect/collections'));
   });
 });

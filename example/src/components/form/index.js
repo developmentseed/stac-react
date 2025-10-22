@@ -1,7 +1,4 @@
-import Checkbox from "./Checkbox";
-import Legend from "./Legend";
+import Checkbox from './Checkbox';
+import Legend from './Legend';
 
-export {
-  Checkbox,
-  Legend
-}
+export { Checkbox, Legend };

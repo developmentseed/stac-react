@@ -12,11 +12,10 @@ describe('useItem', () => {
     fetch
       .mockResponseOnce(JSON.stringify({ id: 'abc', links: [] }))
       .mockResponseOnce(JSON.stringify({ id: 'abc' }));
-    
-    const { result } = renderHook(
-      () => useItem('https://fake-stac-api.net/items/abc'),
-      { wrapper }
-    );
+
+    const { result } = renderHook(() => useItem('https://fake-stac-api.net/items/abc'), {
+      wrapper,
+    });
     await waitFor(() => expect(result.current.item).toEqual({ id: 'abc' }));
     await waitFor(() => expect(result.current.state).toEqual('IDLE'));
   });
@@ -24,17 +23,21 @@ describe('useItem', () => {
   it('handles error with JSON response', async () => {
     fetch
       .mockResponseOnce(JSON.stringify({ id: 'abc', links: [] }))
-      .mockResponseOnce(JSON.stringify({ error: 'Wrong query' }), { status: 400, statusText: 'Bad Request' });
+      .mockResponseOnce(JSON.stringify({ error: 'Wrong query' }), {
+        status: 400,
+        statusText: 'Bad Request',
+      });
 
-    const { result } = renderHook(
-      () => useItem('https://fake-stac-api.net/items/abc'),
-      { wrapper }
+    const { result } = renderHook(() => useItem('https://fake-stac-api.net/items/abc'), {
+      wrapper,
+    });
+    await waitFor(() =>
+      expect(result.current.error).toEqual({
+        status: 400,
+        statusText: 'Bad Request',
+        detail: { error: 'Wrong query' },
+      })
     );
-    await waitFor(() => expect(result.current.error).toEqual({
-      status: 400,
-      statusText: 'Bad Request',
-      detail: { error: 'Wrong query' }
-    }));
   });
 
   it('handles error with non-JSON response', async () => {
@@ -42,15 +45,16 @@ describe('useItem', () => {
       .mockResponseOnce(JSON.stringify({ id: 'abc', links: [] }))
       .mockResponseOnce('Wrong query', { status: 400, statusText: 'Bad Request' });
 
-    const { result } = renderHook(
-      () => useItem('https://fake-stac-api.net/items/abc'),
-      { wrapper }
+    const { result } = renderHook(() => useItem('https://fake-stac-api.net/items/abc'), {
+      wrapper,
+    });
+    await waitFor(() =>
+      expect(result.current.error).toEqual({
+        status: 400,
+        statusText: 'Bad Request',
+        detail: 'Wrong query',
+      })
     );
-    await waitFor(() => expect(result.current.error).toEqual({
-      status: 400,
-      statusText: 'Bad Request',
-      detail: 'Wrong query'
-    }));
   });
 
   it('reloads item', async () => {
@@ -58,11 +62,10 @@ describe('useItem', () => {
       .mockResponseOnce(JSON.stringify({ id: 'abc', links: [] }))
       .mockResponseOnce(JSON.stringify({ id: 'abc' }))
       .mockResponseOnce(JSON.stringify({ id: 'abc', description: 'Updated' }));
-    
-    const { result } = renderHook(
-      () => useItem('https://fake-stac-api.net/items/abc'),
-      { wrapper }
-    );
+
+    const { result } = renderHook(() => useItem('https://fake-stac-api.net/items/abc'), {
+      wrapper,
+    });
     await waitFor(() => expect(result.current.item).toEqual({ id: 'abc' }));
 
     act(() => result.current.reload());

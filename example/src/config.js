@@ -12,6 +12,6 @@ export const collectionsOptions = [
   // },
   {
     value: 'modis-09A1-061',
-    label: 'MODIS Surface Reflectance 8-Day (500m)'
-  }
+    label: 'MODIS Surface Reflectance 8-Day (500m)',
+  },
 ];

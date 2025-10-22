@@ -22,17 +22,13 @@ describe('useStacSearch — API supports POST', () => {
 
   it('includes IDs in search', async () => {
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }), {
+        url: 'https://fake-stac-api.net',
+      })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
-    
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
+
     // 1. Wait for initial API capabilities fetch (stacApi initialization)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
@@ -59,23 +55,19 @@ describe('useStacSearch — API supports POST', () => {
 
   it('includes Bbox in search', async () => {
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }), {
+        url: 'https://fake-stac-api.net',
+      })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial API capabilities fetch (stacApi initialization)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
     await act(async () => {});
 
     // 3. Set search parameters and submit (debounced)
-    act(() => result.current.setBbox([-0.59, 51.24, 0.30, 51.74]));
+    act(() => result.current.setBbox([-0.59, 51.24, 0.3, 51.74]));
     act(() => result.current.submit());
     // 4. Advance timers to trigger debounce
     act(() => {
@@ -90,28 +82,24 @@ describe('useStacSearch — API supports POST', () => {
     await waitFor(() => expect(result.current.results).toEqual({ data: '12345' }));
     // 8. Validate POST payload
     const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
-    expect(postPayload).toEqual({ bbox: [-0.59, 51.24, 0.30, 51.74], limit: 25 });
+    expect(postPayload).toEqual({ bbox: [-0.59, 51.24, 0.3, 51.74], limit: 25 });
   });
 
   it('includes Bbox in search in correct order', async () => {
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }), {
+        url: 'https://fake-stac-api.net',
+      })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial API capabilities fetch (stacApi initialization)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
     await act(async () => {});
 
     // 3. Set search parameters and submit (debounced)
-    act(() => result.current.setBbox([0.30, 51.74, -0.59, 51.24]));
+    act(() => result.current.setBbox([0.3, 51.74, -0.59, 51.24]));
     act(() => result.current.submit());
     // 4. Advance timers to trigger debounce
     act(() => {
@@ -126,21 +114,17 @@ describe('useStacSearch — API supports POST', () => {
     await waitFor(() => expect(result.current.results).toEqual({ data: '12345' }));
     // 8. Validate POST payload
     const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
-    expect(postPayload).toEqual({ bbox: [-0.59, 51.24, 0.30, 51.74], limit: 25 });
+    expect(postPayload).toEqual({ bbox: [-0.59, 51.24, 0.3, 51.74], limit: 25 });
   });
 
   it('includes Collections in search', async () => {
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }), {
+        url: 'https://fake-stac-api.net',
+      })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial API capabilities fetch (stacApi initialization)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
@@ -167,16 +151,12 @@ describe('useStacSearch — API supports POST', () => {
 
   it('clears collections when array is empty', async () => {
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }), {
+        url: 'https://fake-stac-api.net',
+      })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial API capabilities fetch (stacApi initialization)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
@@ -203,16 +183,12 @@ describe('useStacSearch — API supports POST', () => {
 
   it('includes date range in search', async () => {
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }), {
+        url: 'https://fake-stac-api.net',
+      })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial API capabilities fetch (stacApi initialization)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
@@ -240,16 +216,12 @@ describe('useStacSearch — API supports POST', () => {
 
   it('includes open date range in search (no to-date)', async () => {
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }), {
+        url: 'https://fake-stac-api.net',
+      })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial API capabilities fetch (stacApi initialization)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
@@ -276,16 +248,12 @@ describe('useStacSearch — API supports POST', () => {
 
   it('includes open date range in search (no from-date)', async () => {
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }), {
+        url: 'https://fake-stac-api.net',
+      })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial API capabilities fetch (stacApi initialization)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
@@ -312,16 +280,15 @@ describe('useStacSearch — API supports POST', () => {
 
   it('handles error with JSON response', async () => {
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
-        { url: 'https://fake-stac-api.net' }
-      )
-      .mockResponseOnce(JSON.stringify({ error: 'Wrong query' }), { status: 400, statusText: 'Bad Request' });
+      .mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }), {
+        url: 'https://fake-stac-api.net',
+      })
+      .mockResponseOnce(JSON.stringify({ error: 'Wrong query' }), {
+        status: 400,
+        statusText: 'Bad Request',
+      });
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial API capabilities fetch (stacApi initialization)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
@@ -339,25 +306,23 @@ describe('useStacSearch — API supports POST', () => {
     // 6. Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // 7. Wait for error to be set in state
-    await waitFor(() => expect(result.current.error).toEqual({
-      status: 400,
-      statusText: 'Bad Request',
-      detail: { error: 'Wrong query' }
-    }));
+    await waitFor(() =>
+      expect(result.current.error).toEqual({
+        status: 400,
+        statusText: 'Bad Request',
+        detail: { error: 'Wrong query' },
+      })
+    );
   });
 
   it('handles error with non-JSON response', async () => {
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }), {
+        url: 'https://fake-stac-api.net',
+      })
       .mockResponseOnce('Wrong query', { status: 400, statusText: 'Bad Request' });
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial API capabilities fetch (stacApi initialization)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
@@ -375,37 +340,37 @@ describe('useStacSearch — API supports POST', () => {
     // 6. Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // 7. Wait for error to be set in state
-    await waitFor(() => expect(result.current.error).toEqual({
-      status: 400,
-      statusText: 'Bad Request',
-      detail: 'Wrong query'
-    }));
+    await waitFor(() =>
+      expect(result.current.error).toEqual({
+        status: 400,
+        statusText: 'Bad Request',
+        detail: 'Wrong query',
+      })
+    );
   });
 
   it('includes nextPage callback', async () => {
     const response = {
-      links: [{
-        rel: 'next',
-        type: 'application/geo+json',
-        method: 'POST',
-        href: 'https://example.com/stac/search',
-        body: {
-          limit: 25,
-          token: 'next:abc123'
-        }
-      }]
+      links: [
+        {
+          rel: 'next',
+          type: 'application/geo+json',
+          method: 'POST',
+          href: 'https://example.com/stac/search',
+          body: {
+            limit: 25,
+            token: 'next:abc123',
+          },
+        },
+      ],
     };
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }), {
+        url: 'https://fake-stac-api.net',
+      })
       .mockResponseOnce(JSON.stringify(response));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial API capabilities fetch (stacApi initialization)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
@@ -439,28 +404,26 @@ describe('useStacSearch — API supports POST', () => {
 
   it('includes previousPage callback', async () => {
     const response = {
-      links: [{
-        rel: 'prev',
-        type: 'application/geo+json',
-        method: 'POST',
-        href: 'https://example.com/stac/search',
-        body: {
-          limit: 25,
-          token: 'prev:abc123'
-        }
-      }]
+      links: [
+        {
+          rel: 'prev',
+          type: 'application/geo+json',
+          method: 'POST',
+          href: 'https://example.com/stac/search',
+          body: {
+            limit: 25,
+            token: 'prev:abc123',
+          },
+        },
+      ],
     };
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }), {
+        url: 'https://fake-stac-api.net',
+      })
       .mockResponseOnce(JSON.stringify(response));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial API capabilities fetch (stacApi initialization)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
@@ -494,28 +457,26 @@ describe('useStacSearch — API supports POST', () => {
 
   it('includes previousPage callback (previous edition)', async () => {
     const response = {
-      links: [{
-        rel: 'previous',
-        type: 'application/geo+json',
-        method: 'POST',
-        href: 'https://example.com/stac/search',
-        body: {
-          limit: 25,
-          token: 'prev:abc123'
-        }
-      }]
+      links: [
+        {
+          rel: 'previous',
+          type: 'application/geo+json',
+          method: 'POST',
+          href: 'https://example.com/stac/search',
+          body: {
+            limit: 25,
+            token: 'prev:abc123',
+          },
+        },
+      ],
     };
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }), {
+        url: 'https://fake-stac-api.net',
+      })
       .mockResponseOnce(JSON.stringify(response));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial API capabilities fetch (stacApi initialization)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
@@ -549,36 +510,34 @@ describe('useStacSearch — API supports POST', () => {
 
   it('merges pagination body', async () => {
     const response = {
-      links: [{
-        rel: 'previous',
-        type: 'application/geo+json',
-        method: 'POST',
-        href: 'https://example.com/stac/search',
-        body: {
-          limit: 25,
-          token: 'prev:abc123',
-          merge: true
-        }
-      }]
+      links: [
+        {
+          rel: 'previous',
+          type: 'application/geo+json',
+          method: 'POST',
+          href: 'https://example.com/stac/search',
+          body: {
+            limit: 25,
+            token: 'prev:abc123',
+            merge: true,
+          },
+        },
+      ],
     };
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }), {
+        url: 'https://fake-stac-api.net',
+      })
       .mockResponseOnce(JSON.stringify(response));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial API capabilities fetch (stacApi initialization)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
     await act(async () => {});
 
     // 3. Set search parameters and submit (debounced)
-    act(() => result.current.setBbox([-0.59, 51.24, 0.30, 51.74]));
+    act(() => result.current.setBbox([-0.59, 51.24, 0.3, 51.74]));
     act(() => result.current.submit());
     // 4. Advance timers to trigger debounce
     act(() => {
@@ -601,45 +560,43 @@ describe('useStacSearch — API supports POST', () => {
     const postPayload = parseRequestPayload(fetch.mock.calls[2][1]);
     expect(result.current.results).toEqual({ data: '12345' });
     expect(postPayload).toEqual({
-      bbox: [-0.59, 51.24, 0.30, 51.74],
-      ...response.links[0].body
+      bbox: [-0.59, 51.24, 0.3, 51.74],
+      ...response.links[0].body,
     });
   });
 
   it('sends pagination header', async () => {
     const response = {
-      links: [{
-        rel: 'previous',
-        type: 'application/geo+json',
-        method: 'POST',
-        href: 'https://example.com/stac/search',
-        body: {
-          limit: 25,
-          token: 'prev:abc123'
+      links: [
+        {
+          rel: 'previous',
+          type: 'application/geo+json',
+          method: 'POST',
+          href: 'https://example.com/stac/search',
+          body: {
+            limit: 25,
+            token: 'prev:abc123',
+          },
+          headers: {
+            next: '123abc',
+          },
         },
-        headers: {
-          next: '123abc'
-        }
-      }]
+      ],
     };
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }), {
+        url: 'https://fake-stac-api.net',
+      })
       .mockResponseOnce(JSON.stringify(response));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial API capabilities fetch (stacApi initialization)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
     await act(async () => {});
 
     // 3. Set search parameters and submit (debounced)
-    act(() => result.current.setBbox([-0.59, 51.24, 0.30, 51.74]));
+    act(() => result.current.setBbox([-0.59, 51.24, 0.3, 51.74]));
     act(() => result.current.submit());
     // 4. Advance timers to trigger debounce
     act(() => {
@@ -666,22 +623,20 @@ describe('useStacSearch — API supports POST', () => {
 
   it('loads next-page from GET request', async () => {
     const response = {
-      links: [{
-        rel: 'next',
-        href: 'https://fake-stac-api.net/?page=2'
-      }]
+      links: [
+        {
+          rel: 'next',
+          href: 'https://fake-stac-api.net/?page=2',
+        },
+      ],
     };
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }), {
+        url: 'https://fake-stac-api.net',
+      })
       .mockResponseOnce(JSON.stringify(response));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial API capabilities fetch (stacApi initialization)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
@@ -715,22 +670,20 @@ describe('useStacSearch — API supports POST', () => {
 
   it('loads prev-page from GET request', async () => {
     const response = {
-      links: [{
-        rel: 'prev',
-        href: 'https://fake-stac-api.net/?page=2'
-      }]
+      links: [
+        {
+          rel: 'prev',
+          href: 'https://fake-stac-api.net/?page=2',
+        },
+      ],
     };
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }), {
+        url: 'https://fake-stac-api.net',
+      })
       .mockResponseOnce(JSON.stringify(response));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial API capabilities fetch (stacApi initialization)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
@@ -764,23 +717,19 @@ describe('useStacSearch — API supports POST', () => {
 
   it('includes sortBy in search', async () => {
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }), {
+        url: 'https://fake-stac-api.net',
+      })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial API capabilities fetch (stacApi initialization)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
     await act(async () => {});
 
     // 3. Set search parameters and submit (debounced)
-    act(() => result.current.setSortby([{ field: 'id', direction: 'asc'}]));
+    act(() => result.current.setSortby([{ field: 'id', direction: 'asc' }]));
     act(() => result.current.submit());
     // 4. Advance timers to trigger debounce
     act(() => {
@@ -795,21 +744,17 @@ describe('useStacSearch — API supports POST', () => {
     await waitFor(() => expect(result.current.results).toEqual({ data: '12345' }));
     // 8. Validate POST payload
     const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
-    expect(postPayload).toEqual({ sortby: [{ field: 'id', direction: 'asc'}], limit: 25 });
+    expect(postPayload).toEqual({ sortby: [{ field: 'id', direction: 'asc' }], limit: 25 });
   });
 
   it('includes limit in search', async () => {
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [{ rel: 'search', method: 'POST' }] }), {
+        url: 'https://fake-stac-api.net',
+      })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial API capabilities fetch (stacApi initialization)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
@@ -869,22 +814,16 @@ describe('useStacSearch — API supports GET', () => {
 
   it('includes Bbox in search', async () => {
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial hook setup
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
     await act(async () => {});
     // 3. Set search parameters and submit (debounced)
-    act(() => result.current.setBbox([-0.59, 51.24, 0.30, 51.74]));
+    act(() => result.current.setBbox([-0.59, 51.24, 0.3, 51.74]));
     act(() => result.current.submit());
     // 4. Advance timers to trigger debounce
     act(() => {
@@ -896,22 +835,18 @@ describe('useStacSearch — API supports GET', () => {
     await waitFor(() => expect(result.current.state).toBe('IDLE'));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // 7. Assert fetch URL and results
-    expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/search?limit=25&bbox=-0.59%2C51.24%2C0.3%2C51.74');
+    expect(fetch.mock.calls[1][0]).toEqual(
+      'https://fake-stac-api.net/search?limit=25&bbox=-0.59%2C51.24%2C0.3%2C51.74'
+    );
     expect(result.current.results).toEqual({ data: '12345' });
   });
 
   it('includes Collections in search', async () => {
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial hook setup
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
@@ -929,22 +864,18 @@ describe('useStacSearch — API supports GET', () => {
     await waitFor(() => expect(result.current.state).toBe('IDLE'));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // 7. Assert fetch URL and results
-    expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/search?limit=25&collections=wildfire%2Csurface_temp');
+    expect(fetch.mock.calls[1][0]).toEqual(
+      'https://fake-stac-api.net/search?limit=25&collections=wildfire%2Csurface_temp'
+    );
     expect(result.current.results).toEqual({ data: '12345' });
   });
 
   it('includes date range in search', async () => {
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial hook setup
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
@@ -963,22 +894,18 @@ describe('useStacSearch — API supports GET', () => {
     await waitFor(() => expect(result.current.state).toBe('IDLE'));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // 7. Assert fetch URL and results
-    expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/search?limit=25&datetime=2022-01-17%2F2022-05-17');
+    expect(fetch.mock.calls[1][0]).toEqual(
+      'https://fake-stac-api.net/search?limit=25&datetime=2022-01-17%2F2022-05-17'
+    );
     expect(result.current.results).toEqual({ data: '12345' });
   });
 
   it('includes open date range in search (no to-date)', async () => {
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial hook setup
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
@@ -996,22 +923,18 @@ describe('useStacSearch — API supports GET', () => {
     await waitFor(() => expect(result.current.state).toBe('IDLE'));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // 7. Assert fetch URL and results
-    expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/search?limit=25&datetime=2022-01-17%2F..');
+    expect(fetch.mock.calls[1][0]).toEqual(
+      'https://fake-stac-api.net/search?limit=25&datetime=2022-01-17%2F..'
+    );
     expect(result.current.results).toEqual({ data: '12345' });
   });
 
   it('includes open date range in search (no from-date)', async () => {
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial hook setup
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
@@ -1029,31 +952,29 @@ describe('useStacSearch — API supports GET', () => {
     await waitFor(() => expect(result.current.state).toBe('IDLE'));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // 7. Assert fetch URL and results
-    expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/search?limit=25&datetime=..%2F2022-05-17');
+    expect(fetch.mock.calls[1][0]).toEqual(
+      'https://fake-stac-api.net/search?limit=25&datetime=..%2F2022-05-17'
+    );
     expect(result.current.results).toEqual({ data: '12345' });
   });
 
   it('includes sortby', async () => {
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial hook setup
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available
     await act(async () => {});
     // 3. Set search parameters and submit (debounced)
-    act(() => result.current.setSortby([
-      { field: 'id', direction: 'asc' },
-      { field: 'properties.cloud', direction: 'desc' },
-    ]));
+    act(() =>
+      result.current.setSortby([
+        { field: 'id', direction: 'asc' },
+        { field: 'properties.cloud', direction: 'desc' },
+      ])
+    );
     act(() => result.current.submit());
     // 4. Advance timers to trigger debounce
     act(() => {
@@ -1065,22 +986,18 @@ describe('useStacSearch — API supports GET', () => {
     await waitFor(() => expect(result.current.state).toBe('IDLE'));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // 7. Assert fetch URL and results
-    expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/search?limit=25&sortby=%2Bid%2C-properties.cloud');
+    expect(fetch.mock.calls[1][0]).toEqual(
+      'https://fake-stac-api.net/search?limit=25&sortby=%2Bid%2C-properties.cloud'
+    );
     expect(result.current.results).toEqual({ data: '12345' });
   });
 
   it('includes limit', async () => {
     fetch
-      .mockResponseOnce(
-        JSON.stringify({ links: [] }),
-        { url: 'https://fake-stac-api.net' }
-      )
+      .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(
-      () => useStacSearch(),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useStacSearch(), { wrapper });
     // 1. Wait for initial hook setup
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     // 2. Flush React state update so stacApi is available

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback} from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Item } from '../types/stac';
 import { ApiError, LoadingState } from '../types';
 import { useStacApiContext } from '../context/useStacApiContext';
@@ -8,13 +8,13 @@ type ItemHook = {
   state: LoadingState;
   error?: ApiError;
   reload: () => void;
-}
+};
 
 function useItem(url: string): ItemHook {
   const { stacApi, getItem, addItem, deleteItem } = useStacApiContext();
-  const [ state, setState ] = useState<LoadingState>('IDLE');
-  const [ item, setItem ] = useState<Item>();
-  const [ error, setError ] = useState<ApiError>();
+  const [state, setState] = useState<LoadingState>('IDLE');
+  const [item, setItem] = useState<Item>();
+  const [error, setError] = useState<ApiError>();
 
   useEffect(() => {
     if (!stacApi) return;
@@ -25,7 +25,8 @@ function useItem(url: string): ItemHook {
       if (i) {
         resolve(i);
       } else {
-        stacApi.fetch(url)
+        stacApi
+          .fetch(url)
           .then((r: Response) => r.json())
           .then((r: Item) => {
             addItem(url, r);
@@ -34,8 +35,8 @@ function useItem(url: string): ItemHook {
           .catch((err: unknown) => reject(err));
       }
     })
-  .then(setItem)
-  .catch((err: unknown) => setError(err as ApiError))
+      .then(setItem)
+      .catch((err: unknown) => setError(err as ApiError))
       .finally(() => setState('IDLE'));
   }, [stacApi, addItem, getItem, url]);
 
@@ -48,7 +49,8 @@ function useItem(url: string): ItemHook {
       if (i) {
         resolve(i);
       } else {
-        stacApi.fetch(url)
+        stacApi
+          .fetch(url)
           .then((r: Response) => r.json())
           .then((r: Item) => {
             addItem(url, r);
@@ -57,8 +59,8 @@ function useItem(url: string): ItemHook {
           .catch((err: unknown) => reject(err));
       }
     })
-  .then(setItem)
-  .catch((err: unknown) => setError(err as ApiError))
+      .then(setItem)
+      .catch((err: unknown) => setError(err as ApiError))
       .finally(() => setState('IDLE'));
   }, [addItem, getItem, stacApi, url]);
 
@@ -67,11 +69,11 @@ function useItem(url: string): ItemHook {
     fetchItem();
   }, [deleteItem, fetchItem, url]);
 
-  return { 
+  return {
     item,
     state,
     error,
-    reload
+    reload,
   };
 }
 

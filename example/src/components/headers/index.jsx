@@ -6,7 +6,7 @@ export function H2({ children, className }) {
 
 const Props = {
   children: T.node.isRequired,
-  className: T.string
-}
+  className: T.string,
+};
 
 H2.propTypes = Props;

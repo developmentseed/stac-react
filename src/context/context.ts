@@ -1,5 +1,5 @@
-import { createContext } from "react";
-import type { CollectionsResponse, Item } from "../types/stac";
+import { createContext } from 'react';
+import type { CollectionsResponse, Item } from '../types/stac';
 
 export type StacApiContextType = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -11,6 +11,4 @@ export type StacApiContextType = {
   deleteItem: (id: string) => void;
 };
 
-export const StacApiContext = createContext<StacApiContextType>(
-  {} as StacApiContextType
-);
+export const StacApiContext = createContext<StacApiContextType>({} as StacApiContextType);
