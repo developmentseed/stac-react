@@ -43,7 +43,7 @@ function Main() {
       <QueryBuilder
         setIsBboxDrawEnabled={setIsBboxDrawEnabled}
         handleSubmit={submit}
-        collections={collections}
+        collections={collections || {}}
         selectedCollections={selectedCollections}
         setCollections={setCollections}
         dateRangeFrom={dateRangeFrom}

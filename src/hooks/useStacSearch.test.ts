@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import fetch from 'jest-fetch-mock';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import useStacSearch from './useStacSearch';

@@ -10,7 +10,7 @@ import type {
   LinkBody,
   Sortby
 } from '../types/stac';
-import { useStacApiContext } from '../context';
+import { useStacApiContext } from '../context/useStacApiContext';
 
 type PaginationHandler = () => void;
 

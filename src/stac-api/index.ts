@@ -64,7 +64,8 @@ class StacApi {
   }
 
   payloadToQuery({ sortby, ...payload }: SearchPayload): string {
-    const queryObj = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const queryObj: { [key: string]: any } = {};
     for (const [key, value] of Object.entries(payload)) {
       if (!value) continue;
 
@@ -91,14 +92,14 @@ class StacApi {
       statusText
     };
 
-    // Some STAC APIs return errors as JSON others as string. 
-    // Clone the response so we can read the body as text if json fails. 
+    // Some STAC APIs return errors as JSON others as string.
+    // Clone the response so we can read the body as text if json fails.
     const clone = response.clone();
     try {
-      e.detail = await response.json(); 
-    } catch (err) {
+      e.detail = await response.json();
+    } catch (err) { // eslint-disable-line @typescript-eslint/no-unused-vars
       e.detail = await clone.text();
-    }      
+    }
     return Promise.reject(e);
   }
 

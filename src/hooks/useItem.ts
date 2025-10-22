@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback} from 'react';
 import { Item } from '../types/stac';
 import { ApiError, LoadingState } from '../types';
-import { useStacApiContext } from '../context';
+import { useStacApiContext } from '../context/useStacApiContext';
 
 type ItemHook = {
   item?: Item;
@@ -26,16 +26,16 @@ function useItem(url: string): ItemHook {
         resolve(i);
       } else {
         stacApi.fetch(url)
-          .then(r => r.json())
-          .then(r => {
+          .then((r: Response) => r.json())
+          .then((r: Item) => {
             addItem(url, r);
             resolve(r);
           })
-          .catch((err) => reject(err));
+          .catch((err: unknown) => reject(err));
       }
     })
-      .then(setItem)
-      .catch((err) => setError(err))
+  .then(setItem)
+  .catch((err: unknown) => setError(err as ApiError))
       .finally(() => setState('IDLE'));
   }, [stacApi, addItem, getItem, url]);
 
@@ -49,16 +49,16 @@ function useItem(url: string): ItemHook {
         resolve(i);
       } else {
         stacApi.fetch(url)
-          .then(r => r.json())
-          .then(r => {
+          .then((r: Response) => r.json())
+          .then((r: Item) => {
             addItem(url, r);
             resolve(r);
           })
-          .catch((err) => reject(err));
+          .catch((err: unknown) => reject(err));
       }
     })
-      .then(setItem)
-      .catch((err) => setError(err))
+  .then(setItem)
+  .catch((err: unknown) => setError(err as ApiError))
       .finally(() => setState('IDLE'));
   }, [addItem, getItem, stacApi, url]);
 

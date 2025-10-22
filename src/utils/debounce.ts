@@ -1,4 +1,5 @@
-const debounce = <F extends ((...args: any) => any)>(fn: F, ms = 250) => {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const debounce = <F extends (...args: any) => any>(fn: F, ms = 250) => {
   let timeoutId: ReturnType<typeof setTimeout>;
 
   return function (this: any, ...args: any[]) {

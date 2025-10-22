@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, useMemo } from 'react';
 import { type ApiError, type LoadingState } from '../types';
 import type { CollectionsResponse } from '../types/stac';
 import debounce from '../utils/debounce';
-import { useStacApiContext } from '../context';
+import { useStacApiContext } from '../context/useStacApiContext';
 
 type StacCollectionsHook = {
   collections?: CollectionsResponse,
@@ -22,10 +22,10 @@ function useCollections(): StacCollectionsHook {
         setState('LOADING');
 
         stacApi.getCollections()
-          .then(response => response.json())
+          .then((response: Response) => response.json())
           .then(setCollections)
-          .catch((err) => {
-            setError(err);
+          .catch((err: unknown) => {
+            setError(err as ApiError);
             setCollections(undefined);
           })
           .finally(() => setState('IDLE'));
