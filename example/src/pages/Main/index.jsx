@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+// eslint-disable-next-line no-unused-vars
 import { useStacSearch, useCollections, useStacApi, StacApiProvider } from 'stac-react';
 
 import ItemList from './ItemList';
 import Map from './Map';
 import QueryBuilder from './QueryBuilder';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+// eslint-disable-next-line no-unused-vars
 const options = {
   headers: {
     Authorization: 'Basic ' + btoa(process.env.REACT_APP_STAC_API_TOKEN + ':'),

@@ -102,6 +102,7 @@ class StacApi {
     } catch (err) {
       e.detail = await clone.text();
     }
+    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
     return Promise.reject(e);
   }
 
@@ -135,7 +136,7 @@ class StacApi {
       datetime: this.makeDatetimePayload(dateRange),
     };
 
-    if (this.searchMode === 'POST') {
+    if (this.searchMode === SearchMode.POST) {
       return this.fetch(`${this.baseUrl}/search`, {
         method: 'POST',
         payload: requestPayload,

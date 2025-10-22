@@ -33,7 +33,11 @@ function useStacApi(url: string, options?: GenericObject): StacApiHook {
           searchMode = SearchMode.POST;
         }
       })
-      .then(() => setStacApi(new StacApi(baseUrl, searchMode, options)));
+      .then(() => setStacApi(new StacApi(baseUrl, searchMode, options)))
+      .catch((e) => {
+        // eslint-disable-next-line no-console
+        console.error('Failed to initialize StacApi:', e);
+      });
   }, [url, options]);
 
   return { stacApi };

@@ -32,6 +32,7 @@ function useItem(url: string): ItemHook {
             addItem(url, r);
             resolve(r);
           })
+          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
           .catch((err: unknown) => reject(err));
       }
     })
@@ -56,6 +57,7 @@ function useItem(url: string): ItemHook {
             addItem(url, r);
             resolve(r);
           })
+          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
           .catch((err: unknown) => reject(err));
       }
     })

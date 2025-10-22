@@ -78,7 +78,6 @@ function Map({ className, isBboxDrawEnabled, handleDrawComplete, items }) {
         map.remove();
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -110,7 +109,7 @@ Map.propTypes = {
   className: T.string,
   isBboxDrawEnabled: T.bool,
   handleDrawComplete: T.func.isRequired,
-  item: TItemList,
+  items: TItemList,
 };
 
 export default Map;
