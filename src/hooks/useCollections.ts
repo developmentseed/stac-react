@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { type ApiError, type LoadingState } from '../types';
 import type { CollectionsResponse } from '../types/stac';
 import debounce from '../utils/debounce';
@@ -12,38 +13,69 @@ type StacCollectionsHook = {
 };
 
 function useCollections(): StacCollectionsHook {
-  const { stacApi, collections, setCollections } = useStacApiContext();
+  const { stacApi, setCollections } = useStacApiContext();
   const [state, setState] = useState<LoadingState>('IDLE');
-  const [error, setError] = useState<ApiError>();
 
-  const _getCollections = useCallback(() => {
-    if (stacApi) {
-      setState('LOADING');
+  const fetchCollections = async (): Promise<CollectionsResponse> => {
+    if (!stacApi) throw new Error('No STAC API configured');
+    const response: Response = await stacApi.getCollections();
+    if (!response.ok) {
+      let detail;
+      try {
+        detail = await response.json();
+      } catch {
+        detail = await response.text();
+      }
 
-      stacApi
-        .getCollections()
-        .then((response: Response) => response.json())
-        .then(setCollections)
-        .catch((err: unknown) => {
-          setError(err as ApiError);
-          setCollections(undefined);
-        })
-        .finally(() => setState('IDLE'));
+      const err = Object.assign(new Error(response.statusText), {
+        status: response.status,
+        statusText: response.statusText,
+        detail,
+      });
+      throw err;
     }
-  }, [setCollections, stacApi]);
-  const getCollections = useMemo(() => debounce(_getCollections), [_getCollections]);
+    return await response.json();
+  };
+
+  const {
+    data: collections,
+    error,
+    isLoading,
+    isFetching,
+    refetch,
+  } = useQuery<CollectionsResponse, ApiError>({
+    queryKey: ['collections'],
+    queryFn: fetchCollections,
+    enabled: !!stacApi,
+    retry: false,
+  });
+
+  // Sync collections with context
+  // This preserves the previous logic for consumers and tests
+  useEffect(() => {
+    if (collections) {
+      setCollections(collections);
+    } else if (error) {
+      setCollections(undefined);
+    }
+  }, [collections, error, setCollections]);
+
+  const reload = useMemo(() => debounce(refetch), [refetch]);
 
   useEffect(() => {
-    if (stacApi && !error && !collections) {
-      getCollections();
+    // Map TanStack Query loading states to previous LoadingState type
+    if (isLoading || isFetching) {
+      setState('LOADING');
+    } else {
+      setState('IDLE');
     }
-  }, [getCollections, stacApi, collections, error]);
+  }, [isLoading, isFetching]);
 
   return {
     collections,
-    reload: getCollections,
+    reload,
     state,
-    error,
+    error: error as ApiError,
   };
 }
 

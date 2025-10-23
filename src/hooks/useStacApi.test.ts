@@ -4,8 +4,11 @@ import useCollections from './useCollections';
 import wrapper from './wrapper';
 
 describe('useStacApi', () => {
-  beforeEach(() => fetch.resetMocks());
-  it('initilises StacAPI', async () => {
+  beforeEach(() => {
+    fetch.resetMocks();
+  });
+
+  it('initializes StacAPI', async () => {
     fetch
       .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
@@ -16,7 +19,7 @@ describe('useStacApi', () => {
     );
   });
 
-  it('initilises StacAPI with redirect URL', async () => {
+  it('initializes StacAPI with redirect URL', async () => {
     fetch
       .mockResponseOnce(JSON.stringify({ links: [] }), {
         url: 'https://fake-stac-api.net/redirect/',

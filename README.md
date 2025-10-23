@@ -19,47 +19,75 @@ With Yarn:
 yarn add @developmentseed/stac-react
 ```
 
+### Peer Dependency: @tanstack/react-query
+
+stac-react relies on [TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview) for data fetching and caching. To avoid duplicate React Query clients and potential version conflicts, stac-react lists `@tanstack/react-query` as a **peer dependency**. This means you must install it in your project:
+
+```sh
+npm install @tanstack/react-query
+# or
+yarn add @tanstack/react-query
+```
+
+If you do not install it, your package manager will warn you, and stac-react will not work correctly.
+
 ## Getting started
 
-Stac-react's hooks must be used inside children of a React context that provides access to the stac-react's core functionality.
+stac-react's hooks must be used inside children of a React context that provides access to the stac-react's core functionality.
 
-To get started, initialize `StacApiProvider` with the base URL of the STAC catalog.
+To get started, initialize `StacApiProvider` with the base URL of the STAC catalog. `StacApiProvider` automatically sets up a [TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview) QueryClientProvider for you, so you do not need to wrap your app with QueryClientProvider yourself.
 
 ```jsx
-import { StacApiProvider } from "stac-react";
+import { StacApiProvider } from 'stac-react';
 
 function StacApp() {
   return (
-    <StacApiProvider apiUrl="https://my-stac-api.com">
-      // Other components
-    </StacApiProvide>
+    <StacApiProvider apiUrl="https://my-stac-api.com">{/* Other components */}</StacApiProvider>
   );
 }
 ```
 
+If you want to provide your own custom QueryClient (for advanced caching or devtools), you can pass it as a prop:
+
+```jsx
+import { StacApiProvider } from 'stac-react';
+import { QueryClient } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
+
+function StacApp() {
+  return (
+    <StacApiProvider apiUrl="https://my-stac-api.com" queryClient={queryClient}>
+      {/* Other components */}
+    </StacApiProvider>
+  );
+}
+```
+
+For additional information, see the React Query setup guide: [docs/react-query-setup.md](docs/react-query-setup.md).
+
 Now you can start using stac-react hooks in child components of `StacApiProvider`
 
 ```jsx
-import { StacApiProvider, useCollections } from "stac-react";
+import { StacApiProvider, useCollections } from 'stac-react';
 
 function Collections() {
   const { collections } = useCollections();
 
   return (
-   <ul>
-     {collections.collections.map(({ id, title }) => (
-       <li key={id}>{ title }</li>
-     ))}
-   </ul>
-
-  )
+    <ul>
+      {collections.collections.map(({ id, title }) => (
+        <li key={id}>{title}</li>
+      ))}
+    </ul>
+  );
 }
 
 function StacApp() {
   return (
     <StacApiProvider apiUrl="https://my-stac-api.com">
       <Collections />
-    </StacApiProvide>
+    </StacApiProvider>
   );
 }
 ```
@@ -73,14 +101,10 @@ Provides the React context required for stac-react hooks.
 #### Initialization
 
 ```jsx
-import { StacApiProvider } from "stac-react";
+import { StacApiProvider } from 'stac-react';
 
 function StacApp() {
-  return (
-    <StacApiProvider apiUrl="https://my-stac-api.com">
-      // Other components
-    </StacApiProvide>
-  );
+  return <StacApiProvider apiUrl="https://my-stac-api.com">// Other components</StacApiProvider>;
 }
 ```
 
@@ -471,9 +495,9 @@ function StacComponent() {
 ```
 
 | Option       | Type     | Description                       |
-| ------------ | -------- | --------------------------------- | ------------------------------------------------------------------------------------------- |
+| ------------ | -------- | --------------------------------- | ------------------------------------------------------------------------------------------ |
 | `detail`     | `string` | `object                           | The error return from the API. Either a`string` or and `object` depending on the response. |
-| `status` | `number` | HTTP status code of the response. |
+| `status`     | `number` | HTTP status code of the response. |
 | `statusText` | `string` | Status text for the response.     |
 
 ## Development

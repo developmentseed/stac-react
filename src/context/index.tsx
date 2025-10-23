@@ -2,6 +2,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { StacApiContext } from './context';
 import type { CollectionsResponse, Item } from '../types/stac';
 import { GenericObject } from '../types';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import useStacApi from '../hooks/useStacApi';
 
@@ -9,9 +10,10 @@ type StacApiProviderType = {
   apiUrl: string;
   children: React.ReactNode;
   options?: GenericObject;
+  queryClient?: QueryClient;
 };
 
-export function StacApiProvider({ children, apiUrl, options }: StacApiProviderType) {
+export function StacApiProvider({ children, apiUrl, options, queryClient }: StacApiProviderType) {
   const { stacApi } = useStacApi(apiUrl, options);
   const [collections, setCollections] = useState<CollectionsResponse>();
   const [items, setItems] = useState(new Map<string, Item>());
@@ -46,5 +48,12 @@ export function StacApiProvider({ children, apiUrl, options }: StacApiProviderTy
     [addItem, collections, deleteItem, getItem, stacApi]
   );
 
-  return <StacApiContext.Provider value={contextValue}>{children}</StacApiContext.Provider>;
+  const defaultClient = useMemo(() => new QueryClient(), []);
+  const client: QueryClient = queryClient ?? defaultClient;
+
+  return (
+    <QueryClientProvider client={client}>
+      <StacApiContext.Provider value={contextValue}>{children}</StacApiContext.Provider>
+    </QueryClientProvider>
+  );
 }
