@@ -68,7 +68,10 @@ describe('useItem', () => {
     });
     await waitFor(() => expect(result.current.item).toEqual({ id: 'abc' }));
 
-    act(() => result.current.reload());
+    await act(async () => {
+      // eslint-disable-next-line @typescript-eslint/await-thenable
+      await result.current.reload();
+    });
 
     await waitFor(() => expect(result.current.item).toEqual({ id: 'abc', description: 'Updated' }));
   });
