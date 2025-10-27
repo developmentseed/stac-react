@@ -51,9 +51,20 @@ export function StacApiProvider({ children, apiUrl, options, queryClient }: Stac
   const defaultClient = useMemo(() => new QueryClient(), []);
   const client: QueryClient = queryClient ?? defaultClient;
 
+  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+    // Connect TanStack Query DevTools (browser extension)
+    window.__TANSTACK_QUERY_CLIENT__ = client;
+  }
+
   return (
     <QueryClientProvider client={client}>
       <StacApiContext.Provider value={contextValue}>{children}</StacApiContext.Provider>
     </QueryClientProvider>
   );
+}
+
+declare global {
+  interface Window {
+    __TANSTACK_QUERY_CLIENT__: import('@tanstack/query-core').QueryClient;
+  }
 }

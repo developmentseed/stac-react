@@ -32,3 +32,21 @@ function App() {
 ```
 
 If you do not pass the same QueryClient instance, each provider will maintain its own cache, which can lead to unexpected behavior.
+
+## TanStack Query DevTools Integration
+
+stac-react automatically connects your QueryClient to the [TanStack Query DevTools browser extension](https://tanstack.com/query/latest/docs/framework/react/devtools) when running in development mode. This allows you to inspect queries, mutations, and cache directly in your browser without adding extra dependencies to your project.
+
+**How it works:**
+
+- In development (`process.env.NODE_ENV === 'development'`), stac-react exposes the QueryClient on `window.__TANSTACK_QUERY_CLIENT__`.
+- The browser extension detects this and connects automatically.
+- No code changes or additional dependencies are required.
+
+> By default, React Query Devtools are only included in bundles when process.env.NODE_ENV === 'development', so you don't need to worry about excluding them during a production build.
+
+**Alternative:**
+
+- If you prefer an embedded/floating devtools panel, you can install and use the [TanStack Query Devtools React component](https://tanstack.com/query/latest/docs/framework/react/devtools#floating-devtools) in your app. This adds a UI panel directly to your app, but increases bundle size and dependencies.
+
+For more details, see the [TanStack Query DevTools documentation](https://tanstack.com/query/latest/docs/framework/react/devtools).
