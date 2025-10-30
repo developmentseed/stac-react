@@ -51,7 +51,6 @@ function useCollections(): StacCollectionsHook {
   });
 
   // Sync collections with context
-  // This preserves the previous logic for consumers and tests
   useEffect(() => {
     if (collections) {
       setCollections(collections);
@@ -63,13 +62,14 @@ function useCollections(): StacCollectionsHook {
   const reload = useMemo(() => debounce(refetch), [refetch]);
 
   useEffect(() => {
-    // Map TanStack Query loading states to previous LoadingState type
-    if (isLoading || isFetching) {
+    if (!stacApi) {
+      setState('IDLE');
+    } else if (isLoading || isFetching) {
       setState('LOADING');
     } else {
       setState('IDLE');
     }
-  }, [isLoading, isFetching]);
+  }, [stacApi, isLoading, isFetching]);
 
   return {
     collections,

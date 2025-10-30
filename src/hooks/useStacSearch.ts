@@ -135,7 +135,7 @@ function useStacSearch(): StacSearchHook {
   );
 
   /**
-   * Retreives a page from a paginatied item set using the provided link config.
+   * Retrieves a page from a paginated item set using the provided link config.
    * Executes a POST request against the `search` endpoint if pagination uses POST
    * or retrieves the page items using GET against the link href
    */
