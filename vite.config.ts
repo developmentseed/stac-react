@@ -12,7 +12,7 @@ export default defineConfig({
     },
     sourcemap: true,
     rollupOptions: {
-      external: ['react', 'react-dom'],
+      external: ['react', 'react-dom', '@tanstack/react-query'],
     },
   },
   plugins: [

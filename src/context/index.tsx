@@ -13,7 +13,11 @@ type StacApiProviderType = {
   queryClient?: QueryClient;
 };
 
-export function StacApiProvider({ children, apiUrl, options, queryClient }: StacApiProviderType) {
+function StacApiProviderInner({
+  children,
+  apiUrl,
+  options,
+}: Omit<StacApiProviderType, 'queryClient'>) {
   const { stacApi } = useStacApi(apiUrl, options);
   const [collections, setCollections] = useState<CollectionsResponse>();
   const [items, setItems] = useState(new Map<string, Item>());
@@ -48,6 +52,10 @@ export function StacApiProvider({ children, apiUrl, options, queryClient }: Stac
     [addItem, collections, deleteItem, getItem, stacApi]
   );
 
+  return <StacApiContext.Provider value={contextValue}>{children}</StacApiContext.Provider>;
+}
+
+export function StacApiProvider({ children, apiUrl, options, queryClient }: StacApiProviderType) {
   const defaultClient = useMemo(() => new QueryClient(), []);
   const client: QueryClient = queryClient ?? defaultClient;
 
@@ -58,7 +66,9 @@ export function StacApiProvider({ children, apiUrl, options, queryClient }: Stac
 
   return (
     <QueryClientProvider client={client}>
-      <StacApiContext.Provider value={contextValue}>{children}</StacApiContext.Provider>
+      <StacApiProviderInner apiUrl={apiUrl} options={options}>
+        {children}
+      </StacApiProviderInner>
     </QueryClientProvider>
   );
 }
