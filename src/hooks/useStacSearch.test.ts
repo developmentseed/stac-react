@@ -343,7 +343,8 @@ describe('useStacSearch — API supports POST', () => {
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual(response));
-    expect(result.current.nextPage).toBeDefined();
+    // Wait for pagination links to be extracted from results
+    await waitFor(() => expect(result.current.nextPage).toBeDefined());
     // Trigger nextPage and validate
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.nextPage && result.current.nextPage());
@@ -390,7 +391,8 @@ describe('useStacSearch — API supports POST', () => {
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual(response));
-    expect(result.current.previousPage).toBeDefined();
+    // Wait for pagination links to be extracted from results
+    await waitFor(() => expect(result.current.previousPage).toBeDefined());
     // Trigger previousPage and validate
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.previousPage && result.current.previousPage());
@@ -437,7 +439,8 @@ describe('useStacSearch — API supports POST', () => {
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual(response));
-    expect(result.current.previousPage).toBeDefined();
+    // Wait for pagination links to be extracted from results
+    await waitFor(() => expect(result.current.previousPage).toBeDefined());
     // Trigger previousPage and validate
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.previousPage && result.current.previousPage());
@@ -485,7 +488,8 @@ describe('useStacSearch — API supports POST', () => {
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual(response));
-    expect(result.current.previousPage).toBeDefined();
+    // Wait for pagination links to be extracted from results
+    await waitFor(() => expect(result.current.previousPage).toBeDefined());
     // Trigger previousPage and validate merged body
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.previousPage && result.current.previousPage());
@@ -538,7 +542,8 @@ describe('useStacSearch — API supports POST', () => {
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual(response));
-    expect(result.current.previousPage).toBeDefined();
+    // Wait for pagination links to be extracted from results
+    await waitFor(() => expect(result.current.previousPage).toBeDefined());
     // Trigger previousPage and validate header
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.previousPage && result.current.previousPage());
@@ -579,7 +584,8 @@ describe('useStacSearch — API supports POST', () => {
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual(response));
-    expect(result.current.nextPage).toBeDefined();
+    // Wait for pagination links to be extracted from results
+    await waitFor(() => expect(result.current.nextPage).toBeDefined());
     // Trigger nextPage and validate GET request
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.nextPage && result.current.nextPage());
@@ -620,7 +626,8 @@ describe('useStacSearch — API supports POST', () => {
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual(response));
-    expect(result.current.previousPage).toBeDefined();
+    // Wait for pagination links to be extracted from results
+    await waitFor(() => expect(result.current.previousPage).toBeDefined());
     // Trigger previousPage and validate GET request
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.previousPage && result.current.previousPage());

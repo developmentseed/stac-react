@@ -60,7 +60,7 @@ function useItem(url: string): ItemHook {
     item,
     state,
     error: error as ApiError,
-    reload: refetch,
+    reload: refetch as () => void,
   };
 }
 

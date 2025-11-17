@@ -1,4 +1,5 @@
 import { useCallback, useState, useMemo, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import debounce from '../utils/debounce';
 import type { ApiError, LoadingState } from '../types';
 import type {
@@ -7,7 +8,6 @@ import type {
   CollectionIdList,
   SearchPayload,
   SearchResponse,
-  LinkBody,
   Sortby,
 } from '../types/stac';
 import { useStacApiContext } from '../context/useStacApiContext';
@@ -37,9 +37,22 @@ type StacSearchHook = {
   previousPage: PaginationHandler | undefined;
 };
 
+type FetchRequest =
+  | {
+      type: 'search';
+      payload: SearchPayload;
+      headers?: Record<string, string>;
+    }
+  | {
+      type: 'get';
+      url: string;
+    };
+
 function useStacSearch(): StacSearchHook {
   const { stacApi } = useStacApiContext();
-  const [results, setResults] = useState<SearchResponse>();
+  const queryClient = useQueryClient();
+
+  // Search parameters state
   const [ids, setIds] = useState<string[]>();
   const [bbox, setBbox] = useState<Bbox>();
   const [collections, setCollections] = useState<CollectionIdList>();
@@ -47,14 +60,14 @@ function useStacSearch(): StacSearchHook {
   const [dateRangeTo, setDateRangeTo] = useState<string>('');
   const [limit, setLimit] = useState<number>(25);
   const [sortby, setSortby] = useState<Sortby[]>();
-  const [state, setState] = useState<LoadingState>('IDLE');
-  const [error, setError] = useState<ApiError>();
+
+  // Track the current request (search or pagination) for React Query
+  const [currentRequest, setCurrentRequest] = useState<FetchRequest | null>(null);
 
   const [nextPageConfig, setNextPageConfig] = useState<Link>();
   const [previousPageConfig, setPreviousPageConfig] = useState<Link>();
 
   const reset = () => {
-    setResults(undefined);
     setBbox(undefined);
     setCollections(undefined);
     setIds(undefined);
@@ -62,15 +75,24 @@ function useStacSearch(): StacSearchHook {
     setDateRangeTo('');
     setSortby(undefined);
     setLimit(25);
+    setCurrentRequest(null);
+    setNextPageConfig(undefined);
+    setPreviousPageConfig(undefined);
   };
 
   /**
    * Reset state when stacApi changes
    */
-  useEffect(reset, [stacApi]);
+  useEffect(() => {
+    if (stacApi) {
+      reset();
+      // Invalidate all search queries when API changes
+      void queryClient.invalidateQueries({ queryKey: ['stacSearch'] });
+    }
+  }, [stacApi, queryClient]);
 
   /**
-   * Extracts the pagination config from the the links array of the items response
+   * Extracts the pagination config from the links array of the items response
    */
   const setPaginationConfig = useCallback((links: Link[]) => {
     setNextPageConfig(links.find(({ rel }) => rel === 'next'));
@@ -93,84 +115,107 @@ function useStacSearch(): StacSearchHook {
   );
 
   /**
-   * Resets the state and processes the results from the provided request
+   * Fetch function for searches using TanStack Query
    */
-  const processRequest = useCallback(
-    (request: Promise<Response>) => {
-      setResults(undefined);
-      setState('LOADING');
-      setError(undefined);
-      setNextPageConfig(undefined);
-      setPreviousPageConfig(undefined);
+  const fetchRequest = async (request: FetchRequest): Promise<SearchResponse> => {
+    if (!stacApi) throw new Error('No STAC API configured');
 
-      request
-        .then((response) => response.json())
-        .then((data) => {
-          setResults(data);
-          if (data.links) {
-            setPaginationConfig(data.links);
-          }
-        })
-        .catch((err) => setError(err))
-        .finally(() => setState('IDLE'));
-    },
-    [setPaginationConfig]
-  );
+    const response =
+      request.type === 'search'
+        ? await stacApi.search(request.payload, request.headers)
+        : await stacApi.get(request.url);
 
-  /**
-   * Executes a POST request against the `search` endpoint using the provided payload and headers
-   */
-  const executeSearch = useCallback(
-    (payload: SearchPayload, headers = {}) =>
-      stacApi && processRequest(stacApi.search(payload, headers)),
-    [stacApi, processRequest]
-  );
-
-  /**
-   * Execute a GET request against the provided URL
-   */
-  const getItems = useCallback(
-    (url: string) => stacApi && processRequest(stacApi.get(url)),
-    [stacApi, processRequest]
-  );
-
-  /**
-   * Retrieves a page from a paginated item set using the provided link config.
-   * Executes a POST request against the `search` endpoint if pagination uses POST
-   * or retrieves the page items using GET against the link href
-   */
-  const flipPage = useCallback(
-    (link?: Link) => {
-      if (link) {
-        let payload = link.body as LinkBody;
-        if (payload) {
-          if (payload.merge) {
-            payload = {
-              ...payload,
-              ...getSearchPayload(),
-            };
-          }
-          executeSearch(payload, link.headers);
-        } else {
-          getItems(link.href);
-        }
+    if (!response.ok) {
+      let detail;
+      try {
+        detail = await response.json();
+      } catch {
+        detail = await response.text();
       }
+      const err = Object.assign(new Error(response.statusText), {
+        status: response.status,
+        statusText: response.statusText,
+        detail,
+      });
+      throw err;
+    }
+    return await response.json();
+  };
+
+  /**
+   * useQuery for search and pagination with caching
+   */
+  const {
+    data: results,
+    error,
+    isLoading,
+    isFetching,
+  } = useQuery<SearchResponse, ApiError>({
+    queryKey: ['stacSearch', currentRequest],
+    queryFn: () => fetchRequest(currentRequest!),
+    enabled: currentRequest !== null,
+    retry: false,
+  });
+
+  /**
+   * Extract pagination links from results
+   */
+  useEffect(() => {
+    // Only update pagination links when we have actual results with links
+    // Don't clear them when results becomes undefined (during new requests)
+    if (results?.links) {
+      setPaginationConfig(results.links);
+    }
+  }, [results, setPaginationConfig]);
+
+  /**
+   * Convert a pagination Link to a FetchRequest
+   */
+  const linkToRequest = useCallback(
+    (link: Link): FetchRequest => {
+      if (link.body) {
+        const payload = link.body.merge ? { ...link.body, ...getSearchPayload() } : link.body;
+        return {
+          type: 'search',
+          payload,
+          headers: link.headers,
+        };
+      }
+      return {
+        type: 'get',
+        url: link.href,
+      };
     },
-    [executeSearch, getItems, getSearchPayload]
+    [getSearchPayload]
   );
 
-  const nextPageFn = useCallback(() => flipPage(nextPageConfig), [flipPage, nextPageConfig]);
+  /**
+   * Pagination handlers
+   */
+  const nextPageFn = useCallback(() => {
+    if (nextPageConfig) {
+      setCurrentRequest(linkToRequest(nextPageConfig));
+    }
+  }, [nextPageConfig, linkToRequest]);
 
-  const previousPageFn = useCallback(
-    () => flipPage(previousPageConfig),
-    [flipPage, previousPageConfig]
-  );
+  const previousPageFn = useCallback(() => {
+    if (previousPageConfig) {
+      setCurrentRequest(linkToRequest(previousPageConfig));
+    }
+  }, [previousPageConfig, linkToRequest]);
 
+  /**
+   * Submit handler for new searches
+   */
   const _submit = useCallback(() => {
     const payload = getSearchPayload();
-    executeSearch(payload);
-  }, [executeSearch, getSearchPayload]);
+    setCurrentRequest({ type: 'search', payload });
+  }, [getSearchPayload]);
+
   const submit = useMemo(() => debounce(_submit), [_submit]);
+
+  // Sync loading state for backwards compatibility
+  const state: LoadingState = isLoading || isFetching ? 'LOADING' : 'IDLE';
 
   return {
     submit,
@@ -186,7 +231,7 @@ function useStacSearch(): StacSearchHook {
     setDateRangeTo,
     results,
     state,
-    error,
+    error: error ?? undefined,
     sortby,
     setSortby,
     limit,
