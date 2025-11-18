@@ -19,6 +19,7 @@ export default defineConfig({
     dts({
       exclude: ['**/*.test.ts'],
       outDir: 'dist',
+      insertTypesEntry: true,
     }),
   ],
 });
