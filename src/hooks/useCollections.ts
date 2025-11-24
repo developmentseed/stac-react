@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { type ApiError, type LoadingState } from '../types';
 import type { CollectionsResponse } from '../types/stac';
 import debounce from '../utils/debounce';
+import { generateCollectionsQueryKey } from '../utils/queryKeys';
 import { useStacApiContext } from '../context/useStacApiContext';
 
 type StacCollectionsHook = {
@@ -44,7 +45,7 @@ function useCollections(): StacCollectionsHook {
     isFetching,
     refetch,
   } = useQuery<CollectionsResponse, ApiError>({
-    queryKey: ['collections'],
+    queryKey: generateCollectionsQueryKey(),
     queryFn: fetchCollections,
     enabled: !!stacApi,
     retry: false,

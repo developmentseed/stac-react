@@ -21,6 +21,37 @@ export type SearchPayload = {
   sortby?: Sortby[];
 };
 
+/**
+ * Extended search payload that includes both the base SearchPayload structure
+ * and additional properties used in API requests.
+ */
+export type SearchRequestPayload = SearchPayload & {
+  /** Datetime string in ISO 8601 format (transformed from dateRange) */
+  datetime?: string;
+  /** Maximum number of results to return */
+  limit?: number;
+  /** Pagination token for cursor-based pagination */
+  token?: string;
+  /** Page number for offset-based pagination */
+  page?: number;
+  /** Flag indicating if this payload should be merged with current search params */
+  merge?: boolean;
+};
+
+/**
+ * Type for fetch requests used in useStacSearch hook
+ */
+export type FetchRequest =
+  | {
+      type: 'search';
+      payload: SearchRequestPayload;
+      headers?: Record<string, string>;
+    }
+  | {
+      type: 'get';
+      url: string;
+    };
+
 export type LinkBody = SearchPayload & {
   merge?: boolean;
 };

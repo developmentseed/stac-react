@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import StacApi, { SearchMode } from '../stac-api';
 import { Link } from '../types/stac';
 import { GenericObject } from '../types';
+import { generateStacApiQueryKey } from '../utils/queryKeys';
 
 type StacApiHook = {
   stacApi?: StacApi;
@@ -11,7 +12,7 @@ type StacApiHook = {
 
 function useStacApi(url: string, options?: GenericObject): StacApiHook {
   const { data, isSuccess, isLoading, isError } = useQuery({
-    queryKey: ['stacApi', url, options],
+    queryKey: generateStacApiQueryKey(url, options),
     queryFn: async () => {
       let searchMode = SearchMode.GET;
       const response = await fetch(url, {

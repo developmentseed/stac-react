@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Item } from '../types/stac';
 import { ApiError, LoadingState } from '../types';
 import { useStacApiContext } from '../context/useStacApiContext';
+import { generateItemQueryKey } from '../utils/queryKeys';
 
 type ItemHook = {
   item?: Item;
@@ -42,7 +43,7 @@ function useItem(url: string): ItemHook {
     isFetching,
     refetch,
   } = useQuery<Item, ApiError>({
-    queryKey: ['item', url],
+    queryKey: generateItemQueryKey(url),
     queryFn: fetchItem,
     enabled: !!stacApi,
     retry: false,

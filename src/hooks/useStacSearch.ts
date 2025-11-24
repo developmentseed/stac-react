@@ -1,14 +1,15 @@
 import { useCallback, useState, useMemo, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import debounce from '../utils/debounce';
+import { generateStacSearchQueryKey } from '../utils/queryKeys';
 import type { ApiError, LoadingState } from '../types';
 import type {
   Link,
   Bbox,
   CollectionIdList,
-  SearchPayload,
   SearchResponse,
   Sortby,
+  FetchRequest,
 } from '../types/stac';
 import { useStacApiContext } from '../context/useStacApiContext';
 
@@ -36,17 +37,6 @@ type StacSearchHook = {
   nextPage: PaginationHandler | undefined;
   previousPage: PaginationHandler | undefined;
 };
-
-type FetchRequest =
-  | {
-      type: 'search';
-      payload: SearchPayload;
-      headers?: Record<string, string>;
-    }
-  | {
-      type: 'get';
-      url: string;
-    };
 
 function useStacSearch(): StacSearchHook {
   const { stacApi } = useStacApiContext();
@@ -151,7 +141,7 @@ function useStacSearch(): StacSearchHook {
     isLoading,
     isFetching,
   } = useQuery<SearchResponse, ApiError>({
-    queryKey: ['stacSearch', currentRequest],
+    queryKey: currentRequest ? generateStacSearchQueryKey(currentRequest) : ['stacSearch', 'idle'],
     queryFn: () => fetchRequest(currentRequest!),
     enabled: currentRequest !== null,
     retry: false,
