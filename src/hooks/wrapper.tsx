@@ -10,6 +10,8 @@ const Wrapper = ({ children }: WrapperType) => {
   const testQueryClient = new QueryClient({
     defaultOptions: {
       queries: {
+        // gcTime (previously cacheTime in v4) controls how long unused/inactive queries
+        // remain in memory. Set to 0 in tests to prevent caching between test runs.
         gcTime: 0,
         staleTime: 0,
         retry: false,
