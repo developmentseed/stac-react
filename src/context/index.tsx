@@ -11,6 +11,7 @@ type StacApiProviderType = {
   children: React.ReactNode;
   options?: GenericObject;
   queryClient?: QueryClient;
+  enableDevTools?: boolean;
 };
 
 function StacApiProviderInner({
@@ -55,11 +56,17 @@ function StacApiProviderInner({
   return <StacApiContext.Provider value={contextValue}>{children}</StacApiContext.Provider>;
 }
 
-export function StacApiProvider({ children, apiUrl, options, queryClient }: StacApiProviderType) {
+export function StacApiProvider({
+  children,
+  apiUrl,
+  options,
+  queryClient,
+  enableDevTools,
+}: StacApiProviderType) {
   const defaultClient = useMemo(() => new QueryClient(), []);
   const client: QueryClient = queryClient ?? defaultClient;
 
-  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  if (enableDevTools && typeof window !== 'undefined') {
     // Connect TanStack Query DevTools (browser extension)
     window.__TANSTACK_QUERY_CLIENT__ = client;
   }
@@ -75,6 +82,6 @@ export function StacApiProvider({ children, apiUrl, options, queryClient }: Stac
 
 declare global {
   interface Window {
-    __TANSTACK_QUERY_CLIENT__: import('@tanstack/query-core').QueryClient;
+    __TANSTACK_QUERY_CLIENT__?: import('@tanstack/query-core').QueryClient;
   }
 }
