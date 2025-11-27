@@ -1,4 +1,4 @@
-import type { ApiError, GenericObject } from '../types';
+import type { ApiErrorType, GenericObject } from '../types';
 import type { Bbox, SearchPayload, DateRange } from '../types/stac';
 
 type RequestPayload = SearchPayload;
@@ -88,7 +88,7 @@ class StacApi {
 
   async handleError(response: Response) {
     const { status, statusText } = response;
-    const e: ApiError = {
+    const e: ApiErrorType = {
       status,
       statusText,
     };

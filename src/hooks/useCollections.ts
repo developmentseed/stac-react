@@ -1,8 +1,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { type ApiError, type LoadingState } from '../types';
+import { type ApiErrorType, type LoadingState } from '../types';
 import type { CollectionsResponse } from '../types/stac';
 import debounce from '../utils/debounce';
+import { ApiError } from '../utils/ApiError';
 import { generateCollectionsQueryKey } from '../utils/queryKeys';
 import { useStacApiContext } from '../context/useStacApiContext';
 
@@ -10,7 +11,7 @@ type StacCollectionsHook = {
   collections?: CollectionsResponse;
   reload: () => void;
   state: LoadingState;
-  error?: ApiError;
+  error?: ApiErrorType;
 };
 
 function useCollections(): StacCollectionsHook {
@@ -28,12 +29,7 @@ function useCollections(): StacCollectionsHook {
         detail = await response.text();
       }
 
-      const err = Object.assign(new Error(response.statusText), {
-        status: response.status,
-        statusText: response.statusText,
-        detail,
-      });
-      throw err;
+      throw new ApiError(response.statusText, response.status, detail);
     }
     return await response.json();
   };
@@ -44,7 +40,7 @@ function useCollections(): StacCollectionsHook {
     isLoading,
     isFetching,
     refetch,
-  } = useQuery<CollectionsResponse, ApiError>({
+  } = useQuery<CollectionsResponse, ApiErrorType>({
     queryKey: generateCollectionsQueryKey(),
     queryFn: fetchCollections,
     enabled: !!stacApi,
@@ -76,7 +72,7 @@ function useCollections(): StacCollectionsHook {
     collections,
     reload,
     state,
-    error: error as ApiError,
+    error: error as ApiErrorType,
   };
 }
 

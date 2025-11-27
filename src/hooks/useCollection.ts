@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
 
-import type { ApiError, LoadingState } from '../types';
+import type { ApiErrorType, LoadingState } from '../types';
 import type { Collection } from '../types/stac';
 import useCollections from './useCollections';
 
 type StacCollectionHook = {
   collection?: Collection;
   state: LoadingState;
-  error?: ApiError;
+  error?: ApiErrorType;
   reload: () => void;
 };
 
@@ -19,7 +19,7 @@ function useCollection(collectionId: string): StacCollectionHook {
   }, [collectionId, collections]);
 
   // Determine error: prefer requestError, else local 404 if collection not found
-  const error: ApiError | undefined = requestError
+  const error: ApiErrorType | undefined = requestError
     ? requestError
     : !collection && collections
       ? {

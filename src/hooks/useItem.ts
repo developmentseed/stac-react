@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Item } from '../types/stac';
-import { ApiError, LoadingState } from '../types';
+import { type ApiErrorType, type LoadingState } from '../types';
 import { useStacApiContext } from '../context/useStacApiContext';
+import { ApiError } from '../utils/ApiError';
 import { generateItemQueryKey } from '../utils/queryKeys';
 
 type ItemHook = {
   item?: Item;
   state: LoadingState;
-  error?: ApiError;
+  error?: ApiErrorType;
   reload: () => void;
 };
 
@@ -26,12 +27,8 @@ function useItem(url: string): ItemHook {
       } catch {
         detail = await response.text();
       }
-      const err = Object.assign(new Error(response.statusText), {
-        status: response.status,
-        statusText: response.statusText,
-        detail,
-      });
-      throw err;
+
+      throw new ApiError(response.statusText, response.status, detail);
     }
     return await response.json();
   };
@@ -42,7 +39,7 @@ function useItem(url: string): ItemHook {
     isLoading,
     isFetching,
     refetch,
-  } = useQuery<Item, ApiError>({
+  } = useQuery<Item, ApiErrorType>({
     queryKey: generateItemQueryKey(url),
     queryFn: fetchItem,
     enabled: !!stacApi,
@@ -60,7 +57,7 @@ function useItem(url: string): ItemHook {
   return {
     item,
     state,
-    error: error as ApiError,
+    error: error as ApiErrorType,
     reload: refetch as () => void,
   };
 }

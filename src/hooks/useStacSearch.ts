@@ -2,7 +2,8 @@ import { useCallback, useState, useMemo, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import debounce from '../utils/debounce';
 import { generateStacSearchQueryKey } from '../utils/queryKeys';
-import type { ApiError, LoadingState } from '../types';
+import { type ApiErrorType, type LoadingState } from '../types';
+import { ApiError } from '../utils/ApiError';
 import type {
   Link,
   Bbox,
@@ -33,7 +34,7 @@ type StacSearchHook = {
   submit: () => void;
   results?: SearchResponse;
   state: LoadingState;
-  error: ApiError | undefined;
+  error?: ApiErrorType;
   nextPage: PaginationHandler | undefined;
   previousPage: PaginationHandler | undefined;
 };
@@ -122,12 +123,8 @@ function useStacSearch(): StacSearchHook {
       } catch {
         detail = await response.text();
       }
-      const err = Object.assign(new Error(response.statusText), {
-        status: response.status,
-        statusText: response.statusText,
-        detail,
-      });
-      throw err;
+
+      throw new ApiError(response.statusText, response.status, detail);
     }
     return await response.json();
   };
@@ -140,7 +137,7 @@ function useStacSearch(): StacSearchHook {
     error,
     isLoading,
     isFetching,
-  } = useQuery<SearchResponse, ApiError>({
+  } = useQuery<SearchResponse, ApiErrorType>({
     queryKey: currentRequest ? generateStacSearchQueryKey(currentRequest) : ['stacSearch', 'idle'],
     queryFn: () => fetchRequest(currentRequest!),
     enabled: currentRequest !== null,
