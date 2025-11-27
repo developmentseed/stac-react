@@ -53,11 +53,24 @@ If you want to provide your own custom QueryClient (for advanced caching or devt
 import { StacApiProvider } from 'stac-react';
 import { QueryClient } from '@tanstack/react-query';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+    },
+  },
+});
 
 function StacApp() {
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
   return (
-    <StacApiProvider apiUrl="https://my-stac-api.com" queryClient={queryClient}>
+    <StacApiProvider
+      apiUrl="https://my-stac-api.com"
+      queryClient={queryClient}
+      enableDevTools={isDevelopment}
+    >
       {/* Other components */}
     </StacApiProvider>
   );
@@ -110,9 +123,12 @@ function StacApp() {
 
 ##### Component Properties
 
-| Option    | Type     | Description                       |
-| --------- | -------- | --------------------------------- |
-| `apiUrl`. | `string` | The base url of the STAC catalog. |
+| Option           | Type          | Description                                                                                                                                                                                       |
+| ---------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apiUrl`         | `string`      | The base URL of the STAC catalog.                                                                                                                                                                 |
+| `queryClient`    | `QueryClient` | Optional. Custom TanStack Query QueryClient instance. If not provided, a default QueryClient will be created.                                                                                     |
+| `options`        | `object`      | Optional. Configuration object for customizing STAC API requests (e.g., headers, authentication).                                                                                                 |
+| `enableDevTools` | `boolean`     | Optional. Enables TanStack Query DevTools browser extension integration by exposing the QueryClient on `window.__TANSTACK_QUERY_CLIENT__`. Defaults to `false`. Recommended for development only. |
 
 ### useCollections
 
@@ -259,7 +275,7 @@ function Item() {
       {item ? (
         <>
           <h2>{item.id}</h2>
-          <p>{items.description}</p>
+          <p>{item.description}</p>
         </>
       ) : (
         <p>Not found</p>
@@ -494,11 +510,11 @@ function StacComponent() {
 }
 ```
 
-| Option       | Type     | Description                       |
-| ------------ | -------- | --------------------------------- | ------------------------------------------------------------------------------------------ |
-| `detail`     | `string` | `object                           | The error return from the API. Either a`string` or and `object` depending on the response. |
-| `status`     | `number` | HTTP status code of the response. |
-| `statusText` | `string` | Status text for the response.     |
+| Option       | Type               | Description                                                                                  |
+| ------------ | ------------------ | -------------------------------------------------------------------------------------------- |
+| `detail`     | `string \| object` | The error returned from the API. Either a `string` or an `object` depending on the response. |
+| `status`     | `number`           | HTTP status code of the response.                                                            |
+| `statusText` | `string`           | Status text for the response.                                                                |
 
 ## Development
 
