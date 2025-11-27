@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, type QueryObserverResult } from '@tanstack/react-query';
 import type { ApiErrorType } from '../types';
 import type { Collection } from '../types/stac';
 import { ApiError } from '../utils/ApiError';
@@ -10,7 +10,7 @@ type StacCollectionHook = {
   isLoading: boolean;
   isFetching: boolean;
   error?: ApiErrorType;
-  reload: () => void;
+  reload: () => Promise<QueryObserverResult<Collection, ApiErrorType>>;
 };
 
 function useCollection(collectionId: string): StacCollectionHook {
@@ -50,7 +50,7 @@ function useCollection(collectionId: string): StacCollectionHook {
     isLoading,
     isFetching,
     error: error as ApiErrorType,
-    reload: refetch as () => void,
+    reload: refetch,
   };
 }
 

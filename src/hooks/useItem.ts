@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, type QueryObserverResult } from '@tanstack/react-query';
 import { Item } from '../types/stac';
 import { type ApiErrorType } from '../types';
 import { useStacApiContext } from '../context/useStacApiContext';
@@ -10,7 +10,7 @@ type ItemHook = {
   isLoading: boolean;
   isFetching: boolean;
   error?: ApiErrorType;
-  reload: () => void;
+  reload: () => Promise<QueryObserverResult<Item, ApiErrorType>>;
 };
 
 function useItem(url: string): ItemHook {
@@ -50,7 +50,7 @@ function useItem(url: string): ItemHook {
     isLoading,
     isFetching,
     error: error as ApiErrorType,
-    reload: refetch as () => void,
+    reload: refetch,
   };
 }
 

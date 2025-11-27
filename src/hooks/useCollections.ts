@@ -1,15 +1,13 @@
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, type QueryObserverResult } from '@tanstack/react-query';
 import { type ApiErrorType } from '../types';
 import type { CollectionsResponse } from '../types/stac';
-import debounce from '../utils/debounce';
 import { ApiError } from '../utils/ApiError';
 import { generateCollectionsQueryKey } from '../utils/queryKeys';
 import { useStacApiContext } from '../context/useStacApiContext';
 
 type StacCollectionsHook = {
   collections?: CollectionsResponse;
-  reload: () => void;
+  reload: () => Promise<QueryObserverResult<CollectionsResponse, ApiErrorType>>;
   isLoading: boolean;
   isFetching: boolean;
   error?: ApiErrorType;
@@ -47,11 +45,9 @@ function useCollections(): StacCollectionsHook {
     retry: false,
   });
 
-  const reload = useMemo(() => debounce(refetch), [refetch]);
-
   return {
     collections,
-    reload,
+    reload: refetch,
     isLoading,
     isFetching,
     error: error as ApiErrorType,

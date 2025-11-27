@@ -83,7 +83,9 @@ describe('useCollection', () => {
       expect(result.current.collection).toEqual({ id: 'abc', title: 'Collection A' })
     );
 
-    act(() => result.current.reload());
+    await act(async () => {
+      await result.current.reload();
+    });
 
     await waitFor(() =>
       expect(result.current.collection).toEqual({ id: 'abc', title: 'Collection A - Updated' })
