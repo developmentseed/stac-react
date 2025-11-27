@@ -1,7 +1,7 @@
-import React, { useMemo, useContext } from 'react';
+import React, { useMemo } from 'react';
 import { StacApiContext } from './context';
 import { GenericObject } from '../types';
-import { QueryClient, QueryClientProvider, QueryClientContext } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import useStacApi from '../hooks/useStacApi';
 
@@ -9,6 +9,7 @@ type StacApiProviderType = {
   apiUrl: string;
   children: React.ReactNode;
   options?: GenericObject;
+  queryClient?: QueryClient;
   enableDevTools?: boolean;
 };
 
@@ -16,7 +17,7 @@ function StacApiProviderInner({
   children,
   apiUrl,
   options,
-}: Omit<StacApiProviderType, 'enableDevTools'>) {
+}: Omit<StacApiProviderType, 'queryClient'>) {
   const { stacApi } = useStacApi(apiUrl, options);
 
   const contextValue = useMemo(
@@ -33,30 +34,19 @@ export function StacApiProvider({
   children,
   apiUrl,
   options,
+  queryClient,
   enableDevTools,
 }: StacApiProviderType) {
-  const existingClient = useContext(QueryClientContext);
   const defaultClient = useMemo(() => new QueryClient(), []);
+  const client: QueryClient = queryClient ?? defaultClient;
 
-  const client = existingClient ?? defaultClient;
-
-  // Setup DevTools once when component mounts or enableDevTools changes
-  useMemo(() => {
-    if (enableDevTools && typeof window !== 'undefined') {
-      window.__TANSTACK_QUERY_CLIENT__ = client;
-    }
-  }, [client, enableDevTools]);
-
-  if (existingClient) {
-    return (
-      <StacApiProviderInner apiUrl={apiUrl} options={options}>
-        {children}
-      </StacApiProviderInner>
-    );
+  if (enableDevTools && typeof window !== 'undefined') {
+    // Connect TanStack Query DevTools (browser extension)
+    window.__TANSTACK_QUERY_CLIENT__ = client;
   }
 
   return (
-    <QueryClientProvider client={defaultClient}>
+    <QueryClientProvider client={client}>
       <StacApiProviderInner apiUrl={apiUrl} options={options}>
         {children}
       </StacApiProviderInner>

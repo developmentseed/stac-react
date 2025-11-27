@@ -8,45 +8,30 @@ stac-react relies on [TanStack Query](https://tanstack.com/query/latest/docs/fra
 - Ensures your app and stac-react share the same QueryClient instance.
 - Follows best practices for React libraries that integrate with popular frameworks.
 
-## QueryClient Management
+stac-react manages the QueryClient for you by default, but you can provide your own for advanced use cases.
 
-By default, `StacApiProvider` automatically creates and manages a QueryClient for you if one doesn't already exist in the component tree. This means you can use stac-react without any additional setup:
+**Important:** If your app uses multiple providers that require a TanStack QueryClient (such as `QueryClientProvider` and `StacApiProvider`), always use the same single QueryClient instance for all providers. This ensures that queries, mutations, and cache are shared across your app and prevents cache fragmentation or duplicate network requests.
 
-```jsx
-import { StacApiProvider } from 'stac-react';
-
-function App() {
-  return <StacApiProvider apiUrl="https://my-stac-api.com">{/* ...your app... */}</StacApiProvider>;
-}
-```
-
-### Custom QueryClient Configuration
-
-If you need custom QueryClient configuration (e.g., custom caching behavior, retry logic, or global settings), wrap `StacApiProvider` with your own `QueryClientProvider`:
+**Example:**
 
 ```jsx
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StacApiProvider } from 'stac-react';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      retry: 3,
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <StacApiProvider apiUrl="https://my-stac-api.com">{/* ...your app... */}</StacApiProvider>
+      <StacApiProvider apiUrl="https://my-stac-api.com" queryClient={queryClient}>
+        {/* ...your app... */}
+      </StacApiProvider>
     </QueryClientProvider>
   );
 }
 ```
 
-`StacApiProvider` will automatically detect the parent QueryClient and use it instead of creating a new one.
+If you do not pass the same QueryClient instance, each provider will maintain its own cache, which can lead to unexpected behavior.
 
 ## TanStack Query DevTools Integration
 
