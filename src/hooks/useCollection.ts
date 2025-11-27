@@ -1,8 +1,9 @@
-import { useMemo } from 'react';
-
+import { useQuery } from '@tanstack/react-query';
 import type { ApiErrorType } from '../types';
 import type { Collection } from '../types/stac';
-import useCollections from './useCollections';
+import { ApiError } from '../utils/ApiError';
+import { generateCollectionQueryKey } from '../utils/queryKeys';
+import { useStacApiContext } from '../context/useStacApiContext';
 
 type StacCollectionHook = {
   collection?: Collection;
@@ -13,29 +14,43 @@ type StacCollectionHook = {
 };
 
 function useCollection(collectionId: string): StacCollectionHook {
-  const { collections, isLoading, isFetching, error: requestError, reload } = useCollections();
+  const { stacApi } = useStacApiContext();
 
-  const collection = useMemo(() => {
-    return collections?.collections.find(({ id }) => id === collectionId);
-  }, [collectionId, collections]);
+  const fetchCollection = async (): Promise<Collection> => {
+    if (!stacApi) throw new Error('No STAC API configured');
+    const response: Response = await stacApi.getCollection(collectionId);
+    if (!response.ok) {
+      let detail;
+      try {
+        detail = await response.json();
+      } catch {
+        detail = await response.text();
+      }
 
-  // Determine error: prefer requestError, else local 404 if collection not found
-  const error: ApiErrorType | undefined = requestError
-    ? requestError
-    : !collection && collections
-      ? {
-          status: 404,
-          statusText: 'Not found',
-          detail: 'Collection does not exist',
-        }
-      : undefined;
+      throw new ApiError(response.statusText, response.status, detail);
+    }
+    return await response.json();
+  };
+
+  const {
+    data: collection,
+    error,
+    isLoading,
+    isFetching,
+    refetch,
+  } = useQuery<Collection, ApiErrorType>({
+    queryKey: generateCollectionQueryKey(collectionId),
+    queryFn: fetchCollection,
+    enabled: !!stacApi,
+    retry: false,
+  });
 
   return {
     collection,
     isLoading,
     isFetching,
-    error,
-    reload,
+    error: error as ApiErrorType,
+    reload: refetch as () => void,
   };
 }
 

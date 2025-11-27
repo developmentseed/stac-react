@@ -11,40 +11,30 @@ describe('useCollection', () => {
   it('queries collection', async () => {
     fetch
       .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
-      .mockResponseOnce(
-        JSON.stringify({
-          collections: [
-            { id: 'abc', title: 'Collection A' },
-            { id: 'def', title: 'Collection B' },
-          ],
-        })
-      );
+      .mockResponseOnce(JSON.stringify({ id: 'abc', title: 'Collection A' }));
 
     const { result } = renderHook(() => useCollection('abc'), { wrapper });
     await waitFor(() => expect(result.current.isLoading).toEqual(false));
     await waitFor(() =>
       expect(result.current.collection).toEqual({ id: 'abc', title: 'Collection A' })
     );
+    expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/collections/abc');
   });
 
   it('returns error if collection does not exist', async () => {
     fetch
       .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
-      .mockResponseOnce(
-        JSON.stringify({
-          collections: [
-            { id: 'abc', title: 'Collection A' },
-            { id: 'def', title: 'Collection B' },
-          ],
-        })
-      );
+      .mockResponseOnce(JSON.stringify({ error: 'Collection not found' }), {
+        status: 404,
+        statusText: 'Not Found',
+      });
 
-    const { result } = renderHook(() => useCollection('ghi'), { wrapper });
+    const { result } = renderHook(() => useCollection('nonexistent'), { wrapper });
     await waitFor(() =>
       expect(result.current.error).toEqual({
         status: 404,
-        statusText: 'Not found',
-        detail: 'Collection does not exist',
+        statusText: 'Not Found',
+        detail: { error: 'Collection not found' },
       })
     );
   });
@@ -73,34 +63,20 @@ describe('useCollection', () => {
       .mockResponseOnce('Wrong query', { status: 400, statusText: 'Bad Request' });
 
     const { result } = renderHook(() => useCollection('abc'), { wrapper });
-    await waitFor(() => expect(result.current.error).toBeDefined());
-
-    expect(result.current.error).toEqual({
-      status: 400,
-      statusText: 'Bad Request',
-      detail: 'Wrong query',
-    });
+    await waitFor(() =>
+      expect(result.current.error).toEqual({
+        status: 400,
+        statusText: 'Bad Request',
+        detail: 'Wrong query',
+      })
+    );
   });
 
   it('reloads collection', async () => {
     fetch
       .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
-      .mockResponseOnce(
-        JSON.stringify({
-          collections: [
-            { id: 'abc', title: 'Collection A' },
-            { id: 'def', title: 'Collection B' },
-          ],
-        })
-      )
-      .mockResponseOnce(
-        JSON.stringify({
-          collections: [
-            { id: 'abc', title: 'Collection A - Updated' },
-            { id: 'def', title: 'Collection B' },
-          ],
-        })
-      );
+      .mockResponseOnce(JSON.stringify({ id: 'abc', title: 'Collection A' }))
+      .mockResponseOnce(JSON.stringify({ id: 'abc', title: 'Collection A - Updated' }));
 
     const { result } = renderHook(() => useCollection('abc'), { wrapper });
     await waitFor(() =>

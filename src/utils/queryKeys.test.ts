@@ -4,6 +4,7 @@ import {
   generateStacApiQueryKey,
   generateItemQueryKey,
   generateCollectionsQueryKey,
+  generateCollectionQueryKey,
 } from './queryKeys';
 import type { SearchRequestPayload, Sortby } from '../types/stac';
 
@@ -12,6 +13,21 @@ describe('Query Key Generators', () => {
     it('should generate a simple static key', () => {
       const key = generateCollectionsQueryKey();
       expect(key).toEqual(['collections']);
+    });
+  });
+
+  describe('generateCollectionQueryKey', () => {
+    it('should generate key with collection ID', () => {
+      const key = generateCollectionQueryKey('my-collection');
+      expect(key).toEqual(['collection', 'my-collection']);
+    });
+
+    it('should handle different collection IDs', () => {
+      const key1 = generateCollectionQueryKey('collection-a');
+      const key2 = generateCollectionQueryKey('collection-b');
+      expect(key1).not.toEqual(key2);
+      expect(key1).toEqual(['collection', 'collection-a']);
+      expect(key2).toEqual(['collection', 'collection-b']);
     });
   });
 

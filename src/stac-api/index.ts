@@ -152,6 +152,10 @@ class StacApi {
     return this.fetch(`${this.baseUrl}/collections`);
   }
 
+  getCollection(collectionId: string): Promise<Response> {
+    return this.fetch(`${this.baseUrl}/collections/${collectionId}`);
+  }
+
   get(href: string, headers = {}): Promise<Response> {
     return this.fetch(href, { headers });
   }

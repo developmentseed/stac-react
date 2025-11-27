@@ -46,6 +46,14 @@ export function generateCollectionsQueryKey(): [string] {
 }
 
 /**
+ * Generates a query key for a single STAC collection request.
+ * Collections are fetched by ID from /collections/{collectionId}.
+ */
+export function generateCollectionQueryKey(collectionId: string): [string, string] {
+  return ['collection', collectionId];
+}
+
+/**
  * Generates a query key for STAC item requests.
  * Items are fetched by URL.
  */
