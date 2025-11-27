@@ -1,6 +1,5 @@
-import React, { useMemo, useState, useCallback, useContext } from 'react';
+import React, { useMemo, useContext } from 'react';
 import { StacApiContext } from './context';
-import type { CollectionsResponse, Item } from '../types/stac';
 import { GenericObject } from '../types';
 import { QueryClient, QueryClientProvider, QueryClientContext } from '@tanstack/react-query';
 
@@ -19,37 +18,12 @@ function StacApiProviderInner({
   options,
 }: Omit<StacApiProviderType, 'enableDevTools'>) {
   const { stacApi } = useStacApi(apiUrl, options);
-  const [collections, setCollections] = useState<CollectionsResponse>();
-  const [items, setItems] = useState(new Map<string, Item>());
-
-  const getItem = useCallback((id: string) => items.get(id), [items]);
-
-  const addItem = useCallback(
-    (itemPath: string, item: Item) => {
-      setItems(new Map(items.set(itemPath, item)));
-    },
-    [items]
-  );
-
-  const deleteItem = useCallback(
-    (itemPath: string) => {
-      const tempItems = new Map(items);
-      items.delete(itemPath);
-      setItems(tempItems);
-    },
-    [items]
-  );
 
   const contextValue = useMemo(
     () => ({
       stacApi,
-      collections,
-      setCollections,
-      getItem,
-      addItem,
-      deleteItem,
     }),
-    [addItem, collections, deleteItem, getItem, stacApi]
+    [stacApi]
   );
 
   return <StacApiContext.Provider value={contextValue}>{children}</StacApiContext.Provider>;

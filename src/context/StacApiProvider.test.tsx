@@ -165,25 +165,6 @@ describe('StacApiProvider', () => {
       });
     });
 
-    it('provides context methods', () => {
-      function ContextChecker() {
-        const context = useStacApiContext();
-        const hasMethods =
-          typeof context.getItem === 'function' &&
-          typeof context.addItem === 'function' &&
-          typeof context.deleteItem === 'function';
-        return <div data-testid="has-methods">{hasMethods ? 'true' : 'false'}</div>;
-      }
-
-      render(
-        <StacApiProvider apiUrl="https://test-stac-api.com">
-          <ContextChecker />
-        </StacApiProvider>
-      );
-
-      expect(screen.getByTestId('has-methods')).toHaveTextContent('true');
-    });
-
     it('passes options to useStacApi hook', () => {
       const customOptions = { headers: { 'X-Custom': 'value' } };
 

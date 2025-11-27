@@ -15,7 +15,7 @@ type StacCollectionsHook = {
 };
 
 function useCollections(): StacCollectionsHook {
-  const { stacApi, setCollections } = useStacApiContext();
+  const { stacApi } = useStacApiContext();
   const [state, setState] = useState<LoadingState>('IDLE');
 
   const fetchCollections = async (): Promise<CollectionsResponse> => {
@@ -46,15 +46,6 @@ function useCollections(): StacCollectionsHook {
     enabled: !!stacApi,
     retry: false,
   });
-
-  // Sync collections with context
-  useEffect(() => {
-    if (collections) {
-      setCollections(collections);
-    } else if (error) {
-      setCollections(undefined);
-    }
-  }, [collections, error, setCollections]);
 
   const reload = useMemo(() => debounce(refetch), [refetch]);
 
