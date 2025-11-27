@@ -35,7 +35,7 @@ If you do not install it, your package manager will warn you, and stac-react wil
 
 stac-react's hooks must be used inside children of a React context that provides access to the stac-react's core functionality.
 
-To get started, initialize `StacApiProvider` with the base URL of the STAC catalog. `StacApiProvider` automatically sets up a [TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview) QueryClientProvider for you, so you do not need to wrap your app with QueryClientProvider yourself.
+To get started, initialize `StacApiProvider` with the base URL of the STAC catalog. `StacApiProvider` automatically sets up a [TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview) QueryClientProvider for you if one doesn't already exist in the component tree.
 
 ```jsx
 import { StacApiProvider } from 'stac-react';
@@ -47,19 +47,26 @@ function StacApp() {
 }
 ```
 
-If you want to provide your own custom QueryClient (for advanced caching or devtools), you can pass it as a prop:
+If you want to customize the QueryClient configuration (e.g., for custom caching behavior, retry logic, or global settings), wrap `StacApiProvider` with your own `QueryClientProvider`:
 
 ```jsx
 import { StacApiProvider } from 'stac-react';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 3,
+    },
+  },
+});
 
 function StacApp() {
   return (
-    <StacApiProvider apiUrl="https://my-stac-api.com" queryClient={queryClient}>
-      {/* Other components */}
-    </StacApiProvider>
+    <QueryClientProvider client={queryClient}>
+      <StacApiProvider apiUrl="https://my-stac-api.com">{/* Other components */}</StacApiProvider>
+    </QueryClientProvider>
   );
 }
 ```
@@ -110,9 +117,11 @@ function StacApp() {
 
 ##### Component Properties
 
-| Option    | Type     | Description                       |
-| --------- | -------- | --------------------------------- |
-| `apiUrl`. | `string` | The base url of the STAC catalog. |
+| Option           | Type      | Description                                                                                   |
+| ---------------- | --------- | --------------------------------------------------------------------------------------------- |
+| `apiUrl`         | `string`  | The base url of the STAC catalog.                                                             |
+| `options`        | `object`  | Optional configuration object for customizing STAC API requests.                              |
+| `enableDevTools` | `boolean` | Optional. Enables TanStack Query DevTools browser extension integration. Defaults to `false`. |
 
 ### useCollections
 

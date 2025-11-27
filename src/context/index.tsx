@@ -1,8 +1,8 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useContext } from 'react';
 import { StacApiContext } from './context';
 import type { CollectionsResponse, Item } from '../types/stac';
 import { GenericObject } from '../types';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, QueryClientContext } from '@tanstack/react-query';
 
 import useStacApi from '../hooks/useStacApi';
 
@@ -10,7 +10,6 @@ type StacApiProviderType = {
   apiUrl: string;
   children: React.ReactNode;
   options?: GenericObject;
-  queryClient?: QueryClient;
   enableDevTools?: boolean;
 };
 
@@ -18,7 +17,7 @@ function StacApiProviderInner({
   children,
   apiUrl,
   options,
-}: Omit<StacApiProviderType, 'queryClient'>) {
+}: Omit<StacApiProviderType, 'enableDevTools'>) {
   const { stacApi } = useStacApi(apiUrl, options);
   const [collections, setCollections] = useState<CollectionsResponse>();
   const [items, setItems] = useState(new Map<string, Item>());
@@ -60,19 +59,30 @@ export function StacApiProvider({
   children,
   apiUrl,
   options,
-  queryClient,
   enableDevTools,
 }: StacApiProviderType) {
+  const existingClient = useContext(QueryClientContext);
   const defaultClient = useMemo(() => new QueryClient(), []);
-  const client: QueryClient = queryClient ?? defaultClient;
 
-  if (enableDevTools && typeof window !== 'undefined') {
-    // Connect TanStack Query DevTools (browser extension)
-    window.__TANSTACK_QUERY_CLIENT__ = client;
+  const client = existingClient ?? defaultClient;
+
+  // Setup DevTools once when component mounts or enableDevTools changes
+  useMemo(() => {
+    if (enableDevTools && typeof window !== 'undefined') {
+      window.__TANSTACK_QUERY_CLIENT__ = client;
+    }
+  }, [client, enableDevTools]);
+
+  if (existingClient) {
+    return (
+      <StacApiProviderInner apiUrl={apiUrl} options={options}>
+        {children}
+      </StacApiProviderInner>
+    );
   }
 
   return (
-    <QueryClientProvider client={client}>
+    <QueryClientProvider client={defaultClient}>
       <StacApiProviderInner apiUrl={apiUrl} options={options}>
         {children}
       </StacApiProviderInner>
