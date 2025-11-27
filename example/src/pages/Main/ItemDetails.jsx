@@ -6,9 +6,7 @@ import { Button } from '../../components/buttons';
 
 function ItemDetails({ item, onClose }) {
   const itemUrl = item.links.find((r) => r.rel === 'self')?.href;
-  const { item: newItem, state, error, reload } = useItem(itemUrl);
-
-  const isLoading = state === 'LOADING';
+  const { item: newItem, isLoading, error, reload } = useItem(itemUrl);
 
   return (
     <Panel className="grid grid-rows-[1fr_min-content] p-4 h-[calc(100vh_-_90px)] overflow-y-scroll w-full overflow-hidden">

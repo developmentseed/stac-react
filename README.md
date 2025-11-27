@@ -143,12 +143,13 @@ const { collections } = useCollections();
 
 #### Return values
 
-| Option        | Type              | Description                                                                                                                        |
-| ------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `collections` | `array`           | A list of collections available from the STAC catalog. Is `null` if collections have not been retrieved.                           |
-| `state`       | `str`             | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress. |
-| `reload`      | `function`        | Callback function to trigger a reload of collections.                                                                              |
-| `error`       | [`Error`](#error) | Error information if the last request was unsuccessful. `undefined` if the last request was successful.                            |
+| Option        | Type              | Description                                                                                              |
+| ------------- | ----------------- | -------------------------------------------------------------------------------------------------------- |
+| `collections` | `array`           | A list of collections available from the STAC catalog. Is `null` if collections have not been retrieved. |
+| `isLoading`   | `boolean`         | `true` when the initial request is in progress. `false` once data is loaded or an error occurred.        |
+| `isFetching`  | `boolean`         | `true` when any request is in progress (including background refetches). `false` otherwise.              |
+| `reload`      | `function`        | Callback function to trigger a reload of collections.                                                    |
+| `error`       | [`Error`](#error) | Error information if the last request was unsuccessful. `undefined` if the last request was successful.  |
 
 #### Example
 
@@ -156,9 +157,9 @@ const { collections } = useCollections();
 import { useCollections } from "stac-react";
 
 function CollectionList() {
-  const { collections, state } = useCollections();
+  const { collections, isLoading } = useCollections();
 
-  if (state === "LOADING") {
+  if (isLoading) {
     return <p>Loading collections...</p>
   }
 
@@ -198,12 +199,13 @@ const { collection } = useCollection(id);
 
 #### Return values
 
-| Option       | Type              | Description                                                                                                                        |
-| ------------ | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `collection` | `object`          | The collection matching the provided ID. Is `null` if collection has not been retrieved.                                           |
-| `state`      | `str`             | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress. |
-| `reload`     | `function`        | Callback function to trigger a reload of the collection.                                                                           |
-| `error`      | [`Error`](#error) | Error information if the last request was unsuccessful. `undefined` if the last request was successful.                            |
+| Option       | Type              | Description                                                                                             |
+| ------------ | ----------------- | ------------------------------------------------------------------------------------------------------- |
+| `collection` | `object`          | The collection matching the provided ID. Is `null` if collection has not been retrieved.                |
+| `isLoading`  | `boolean`         | `true` when the initial request is in progress. `false` once data is loaded or an error occurred.       |
+| `isFetching` | `boolean`         | `true` when any request is in progress (including background refetches). `false` otherwise.             |
+| `reload`     | `function`        | Callback function to trigger a reload of the collection.                                                |
+| `error`      | [`Error`](#error) | Error information if the last request was unsuccessful. `undefined` if the last request was successful. |
 
 #### Example
 
@@ -211,9 +213,9 @@ const { collection } = useCollection(id);
 import { useCollection } from 'stac-react';
 
 function Collection() {
-  const { collection, state } = useCollection('collection_id');
+  const { collection, isLoading } = useCollection('collection_id');
 
-  if (state === 'LOADING') {
+  if (isLoading) {
     return <p>Loading collection...</p>;
   }
 
@@ -251,12 +253,13 @@ const { item } = useItem(url);
 
 #### Return values
 
-| Option   | Type              | Description                                                                                                                        |
-| -------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `item`   | `object`          | The item matching the provided URL.                                                                                                |
-| `state`  | `str`             | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress. |
-| `reload` | `function`        | Callback function to trigger a reload of the item.                                                                                 |
-| `error`  | [`Error`](#error) | Error information if the last request was unsuccessful. `undefined` if the last request was successful.                            |
+| Option       | Type              | Description                                                                                             |
+| ------------ | ----------------- | ------------------------------------------------------------------------------------------------------- |
+| `item`       | `object`          | The item matching the provided URL.                                                                     |
+| `isLoading`  | `boolean`         | `true` when the initial request is in progress. `false` once data is loaded or an error occurred.       |
+| `isFetching` | `boolean`         | `true` when any request is in progress (including background refetches). `false` otherwise.             |
+| `reload`     | `function`        | Callback function to trigger a reload of the item.                                                      |
+| `error`      | [`Error`](#error) | Error information if the last request was unsuccessful. `undefined` if the last request was successful. |
 
 #### Examples
 
@@ -264,9 +267,9 @@ const { item } = useItem(url);
 import { useItem } from 'stac-react';
 
 function Item() {
-  const { item, state } = useItem('https://stac-catalog.com/items/abc123');
+  const { item, isLoading } = useItem('https://stac-catalog.com/items/abc123');
 
-  if (state === 'LOADING') {
+  if (isLoading) {
     return <p>Loading item...</p>;
   }
 
@@ -316,7 +319,8 @@ const { results } = useStacSearch();
 | `limit`                         | `number`          | The number of results returned per result page.                                                                                                                                                                                                                                      |
 | `setLimit(limit)`               | `function`        | Callback to set `limit`. `limit` must be a `number`, or `undefined` to reset.                                                                                                                                                                                                        |
 | `results`                       | `object`          | The result of the last search query; a [GeoJSON `FeatureCollection` with additional members](https://github.com/radiantearth/stac-api-spec/blob/v1.0.0-rc.2/fragments/itemcollection/README.md). `undefined` if the search request has not been submitted, or if there was an error. |
-| `state`                         | `string`          | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress.                                                                                                                                                   |
+| `isLoading`                     | `boolean`         | `true` when the initial request is in progress. `false` once data is loaded or an error occurred.                                                                                                                                                                                    |
+| `isFetching`                    | `boolean`         | `true` when any request is in progress (including background refetches and pagination). `false` otherwise.                                                                                                                                                                           |
 | `error`                         | [`Error`](#error) | Error information if the last request was unsuccessful. `undefined` if the last request was successful.                                                                                                                                                                              |
 | `nextPage`                      | `function`        | Callback function to load the next page of results. Is `undefined` if the last page is the currently loaded.                                                                                                                                                                         |
 | `previousPage`                  | `function`        | Callback function to load the previous page of results. Is `undefined` if the first page is the currently loaded.                                                                                                                                                                    |

@@ -1,18 +1,19 @@
 import { useMemo } from 'react';
 
-import type { ApiErrorType, LoadingState } from '../types';
+import type { ApiErrorType } from '../types';
 import type { Collection } from '../types/stac';
 import useCollections from './useCollections';
 
 type StacCollectionHook = {
   collection?: Collection;
-  state: LoadingState;
+  isLoading: boolean;
+  isFetching: boolean;
   error?: ApiErrorType;
   reload: () => void;
 };
 
 function useCollection(collectionId: string): StacCollectionHook {
-  const { collections, state, error: requestError, reload } = useCollections();
+  const { collections, isLoading, isFetching, error: requestError, reload } = useCollections();
 
   const collection = useMemo(() => {
     return collections?.collections.find(({ id }) => id === collectionId);
@@ -31,7 +32,8 @@ function useCollection(collectionId: string): StacCollectionHook {
 
   return {
     collection,
-    state,
+    isLoading,
+    isFetching,
     error,
     reload,
   };

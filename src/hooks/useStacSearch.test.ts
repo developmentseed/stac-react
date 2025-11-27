@@ -14,7 +14,7 @@ async function setupStacSearch() {
   const { result } = renderHook(() => useStacSearch(), { wrapper });
   await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
   await act(async () => {});
-  await waitFor(() => expect(result.current.state).toBe('IDLE'));
+  await waitFor(() => expect(result.current.isLoading).toBe(false));
   return result;
 }
 
@@ -348,8 +348,8 @@ describe('useStacSearch — API supports POST', () => {
     // Trigger nextPage and validate
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.nextPage && result.current.nextPage());
-    await waitFor(() => expect(result.current.state).toBe('LOADING'));
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(true));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     const postPayload = parseRequestPayload(fetch.mock.calls[2][1]);
     expect(result.current.results).toEqual({ data: '12345' });
     expect(postPayload).toEqual(response.links[0].body);
@@ -396,8 +396,8 @@ describe('useStacSearch — API supports POST', () => {
     // Trigger previousPage and validate
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.previousPage && result.current.previousPage());
-    await waitFor(() => expect(result.current.state).toBe('LOADING'));
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(true));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     const postPayload = parseRequestPayload(fetch.mock.calls[2][1]);
     expect(result.current.results).toEqual({ data: '12345' });
     expect(postPayload).toEqual(response.links[0].body);
@@ -444,8 +444,8 @@ describe('useStacSearch — API supports POST', () => {
     // Trigger previousPage and validate
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.previousPage && result.current.previousPage());
-    await waitFor(() => expect(result.current.state).toBe('LOADING'));
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(true));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     const postPayload = parseRequestPayload(fetch.mock.calls[2][1]);
     expect(result.current.results).toEqual({ data: '12345' });
     expect(postPayload).toEqual(response.links[0].body);
@@ -493,8 +493,8 @@ describe('useStacSearch — API supports POST', () => {
     // Trigger previousPage and validate merged body
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.previousPage && result.current.previousPage());
-    await waitFor(() => expect(result.current.state).toBe('LOADING'));
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(true));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     const postPayload = parseRequestPayload(fetch.mock.calls[2][1]);
     expect(result.current.results).toEqual({ data: '12345' });
     expect(postPayload).toEqual({
@@ -547,8 +547,8 @@ describe('useStacSearch — API supports POST', () => {
     // Trigger previousPage and validate header
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.previousPage && result.current.previousPage());
-    await waitFor(() => expect(result.current.state).toBe('LOADING'));
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(true));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.results).toEqual({ data: '12345' });
     const postHeader = fetch.mock.calls[2][1]?.headers;
     expect(postHeader).toEqual({ 'Content-Type': 'application/json', next: '123abc' });
@@ -589,8 +589,8 @@ describe('useStacSearch — API supports POST', () => {
     // Trigger nextPage and validate GET request
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.nextPage && result.current.nextPage());
-    await waitFor(() => expect(result.current.state).toBe('LOADING'));
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(true));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(fetch.mock.calls[2][0]).toEqual('https://fake-stac-api.net/?page=2');
     expect(fetch.mock.calls[2][1]?.method).toEqual('GET');
     expect(result.current.results).toEqual({ data: '12345' });
@@ -631,8 +631,8 @@ describe('useStacSearch — API supports POST', () => {
     // Trigger previousPage and validate GET request
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.previousPage && result.current.previousPage());
-    await waitFor(() => expect(result.current.state).toBe('LOADING'));
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(true));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(fetch.mock.calls[2][0]).toEqual('https://fake-stac-api.net/?page=2');
     expect(fetch.mock.calls[2][1]?.method).toEqual('GET');
     expect(result.current.results).toEqual({ data: '12345' });
@@ -742,7 +742,7 @@ describe('useStacSearch — API supports GET', () => {
     // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
     // Wait for state to be IDLE
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // Assert fetch URL and results
     expect(fetch.mock.calls[1][0]).toEqual(
@@ -768,7 +768,7 @@ describe('useStacSearch — API supports GET', () => {
     // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
     // Wait for state to be IDLE
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // Assert fetch URL and results
     expect(fetch.mock.calls[1][0]).toEqual(
@@ -795,7 +795,7 @@ describe('useStacSearch — API supports GET', () => {
     // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
     // Wait for state to be IDLE and fetch to be called twice
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // Assert fetch URL and results
     expect(fetch.mock.calls[1][0]).toEqual(
@@ -821,7 +821,7 @@ describe('useStacSearch — API supports GET', () => {
     // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
     // Wait for state to be IDLE and fetch to be called twice
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // Assert fetch URL and results
     expect(fetch.mock.calls[1][0]).toEqual(
@@ -847,7 +847,7 @@ describe('useStacSearch — API supports GET', () => {
     // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
     // Wait for state to be IDLE and fetch to be called twice
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // Assert fetch URL and results
     expect(fetch.mock.calls[1][0]).toEqual(
@@ -878,7 +878,7 @@ describe('useStacSearch — API supports GET', () => {
     // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
     // Wait for state to be IDLE and fetch to be called twice
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // Assert fetch URL and results
     expect(fetch.mock.calls[1][0]).toEqual(
@@ -904,7 +904,7 @@ describe('useStacSearch — API supports GET', () => {
     // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
     // Wait for state to be IDLE and fetch to be called twice
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // Assert fetch URL and results
     expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/search?limit=50');

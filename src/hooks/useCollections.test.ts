@@ -19,7 +19,7 @@ describe('useCollections', () => {
       expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/collections')
     );
     await waitFor(() => expect(result.current.collections).toEqual({ data: '12345' }));
-    await waitFor(() => expect(result.current.state).toEqual('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toEqual(false));
   });
 
   it('reloads collections', async () => {
@@ -30,7 +30,7 @@ describe('useCollections', () => {
 
     const { result } = renderHook(() => useCollections(), { wrapper });
     await waitFor(() => expect(result.current.collections).toEqual({ data: 'original' }));
-    await waitFor(() => expect(result.current.state).toEqual('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toEqual(false));
 
     act(() => result.current.reload());
 

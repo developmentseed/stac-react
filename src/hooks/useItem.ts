@@ -1,21 +1,20 @@
-import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Item } from '../types/stac';
-import { type ApiErrorType, type LoadingState } from '../types';
+import { type ApiErrorType } from '../types';
 import { useStacApiContext } from '../context/useStacApiContext';
 import { ApiError } from '../utils/ApiError';
 import { generateItemQueryKey } from '../utils/queryKeys';
 
 type ItemHook = {
   item?: Item;
-  state: LoadingState;
+  isLoading: boolean;
+  isFetching: boolean;
   error?: ApiErrorType;
   reload: () => void;
 };
 
 function useItem(url: string): ItemHook {
   const { stacApi } = useStacApiContext();
-  const [state, setState] = useState<LoadingState>('IDLE');
 
   const fetchItem = async (): Promise<Item> => {
     if (!stacApi) throw new Error('No STAC API configured');
@@ -46,17 +45,10 @@ function useItem(url: string): ItemHook {
     retry: false,
   });
 
-  useEffect(() => {
-    if (isLoading || isFetching) {
-      setState('LOADING');
-    } else {
-      setState('IDLE');
-    }
-  }, [isLoading, isFetching]);
-
   return {
     item,
-    state,
+    isLoading,
+    isFetching,
     error: error as ApiErrorType,
     reload: refetch as () => void,
   };

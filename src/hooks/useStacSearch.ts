@@ -2,7 +2,7 @@ import { useCallback, useState, useMemo, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import debounce from '../utils/debounce';
 import { generateStacSearchQueryKey } from '../utils/queryKeys';
-import { type ApiErrorType, type LoadingState } from '../types';
+import { type ApiErrorType } from '../types';
 import { ApiError } from '../utils/ApiError';
 import type {
   Link,
@@ -18,22 +18,23 @@ type PaginationHandler = () => void;
 
 type StacSearchHook = {
   ids?: string[];
-  setIds: (ids: string[]) => void;
+  setIds: (ids?: string[]) => void;
   bbox?: Bbox;
-  setBbox: (bbox: Bbox) => void;
+  setBbox: (bbox?: Bbox) => void;
   collections?: CollectionIdList;
-  setCollections: (collectionIds: CollectionIdList) => void;
-  dateRangeFrom?: string;
+  setCollections: (collections?: CollectionIdList) => void;
+  dateRangeFrom: string;
   setDateRangeFrom: (date: string) => void;
-  dateRangeTo?: string;
+  dateRangeTo: string;
   setDateRangeTo: (date: string) => void;
-  limit?: number;
-  setLimit: (limit: number) => void;
   sortby?: Sortby[];
-  setSortby: (sort: Sortby[]) => void;
+  setSortby: (sortby?: Sortby[]) => void;
+  limit: number;
+  setLimit: (limit: number) => void;
   submit: () => void;
   results?: SearchResponse;
-  state: LoadingState;
+  isLoading: boolean;
+  isFetching: boolean;
   error?: ApiErrorType;
   nextPage: PaginationHandler | undefined;
   previousPage: PaginationHandler | undefined;
@@ -201,9 +202,6 @@ function useStacSearch(): StacSearchHook {
 
   const submit = useMemo(() => debounce(_submit), [_submit]);
 
-  // Sync loading state for backwards compatibility
-  const state: LoadingState = isLoading || isFetching ? 'LOADING' : 'IDLE';
-
   return {
     submit,
     ids,
@@ -217,7 +215,8 @@ function useStacSearch(): StacSearchHook {
     dateRangeTo,
     setDateRangeTo,
     results,
-    state,
+    isLoading,
+    isFetching,
     error: error ?? undefined,
     sortby,
     setSortby,

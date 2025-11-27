@@ -21,7 +21,7 @@ describe('useCollection', () => {
       );
 
     const { result } = renderHook(() => useCollection('abc'), { wrapper });
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toEqual(false));
     await waitFor(() =>
       expect(result.current.collection).toEqual({ id: 'abc', title: 'Collection A' })
     );

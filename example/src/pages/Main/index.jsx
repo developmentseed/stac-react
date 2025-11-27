@@ -27,7 +27,7 @@ function Main() {
     setDateRangeTo,
     submit,
     results,
-    state,
+    isLoading,
     error,
     nextPage,
     previousPage,
@@ -74,7 +74,7 @@ function Main() {
       ) : (
         <ItemList
           items={results}
-          isLoading={state === 'LOADING'}
+          isLoading={isLoading}
           error={error && 'Error loading results'}
           nextPage={nextPage}
           previousPage={previousPage}

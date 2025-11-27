@@ -1,6 +1,6 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { type ApiErrorType, type LoadingState } from '../types';
+import { type ApiErrorType } from '../types';
 import type { CollectionsResponse } from '../types/stac';
 import debounce from '../utils/debounce';
 import { ApiError } from '../utils/ApiError';
@@ -10,13 +10,13 @@ import { useStacApiContext } from '../context/useStacApiContext';
 type StacCollectionsHook = {
   collections?: CollectionsResponse;
   reload: () => void;
-  state: LoadingState;
+  isLoading: boolean;
+  isFetching: boolean;
   error?: ApiErrorType;
 };
 
 function useCollections(): StacCollectionsHook {
   const { stacApi } = useStacApiContext();
-  const [state, setState] = useState<LoadingState>('IDLE');
 
   const fetchCollections = async (): Promise<CollectionsResponse> => {
     if (!stacApi) throw new Error('No STAC API configured');
@@ -49,20 +49,11 @@ function useCollections(): StacCollectionsHook {
 
   const reload = useMemo(() => debounce(refetch), [refetch]);
 
-  useEffect(() => {
-    if (!stacApi) {
-      setState('IDLE');
-    } else if (isLoading || isFetching) {
-      setState('LOADING');
-    } else {
-      setState('IDLE');
-    }
-  }, [stacApi, isLoading, isFetching]);
-
   return {
     collections,
     reload,
-    state,
+    isLoading,
+    isFetching,
     error: error as ApiErrorType,
   };
 }

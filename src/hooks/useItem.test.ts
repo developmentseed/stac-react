@@ -17,7 +17,7 @@ describe('useItem', () => {
       wrapper,
     });
     await waitFor(() => expect(result.current.item).toEqual({ id: 'abc' }));
-    await waitFor(() => expect(result.current.state).toEqual('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toEqual(false));
   });
 
   it('handles error with JSON response', async () => {
