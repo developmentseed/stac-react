@@ -84,7 +84,7 @@ describe('useCollection', () => {
     );
 
     await act(async () => {
-      await result.current.reload();
+      await result.current.refetch();
     });
 
     await waitFor(() =>

@@ -7,7 +7,7 @@ import { useStacApiContext } from '../context/useStacApiContext';
 
 type StacCollectionsHook = {
   collections?: CollectionsResponse;
-  reload: () => Promise<QueryObserverResult<CollectionsResponse, ApiErrorType>>;
+  refetch: () => Promise<QueryObserverResult<CollectionsResponse, ApiErrorType>>;
   isLoading: boolean;
   isFetching: boolean;
   error?: ApiErrorType;
@@ -47,7 +47,7 @@ function useCollections(): StacCollectionsHook {
 
   return {
     collections,
-    reload: refetch,
+    refetch,
     isLoading,
     isFetching,
     error: error as ApiErrorType,

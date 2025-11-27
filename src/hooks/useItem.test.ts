@@ -69,7 +69,7 @@ describe('useItem', () => {
     await waitFor(() => expect(result.current.item).toEqual({ id: 'abc' }));
 
     await act(async () => {
-      await result.current.reload();
+      await result.current.refetch();
     });
 
     await waitFor(() => expect(result.current.item).toEqual({ id: 'abc', description: 'Updated' }));

@@ -9,8 +9,8 @@ type StacCollectionHook = {
   collection?: Collection;
   isLoading: boolean;
   isFetching: boolean;
+  refetch: () => Promise<QueryObserverResult<Collection, ApiErrorType>>;
   error?: ApiErrorType;
-  reload: () => Promise<QueryObserverResult<Collection, ApiErrorType>>;
 };
 
 function useCollection(collectionId: string): StacCollectionHook {
@@ -49,8 +49,8 @@ function useCollection(collectionId: string): StacCollectionHook {
     collection,
     isLoading,
     isFetching,
+    refetch,
     error: error as ApiErrorType,
-    reload: refetch,
   };
 }
 

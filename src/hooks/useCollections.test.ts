@@ -33,7 +33,7 @@ describe('useCollections', () => {
     await waitFor(() => expect(result.current.isLoading).toEqual(false));
 
     await act(async () => {
-      await result.current.reload();
+      await result.current.refetch();
     });
 
     await waitFor(() => expect(result.current.collections).toEqual({ data: 'reloaded' }));

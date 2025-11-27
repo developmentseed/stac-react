@@ -10,7 +10,7 @@ type ItemHook = {
   isLoading: boolean;
   isFetching: boolean;
   error?: ApiErrorType;
-  reload: () => Promise<QueryObserverResult<Item, ApiErrorType>>;
+  refetch: () => Promise<QueryObserverResult<Item, ApiErrorType>>;
 };
 
 function useItem(url: string): ItemHook {
@@ -50,7 +50,7 @@ function useItem(url: string): ItemHook {
     isLoading,
     isFetching,
     error: error as ApiErrorType,
-    reload: refetch,
+    refetch,
   };
 }
 
