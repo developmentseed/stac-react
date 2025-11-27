@@ -60,7 +60,7 @@ describe('StacApiProvider', () => {
 
       render(
         <QueryClientProvider client={parentClient}>
-          <StacApiProvider apiUrl="https://test-stac-api.com">
+          <StacApiProvider apiUrl="https://test-stac-api.com" queryClient={parentClient}>
             <TestComponent />
           </StacApiProvider>
         </QueryClientProvider>
@@ -83,7 +83,7 @@ describe('StacApiProvider', () => {
 
       render(
         <QueryClientProvider client={parentClient}>
-          <StacApiProvider apiUrl="https://test-stac-api.com">
+          <StacApiProvider apiUrl="https://test-stac-api.com" queryClient={parentClient}>
             <ClientChecker />
           </StacApiProvider>
         </QueryClientProvider>
@@ -130,20 +130,22 @@ describe('StacApiProvider', () => {
       ).toBeDefined();
     });
 
-    it('sets up DevTools with parent QueryClient when enabled', () => {
-      const parentClient = new QueryClient();
+    it('sets up DevTools with custom queryClient when enabled', () => {
+      const customClient = new QueryClient();
 
       render(
-        <QueryClientProvider client={parentClient}>
-          <StacApiProvider apiUrl="https://test-stac-api.com" enableDevTools={true}>
-            <TestComponent />
-          </StacApiProvider>
-        </QueryClientProvider>
+        <StacApiProvider
+          apiUrl="https://test-stac-api.com"
+          enableDevTools={true}
+          queryClient={customClient}
+        >
+          <TestComponent />
+        </StacApiProvider>
       );
 
       expect(
         (window as Window & { __TANSTACK_QUERY_CLIENT__?: unknown }).__TANSTACK_QUERY_CLIENT__
-      ).toBe(parentClient);
+      ).toBe(customClient);
     });
   });
 
