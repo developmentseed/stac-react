@@ -23,10 +23,10 @@ type StacSearchHook = {
   setBbox: (bbox?: Bbox) => void;
   collections?: CollectionIdList;
   setCollections: (collections?: CollectionIdList) => void;
-  dateRangeFrom: string;
-  setDateRangeFrom: (date: string) => void;
-  dateRangeTo: string;
-  setDateRangeTo: (date: string) => void;
+  dateRangeFrom?: string;
+  setDateRangeFrom: (date?: string) => void;
+  dateRangeTo?: string;
+  setDateRangeTo: (date?: string) => void;
   sortby?: Sortby[];
   setSortby: (sortby?: Sortby[]) => void;
   limit: number;
@@ -48,8 +48,8 @@ function useStacSearch(): StacSearchHook {
   const [ids, setIds] = useState<string[]>();
   const [bbox, setBbox] = useState<Bbox>();
   const [collections, setCollections] = useState<CollectionIdList>();
-  const [dateRangeFrom, setDateRangeFrom] = useState<string>('');
-  const [dateRangeTo, setDateRangeTo] = useState<string>('');
+  const [dateRangeFrom, setDateRangeFrom] = useState<string>();
+  const [dateRangeTo, setDateRangeTo] = useState<string>();
   const [limit, setLimit] = useState<number>(25);
   const [sortby, setSortby] = useState<Sortby[]>();
 
@@ -63,8 +63,8 @@ function useStacSearch(): StacSearchHook {
     setBbox(undefined);
     setCollections(undefined);
     setIds(undefined);
-    setDateRangeFrom('');
-    setDateRangeTo('');
+    setDateRangeFrom(undefined);
+    setDateRangeTo(undefined);
     setSortby(undefined);
     setLimit(25);
     setCurrentRequest(null);
