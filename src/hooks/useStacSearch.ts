@@ -209,7 +209,14 @@ function useStacSearch(): StacSearchHook {
     setCurrentRequest({ type: 'search', payload });
   }, [getSearchPayload]);
 
-  const submit = useMemo(() => debounce(_submit), [_submit]);
+  const submit = useMemo(() => debounce(_submit, 300), [_submit]);
+
+  // Clean up debounced function on unmount or when _submit changes
+  useEffect(() => {
+    return () => {
+      submit.cancel();
+    };
+  }, [submit]);
 
   return {
     submit,
