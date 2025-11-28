@@ -27,9 +27,18 @@ function useCollections(): StacCollectionsHook {
         detail = await response.text();
       }
 
-      throw new ApiError(response.statusText, response.status, detail);
+      throw new ApiError(response.statusText, response.status, detail, response.url);
     }
-    return await response.json();
+    try {
+      return await response.json();
+    } catch (error) {
+      throw new ApiError(
+        'Invalid JSON Response',
+        response.status,
+        `Response is not valid JSON: ${error instanceof Error ? error.message : String(error)}`,
+        response.url
+      );
+    }
   };
 
   const {

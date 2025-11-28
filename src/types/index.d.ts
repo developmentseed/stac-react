@@ -6,4 +6,5 @@ export type ApiErrorType = {
   detail?: GenericObject | string;
   status: number;
   statusText: string;
+  url?: string;
 };

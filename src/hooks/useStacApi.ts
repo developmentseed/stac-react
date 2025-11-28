@@ -22,7 +22,14 @@ function useStacApi(url: string, options?: GenericObject): StacApiHook {
         },
       });
       const baseUrl = response.url;
-      const json = await response.json();
+      let json;
+      try {
+        json = await response.json();
+      } catch (error) {
+        throw new Error(
+          `Invalid JSON response from STAC API: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
       const doesPost = json.links?.find(
         ({ rel, method }: Link) => rel === 'search' && method === 'POST'
       );
