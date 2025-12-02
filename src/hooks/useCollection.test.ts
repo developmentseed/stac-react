@@ -2,6 +2,7 @@ import fetch from 'jest-fetch-mock';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import useCollection from './useCollection';
 import wrapper from './wrapper';
+import { ApiError } from '../utils/ApiError';
 
 describe('useCollection', () => {
   beforeEach(() => {
@@ -31,11 +32,14 @@ describe('useCollection', () => {
 
     const { result } = renderHook(() => useCollection('nonexistent'), { wrapper });
     await waitFor(() =>
-      expect(result.current.error).toEqual({
-        status: 404,
-        statusText: 'Not Found',
-        detail: { error: 'Collection not found' },
-      })
+      expect(result.current.error).toEqual(
+        new ApiError(
+          'Not Found',
+          404,
+          { error: 'Collection not found' },
+          'https://fake-stac-api.net/collections/nonexistent'
+        )
+      )
     );
   });
 
@@ -49,11 +53,14 @@ describe('useCollection', () => {
 
     const { result } = renderHook(() => useCollection('abc'), { wrapper });
     await waitFor(() =>
-      expect(result.current.error).toEqual({
-        status: 400,
-        statusText: 'Bad Request',
-        detail: { error: 'Wrong query' },
-      })
+      expect(result.current.error).toEqual(
+        new ApiError(
+          'Bad Request',
+          400,
+          { error: 'Wrong query' },
+          'https://fake-stac-api.net/search'
+        )
+      )
     );
   });
 
@@ -64,11 +71,9 @@ describe('useCollection', () => {
 
     const { result } = renderHook(() => useCollection('abc'), { wrapper });
     await waitFor(() =>
-      expect(result.current.error).toEqual({
-        status: 400,
-        statusText: 'Bad Request',
-        detail: 'Wrong query',
-      })
+      expect(result.current.error).toEqual(
+        new ApiError('Bad Request', 400, 'Wrong query', 'https://fake-stac-api.net/search')
+      )
     );
   });
 

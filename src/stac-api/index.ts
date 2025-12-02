@@ -1,5 +1,13 @@
-import type { ApiErrorType, GenericObject } from '../types';
-import type { Bbox, SearchPayload, DateRange } from '../types/stac';
+import type { GenericObject } from '../types';
+import type {
+  Bbox,
+  SearchPayload,
+  DateRange,
+  CollectionsResponse,
+  Collection,
+  SearchResponse,
+} from '../types/stac';
+import { ApiError } from '../utils/ApiError';
 
 type RequestPayload = SearchPayload;
 type FetchOptions = {
@@ -85,48 +93,51 @@ class StacApi {
 
     return new URLSearchParams(queryObj).toString();
   }
-
-  async handleError(response: Response) {
-    const { status, statusText } = response;
-    const e: ApiErrorType = {
-      status,
-      statusText,
-    };
-
+  static async handleResponse<T>(response: Response): Promise<T> {
     // Some STAC APIs return errors as JSON others as string.
     // Clone the response so we can read the body as text if json fails.
     const clone = response.clone();
-    try {
-      e.detail = await response.json();
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err) {
-      e.detail = await clone.text();
+
+    if (!response.ok) {
+      let detail;
+      try {
+        detail = await response.json();
+      } catch {
+        detail = await clone.text();
+      }
+      throw new ApiError(response.statusText, response.status, detail, response.url);
     }
-    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-    return Promise.reject(e);
+
+    try {
+      return await response.json();
+    } catch (_) {
+      throw new ApiError(
+        'Invalid JSON Response',
+        response.status,
+        await clone.text(),
+        response.url
+      );
+    }
   }
 
-  fetch(url: string, options: Partial<FetchOptions> = {}): Promise<Response> {
+  async fetch<T>(url: string, options: Partial<FetchOptions> = {}) {
     const { method = 'GET', payload, headers = {} } = options;
 
-    return fetch(url, {
+    // Fetch can also throw errors on network failure, but we don't want to
+    // catch those here.
+    const response = await fetch(url, {
       method,
       headers: {
-        'Content-Type': 'application/json',
+        ...(this.options?.headers || {}),
         ...headers,
-        ...this.options?.headers,
       },
       body: payload ? JSON.stringify(payload) : undefined,
-    }).then(async (response) => {
-      if (response.ok) {
-        return response;
-      }
-
-      return this.handleError(response);
     });
+
+    return StacApi.handleResponse<T>(response);
   }
 
-  search(payload: SearchPayload, headers = {}): Promise<Response> {
+  search(payload: SearchPayload, headers = {}) {
     const { ids, bbox, dateRange, collections, ...restPayload } = payload;
     const requestPayload = {
       ...restPayload,
@@ -137,27 +148,30 @@ class StacApi {
     };
 
     if (this.searchMode === SearchMode.POST) {
-      return this.fetch(`${this.baseUrl}/search`, {
+      return this.fetch<SearchResponse>(`${this.baseUrl}/search`, {
         method: 'POST',
         payload: requestPayload,
         headers,
       });
     } else {
       const query = this.payloadToQuery(requestPayload);
-      return this.fetch(`${this.baseUrl}/search?${query}`, { method: 'GET', headers });
+      return this.fetch<SearchResponse>(`${this.baseUrl}/search?${query}`, {
+        method: 'GET',
+        headers,
+      });
     }
   }
 
-  getCollections(): Promise<Response> {
-    return this.fetch(`${this.baseUrl}/collections`);
+  getCollections() {
+    return this.fetch<CollectionsResponse>(`${this.baseUrl}/collections`);
   }
 
-  getCollection(collectionId: string): Promise<Response> {
-    return this.fetch(`${this.baseUrl}/collections/${collectionId}`);
+  getCollection(collectionId: string) {
+    return this.fetch<Collection>(`${this.baseUrl}/collections/${collectionId}`);
   }
 
-  get(href: string, headers = {}): Promise<Response> {
-    return this.fetch(href, { headers });
+  get<T>(href: string, headers = {}) {
+    return this.fetch<T>(href, { headers });
   }
 }
 

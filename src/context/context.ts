@@ -1,8 +1,8 @@
 import { createContext } from 'react';
+import StacApi from '../stac-api';
 
 export type StacApiContextType = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  stacApi?: any;
+  stacApi?: StacApi;
 };
 
 export const StacApiContext = createContext<StacApiContextType>({} as StacApiContextType);

@@ -14,32 +14,23 @@ function useStacApi(url: string, options?: GenericObject): StacApiHook {
   const { data, isSuccess, isLoading, isError } = useQuery({
     queryKey: generateStacApiQueryKey(url, options),
     queryFn: async () => {
-      let searchMode = SearchMode.GET;
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
           ...options?.headers,
         },
       });
-      const baseUrl = response.url;
-      let json;
-      try {
-        json = await response.json();
-      } catch (error) {
-        throw new Error(
-          `Invalid JSON response from STAC API: ${error instanceof Error ? error.message : String(error)}`
-        );
-      }
-      const doesPost = json.links?.find(
+      const stacData = await StacApi.handleResponse<{ links?: Link[] }>(response);
+
+      const doesPost = stacData.links?.find(
         ({ rel, method }: Link) => rel === 'search' && method === 'POST'
       );
-      if (doesPost) {
-        searchMode = SearchMode.POST;
-      }
-      return new StacApi(baseUrl, searchMode, options);
+
+      return new StacApi(response.url, doesPost ? SearchMode.POST : SearchMode.GET, options);
     },
     staleTime: Infinity,
   });
+
   return { stacApi: isSuccess ? data : undefined, isLoading, isError };
 }
 

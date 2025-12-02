@@ -3,7 +3,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import debounce from '../utils/debounce';
 import { generateStacSearchQueryKey } from '../utils/queryKeys';
 import { type ApiErrorType } from '../types';
-import { ApiError } from '../utils/ApiError';
 import type {
   Link,
   Bbox,
@@ -107,39 +106,6 @@ function useStacSearch(): StacSearchHook {
   );
 
   /**
-   * Fetch function for searches using TanStack Query
-   */
-  const fetchRequest = async (request: FetchRequest): Promise<SearchResponse> => {
-    if (!stacApi) throw new Error('No STAC API configured');
-
-    const response =
-      request.type === 'search'
-        ? await stacApi.search(request.payload, request.headers)
-        : await stacApi.get(request.url);
-
-    if (!response.ok) {
-      let detail;
-      try {
-        detail = await response.json();
-      } catch {
-        detail = await response.text();
-      }
-
-      throw new ApiError(response.statusText, response.status, detail, response.url);
-    }
-    try {
-      return await response.json();
-    } catch (error) {
-      throw new ApiError(
-        'Invalid JSON Response',
-        response.status,
-        `Response is not valid JSON: ${error instanceof Error ? error.message : String(error)}`,
-        response.url
-      );
-    }
-  };
-
-  /**
    * useQuery for search and pagination with caching
    */
   const {
@@ -149,8 +115,11 @@ function useStacSearch(): StacSearchHook {
     isFetching,
   } = useQuery<SearchResponse, ApiErrorType>({
     queryKey: currentRequest ? generateStacSearchQueryKey(currentRequest) : ['stacSearch', 'idle'],
-    queryFn: () => fetchRequest(currentRequest!),
-    enabled: currentRequest !== null,
+    queryFn: () =>
+      currentRequest!.type === 'search'
+        ? stacApi!.search(currentRequest!.payload, currentRequest!.headers)
+        : stacApi!.get<SearchResponse>(currentRequest!.url),
+    enabled: !!stacApi && currentRequest !== null,
     retry: false,
   });
 
