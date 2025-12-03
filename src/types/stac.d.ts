@@ -21,6 +21,10 @@ export type SearchPayload = {
   sortby?: Sortby[]
 }
 
+export type CollectionsPayload = {
+  offset?: number;
+}
+
 export type LinkBody = SearchPayload & {
   merge?: boolean
 }

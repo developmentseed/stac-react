@@ -1,7 +1,7 @@
 import type { ApiError, GenericObject } from '../types';
-import type { Bbox, SearchPayload, DateRange } from '../types/stac';
+import type { Bbox, SearchPayload, DateRange, CollectionsPayload } from '../types/stac';
 
-type RequestPayload = SearchPayload;
+type RequestPayload = SearchPayload | CollectionsPayload;
 type FetchOptions = {
   method?: string,
   payload?: RequestPayload,
@@ -84,6 +84,21 @@ class StacApi {
     return new URLSearchParams(queryObj).toString();
   }
 
+  collectionsPayloadToQuery(payload: CollectionsPayload): string {
+    const queryObj = {};
+    for (const [key, value] of Object.entries(payload)) {
+      if (!value) continue;
+
+      if (Array.isArray(value)) {
+        queryObj[key] = value.join(',');
+      } else {
+        queryObj[key] = value;
+      }
+    }
+
+    return new URLSearchParams(queryObj).toString();
+  }
+
   async handleError(response: Response) {
     const { status, statusText } = response;
     const e: ApiError = {
@@ -146,8 +161,13 @@ class StacApi {
     }
   }
 
-  getCollections(): Promise<Response> {
-    return this.fetch(`${this.baseUrl}/collections`);
+  getCollections(payload?: CollectionsPayload, headers = {}): Promise<Response> {
+    if (payload) {
+      const query = this.collectionsPayloadToQuery(payload);
+      return this.fetch(`${this.baseUrl}/collections?${query}`, { method: 'GET', headers });
+    } else {
+      return this.fetch(`${this.baseUrl}/collections`);
+    }
   }
 
   get(href: string, headers = {}): Promise<Response> {
