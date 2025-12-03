@@ -3,6 +3,8 @@ import { type ApiError, type LoadingState } from '../types';
 import type { CollectionsPayload, CollectionsResponse, Link /*LinkBody*/ } from '../types/stac';
 import debounce from '../utils/debounce';
 import { useStacApiContext } from '../context';
+import StacApi from '../stac-api';
+import { usePreviousValue } from '../utils/usePreviousValue';
 
 type PaginationHandler = () => void;
 
@@ -11,8 +13,9 @@ type StacCollectionsHook = {
   reload: () => void;
   state: LoadingState;
   error?: ApiError;
-  nextPage: PaginationHandler | undefined
-  previousPage: PaginationHandler | undefined
+  nextPage: PaginationHandler | undefined;
+  previousPage: PaginationHandler | undefined;
+  stacApiEndpoint: StacApi | undefined;
 };
 
 function useCollections(): StacCollectionsHook {
@@ -22,6 +25,8 @@ function useCollections(): StacCollectionsHook {
 
   const [ nextPageConfig, setNextPageConfig ] = useState<Link>();
   const [ previousPageConfig, setPreviousPageConfig ] = useState<Link>();
+
+  const previousStacApi = usePreviousValue(stacApi);
 
   /**
    * Extracts the pagination config from the the links array of the items response
@@ -97,11 +102,11 @@ function useCollections(): StacCollectionsHook {
 
   useEffect(
     () => {
-      if (stacApi && !error && !collections) {
+      if ((stacApi && !error && !collections) || (previousStacApi && stacApi && (stacApi !== previousStacApi))) {
         getCollections();
       }
     },
-    [getCollections, stacApi, collections, error]
+    [getCollections, stacApi, collections, error, previousStacApi]
   );
 
   return {
@@ -110,7 +115,8 @@ function useCollections(): StacCollectionsHook {
     state,
     error,
     nextPage: nextPageConfig ? nextPageFn : undefined,
-    previousPage: previousPageConfig ? previousPageFn : undefined
+    previousPage: previousPageConfig ? previousPageFn : undefined,
+    stacApiEndpoint: stacApi
   };
 }
 
