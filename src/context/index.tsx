@@ -13,6 +13,11 @@ type StacApiProviderType = {
   enableDevTools?: boolean;
 };
 
+/**
+ * Inner component that must render inside QueryClientProvider.
+ * Separated because useStacApi() calls useQuery from TanStack Query,
+ * which requires QueryClient context to be available.
+ */
 function StacApiProviderInner({
   children,
   apiUrl,
