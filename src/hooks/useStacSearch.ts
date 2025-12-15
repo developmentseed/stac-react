@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import debounce from '../utils/debounce';
 import { generateStacSearchQueryKey } from '../utils/queryKeys';
 import { type ApiErrorType } from '../types';
-import { ApiError } from '../utils/ApiError';
+import { handleStacResponse } from '../utils/handleStacResponse';
 import type {
   Link,
   Bbox,
@@ -117,26 +117,7 @@ function useStacSearch(): StacSearchHook {
         ? await stacApi.search(request.payload, request.headers)
         : await stacApi.get(request.url);
 
-    if (!response.ok) {
-      let detail;
-      try {
-        detail = await response.json();
-      } catch {
-        detail = await response.text();
-      }
-
-      throw new ApiError(response.statusText, response.status, detail, response.url);
-    }
-    try {
-      return await response.json();
-    } catch (error) {
-      throw new ApiError(
-        'Invalid JSON Response',
-        response.status,
-        `Response is not valid JSON: ${error instanceof Error ? error.message : String(error)}`,
-        response.url
-      );
-    }
+    return handleStacResponse<SearchResponse>(response);
   };
 
   /**
