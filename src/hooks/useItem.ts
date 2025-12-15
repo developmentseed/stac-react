@@ -1,19 +1,16 @@
-import { useQuery, type QueryObserverResult } from '@tanstack/react-query';
-import { Item } from '../types/stac';
-import { type ApiErrorType } from '../types';
+import { useQuery } from '@tanstack/react-query';
+import type { StacHook, StacRefetchFn, ApiErrorType } from '../types';
+import type { Item } from '../types/stac';
 import { useStacApiContext } from '../context/useStacApiContext';
 import { handleStacResponse } from '../utils/handleStacResponse';
 import { generateItemQueryKey } from '../utils/queryKeys';
 
-type ItemHook = {
+interface StacItemHook extends StacHook {
   item?: Item;
-  isLoading: boolean;
-  isFetching: boolean;
-  error?: ApiErrorType;
-  refetch: () => Promise<QueryObserverResult<Item, ApiErrorType>>;
-};
+  refetch: StacRefetchFn<Item>;
+}
 
-function useItem(url: string): ItemHook {
+function useItem(url: string): StacItemHook {
   const { stacApi } = useStacApiContext();
 
   const fetchItem = async (): Promise<Item> => {
