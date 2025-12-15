@@ -5,6 +5,7 @@ import { useStacSearch, useCollections, useStacApi, StacApiProvider } from 'stac
 import ItemList from './ItemList';
 import Map from './Map';
 import QueryBuilder from './QueryBuilder';
+import ItemDetails from './ItemDetails';
 
 // eslint-disable-next-line no-unused-vars
 const options = {
@@ -26,7 +27,7 @@ function Main() {
     setDateRangeTo,
     submit,
     results,
-    state,
+    isLoading,
     error,
     nextPage,
     previousPage,
@@ -43,6 +44,18 @@ function Main() {
     [setBbox]
   );
 
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const onSelect = useCallback(
+    (item) => () => {
+      setSelectedItem(item);
+    },
+    []
+  );
+  const onClose = useCallback(() => {
+    setSelectedItem(null);
+  }, []);
+
   return (
     <div className="grid grid-cols-4 gap-4 m-4">
       <QueryBuilder
@@ -56,13 +69,18 @@ function Main() {
         dateRangeTo={dateRangeTo}
         setDateRangeTo={setDateRangeTo}
       />
-      <ItemList
-        items={results}
-        isLoading={state === 'LOADING'}
-        error={error && 'Error loading results'}
-        nextPage={nextPage}
-        previousPage={previousPage}
-      />
+      {selectedItem ? (
+        <ItemDetails item={selectedItem} onClose={onClose} />
+      ) : (
+        <ItemList
+          items={results}
+          isLoading={isLoading}
+          error={error && 'Error loading results'}
+          nextPage={nextPage}
+          previousPage={previousPage}
+          onSelect={onSelect}
+        />
+      )}
       <Map
         className="col-span-2"
         isBboxDrawEnabled={isBboxDrawEnabled}

@@ -1,49 +1,43 @@
-import { useCallback, useEffect, useState, useMemo } from 'react';
-import { type ApiError, type LoadingState } from '../types';
+import { useQuery } from '@tanstack/react-query';
+import type { StacHook, StacRefetchFn, ApiErrorType } from '../types';
 import type { CollectionsResponse } from '../types/stac';
-import debounce from '../utils/debounce';
+import { handleStacResponse } from '../utils/handleStacResponse';
+import { generateCollectionsQueryKey } from '../utils/queryKeys';
 import { useStacApiContext } from '../context/useStacApiContext';
 
-type StacCollectionsHook = {
+interface StacCollectionsHook extends StacHook {
   collections?: CollectionsResponse;
-  reload: () => void;
-  state: LoadingState;
-  error?: ApiError;
-};
+  refetch: StacRefetchFn<CollectionsResponse>;
+}
 
 function useCollections(): StacCollectionsHook {
-  const { stacApi, collections, setCollections } = useStacApiContext();
-  const [state, setState] = useState<LoadingState>('IDLE');
-  const [error, setError] = useState<ApiError>();
+  const { stacApi } = useStacApiContext();
 
-  const _getCollections = useCallback(() => {
-    if (stacApi) {
-      setState('LOADING');
+  const fetchCollections = async (): Promise<CollectionsResponse> => {
+    if (!stacApi) throw new Error('No STAC API configured');
+    const response: Response = await stacApi.getCollections();
+    return handleStacResponse<CollectionsResponse>(response);
+  };
 
-      stacApi
-        .getCollections()
-        .then((response: Response) => response.json())
-        .then(setCollections)
-        .catch((err: unknown) => {
-          setError(err as ApiError);
-          setCollections(undefined);
-        })
-        .finally(() => setState('IDLE'));
-    }
-  }, [setCollections, stacApi]);
-  const getCollections = useMemo(() => debounce(_getCollections), [_getCollections]);
-
-  useEffect(() => {
-    if (stacApi && !error && !collections) {
-      getCollections();
-    }
-  }, [getCollections, stacApi, collections, error]);
+  const {
+    data: collections,
+    error,
+    isLoading,
+    isFetching,
+    refetch,
+  } = useQuery<CollectionsResponse, ApiErrorType>({
+    queryKey: generateCollectionsQueryKey(),
+    queryFn: fetchCollections,
+    enabled: !!stacApi,
+    retry: false,
+  });
 
   return {
     collections,
-    reload: getCollections,
-    state,
-    error,
+    refetch,
+    isLoading,
+    isFetching,
+    error: error as ApiErrorType,
   };
 }
 

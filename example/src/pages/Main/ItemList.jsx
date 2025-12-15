@@ -19,7 +19,7 @@ PaginationButton.propTypes = {
   children: T.node.isRequired,
 };
 
-function ItemList({ items, isLoading, error, nextPage, previousPage }) {
+function ItemList({ items, isLoading, error, nextPage, previousPage, onSelect }) {
   return (
     <Panel className="grid grid-rows-[1fr_min-content] p-4">
       <div className="overflow-x-clip">
@@ -27,9 +27,13 @@ function ItemList({ items, isLoading, error, nextPage, previousPage }) {
         {isLoading && <p>Loading...</p>}
         {error && <p>{error}</p>}
         {items && (
-          <ul>
-            {items.features.map(({ id }) => (
-              <li key={id}>{id}</li>
+          <ul className="space-y-2">
+            {items.features.map((item) => (
+              <li key={item.id}>
+                <button onClick={onSelect(item)} className="text-pretty">
+                  {item.id}
+                </button>
+              </li>
             ))}
           </ul>
         )}
@@ -52,6 +56,7 @@ ItemList.propTypes = {
   error: T.string,
   previousPage: T.func,
   nextPage: T.func,
+  onSelect: T.func,
 };
 
 export default ItemList;

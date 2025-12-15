@@ -19,47 +19,88 @@ With Yarn:
 yarn add @developmentseed/stac-react
 ```
 
+### Peer Dependency: @tanstack/react-query
+
+stac-react relies on [TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview) for data fetching and caching. To avoid duplicate React Query clients and potential version conflicts, stac-react lists `@tanstack/react-query` as a **peer dependency**. This means you must install it in your project:
+
+```sh
+npm install @tanstack/react-query
+# or
+yarn add @tanstack/react-query
+```
+
+If you do not install it, your package manager will warn you, and stac-react will not work correctly.
+
 ## Getting started
 
-Stac-react's hooks must be used inside children of a React context that provides access to the stac-react's core functionality.
+stac-react's hooks must be used inside children of a React context that provides access to the stac-react's core functionality.
 
-To get started, initialize `StacApiProvider` with the base URL of the STAC catalog.
+To get started, initialize `StacApiProvider` with the base URL of the STAC catalog. `StacApiProvider` automatically sets up a [TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview) QueryClientProvider for you, so you do not need to wrap your app with QueryClientProvider yourself.
 
 ```jsx
-import { StacApiProvider } from "stac-react";
+import { StacApiProvider } from 'stac-react';
 
 function StacApp() {
   return (
-    <StacApiProvider apiUrl="https://my-stac-api.com">
-      // Other components
-    </StacApiProvide>
+    <StacApiProvider apiUrl="https://my-stac-api.com">{/* Other components */}</StacApiProvider>
   );
 }
 ```
 
+If you want to provide your own custom QueryClient (for advanced caching or devtools), you can pass it as a prop:
+
+```jsx
+import { StacApiProvider } from 'stac-react';
+import { QueryClient } from '@tanstack/react-query';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+    },
+  },
+});
+
+function StacApp() {
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
+  return (
+    <StacApiProvider
+      apiUrl="https://my-stac-api.com"
+      queryClient={queryClient}
+      enableDevTools={isDevelopment}
+    >
+      {/* Other components */}
+    </StacApiProvider>
+  );
+}
+```
+
+For additional information, see the React Query setup guide: [docs/react-query-setup.md](docs/react-query-setup.md).
+
 Now you can start using stac-react hooks in child components of `StacApiProvider`
 
 ```jsx
-import { StacApiProvider, useCollections } from "stac-react";
+import { StacApiProvider, useCollections } from 'stac-react';
 
 function Collections() {
   const { collections } = useCollections();
 
   return (
-   <ul>
-     {collections.collections.map(({ id, title }) => (
-       <li key={id}>{ title }</li>
-     ))}
-   </ul>
-
-  )
+    <ul>
+      {collections.collections.map(({ id, title }) => (
+        <li key={id}>{title}</li>
+      ))}
+    </ul>
+  );
 }
 
 function StacApp() {
   return (
     <StacApiProvider apiUrl="https://my-stac-api.com">
       <Collections />
-    </StacApiProvide>
+    </StacApiProvider>
   );
 }
 ```
@@ -73,22 +114,21 @@ Provides the React context required for stac-react hooks.
 #### Initialization
 
 ```jsx
-import { StacApiProvider } from "stac-react";
+import { StacApiProvider } from 'stac-react';
 
 function StacApp() {
-  return (
-    <StacApiProvider apiUrl="https://my-stac-api.com">
-      // Other components
-    </StacApiProvide>
-  );
+  return <StacApiProvider apiUrl="https://my-stac-api.com">// Other components</StacApiProvider>;
 }
 ```
 
 ##### Component Properties
 
-| Option    | Type     | Description                       |
-| --------- | -------- | --------------------------------- |
-| `apiUrl`. | `string` | The base url of the STAC catalog. |
+| Option           | Type          | Description                                                                                                                                                                                       |
+| ---------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apiUrl`         | `string`      | The base URL of the STAC catalog.                                                                                                                                                                 |
+| `queryClient`    | `QueryClient` | Optional. Custom TanStack Query QueryClient instance. If not provided, a default QueryClient will be created.                                                                                     |
+| `options`        | `object`      | Optional. Configuration object for customizing STAC API requests (e.g., headers, authentication).                                                                                                 |
+| `enableDevTools` | `boolean`     | Optional. Enables TanStack Query DevTools browser extension integration by exposing the QueryClient on `window.__TANSTACK_QUERY_CLIENT__`. Defaults to `false`. Recommended for development only. |
 
 ### useCollections
 
@@ -103,12 +143,13 @@ const { collections } = useCollections();
 
 #### Return values
 
-| Option        | Type              | Description                                                                                                                        |
-| ------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `collections` | `array`           | A list of collections available from the STAC catalog. Is `null` if collections have not been retrieved.                           |
-| `state`       | `str`             | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress. |
-| `reload`      | `function`        | Callback function to trigger a reload of collections.                                                                              |
-| `error`       | [`Error`](#error) | Error information if the last request was unsuccessful. `undefined` if the last request was successful.                            |
+| Option        | Type              | Description                                                                                              |
+| ------------- | ----------------- | -------------------------------------------------------------------------------------------------------- |
+| `collections` | `array`           | A list of collections available from the STAC catalog. Is `null` if collections have not been retrieved. |
+| `isLoading`   | `boolean`         | `true` when the initial request is in progress. `false` once data is loaded or an error occurred.        |
+| `isFetching`  | `boolean`         | `true` when any request is in progress (including background refetches). `false` otherwise.              |
+| `reload`      | `function`        | Callback function to trigger a reload of collections.                                                    |
+| `error`       | [`Error`](#error) | Error information if the last request was unsuccessful. `undefined` if the last request was successful.  |
 
 #### Example
 
@@ -116,9 +157,9 @@ const { collections } = useCollections();
 import { useCollections } from "stac-react";
 
 function CollectionList() {
-  const { collections, state } = useCollections();
+  const { collections, isLoading } = useCollections();
 
-  if (state === "LOADING") {
+  if (isLoading) {
     return <p>Loading collections...</p>
   }
 
@@ -158,12 +199,13 @@ const { collection } = useCollection(id);
 
 #### Return values
 
-| Option       | Type              | Description                                                                                                                        |
-| ------------ | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `collection` | `object`          | The collection matching the provided ID. Is `null` if collection has not been retrieved.                                           |
-| `state`      | `str`             | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress. |
-| `reload`     | `function`        | Callback function to trigger a reload of the collection.                                                                           |
-| `error`      | [`Error`](#error) | Error information if the last request was unsuccessful. `undefined` if the last request was successful.                            |
+| Option       | Type              | Description                                                                                             |
+| ------------ | ----------------- | ------------------------------------------------------------------------------------------------------- |
+| `collection` | `object`          | The collection matching the provided ID. Is `null` if collection has not been retrieved.                |
+| `isLoading`  | `boolean`         | `true` when the initial request is in progress. `false` once data is loaded or an error occurred.       |
+| `isFetching` | `boolean`         | `true` when any request is in progress (including background refetches). `false` otherwise.             |
+| `reload`     | `function`        | Callback function to trigger a reload of the collection.                                                |
+| `error`      | [`Error`](#error) | Error information if the last request was unsuccessful. `undefined` if the last request was successful. |
 
 #### Example
 
@@ -171,9 +213,9 @@ const { collection } = useCollection(id);
 import { useCollection } from 'stac-react';
 
 function Collection() {
-  const { collection, state } = useCollection('collection_id');
+  const { collection, isLoading } = useCollection('collection_id');
 
-  if (state === 'LOADING') {
+  if (isLoading) {
     return <p>Loading collection...</p>;
   }
 
@@ -211,12 +253,13 @@ const { item } = useItem(url);
 
 #### Return values
 
-| Option   | Type              | Description                                                                                                                        |
-| -------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `item`   | `object`          | The item matching the provided URL.                                                                                                |
-| `state`  | `str`             | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress. |
-| `reload` | `function`        | Callback function to trigger a reload of the item.                                                                                 |
-| `error`  | [`Error`](#error) | Error information if the last request was unsuccessful. `undefined` if the last request was successful.                            |
+| Option       | Type              | Description                                                                                             |
+| ------------ | ----------------- | ------------------------------------------------------------------------------------------------------- |
+| `item`       | `object`          | The item matching the provided URL.                                                                     |
+| `isLoading`  | `boolean`         | `true` when the initial request is in progress. `false` once data is loaded or an error occurred.       |
+| `isFetching` | `boolean`         | `true` when any request is in progress (including background refetches). `false` otherwise.             |
+| `reload`     | `function`        | Callback function to trigger a reload of the item.                                                      |
+| `error`      | [`Error`](#error) | Error information if the last request was unsuccessful. `undefined` if the last request was successful. |
 
 #### Examples
 
@@ -224,9 +267,9 @@ const { item } = useItem(url);
 import { useItem } from 'stac-react';
 
 function Item() {
-  const { item, state } = useItem('https://stac-catalog.com/items/abc123');
+  const { item, isLoading } = useItem('https://stac-catalog.com/items/abc123');
 
-  if (state === 'LOADING') {
+  if (isLoading) {
     return <p>Loading item...</p>;
   }
 
@@ -235,7 +278,7 @@ function Item() {
       {item ? (
         <>
           <h2>{item.id}</h2>
-          <p>{items.description}</p>
+          <p>{item.description}</p>
         </>
       ) : (
         <p>Not found</p>
@@ -276,7 +319,8 @@ const { results } = useStacSearch();
 | `limit`                         | `number`          | The number of results returned per result page.                                                                                                                                                                                                                                      |
 | `setLimit(limit)`               | `function`        | Callback to set `limit`. `limit` must be a `number`, or `undefined` to reset.                                                                                                                                                                                                        |
 | `results`                       | `object`          | The result of the last search query; a [GeoJSON `FeatureCollection` with additional members](https://github.com/radiantearth/stac-api-spec/blob/v1.0.0-rc.2/fragments/itemcollection/README.md). `undefined` if the search request has not been submitted, or if there was an error. |
-| `state`                         | `string`          | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress.                                                                                                                                                   |
+| `isLoading`                     | `boolean`         | `true` when the initial request is in progress. `false` once data is loaded or an error occurred.                                                                                                                                                                                    |
+| `isFetching`                    | `boolean`         | `true` when any request is in progress (including background refetches and pagination). `false` otherwise.                                                                                                                                                                           |
 | `error`                         | [`Error`](#error) | Error information if the last request was unsuccessful. `undefined` if the last request was successful.                                                                                                                                                                              |
 | `nextPage`                      | `function`        | Callback function to load the next page of results. Is `undefined` if the last page is the currently loaded.                                                                                                                                                                         |
 | `previousPage`                  | `function`        | Callback function to load the previous page of results. Is `undefined` if the first page is the currently loaded.                                                                                                                                                                    |
@@ -470,11 +514,11 @@ function StacComponent() {
 }
 ```
 
-| Option       | Type     | Description                       |
-| ------------ | -------- | --------------------------------- | ------------------------------------------------------------------------------------------- |
-| `detail`     | `string` | `object                           | The error return from the API. Either a`string` or and `object` depending on the response. |
-| `status` | `number` | HTTP status code of the response. |
-| `statusText` | `string` | Status text for the response.     |
+| Option       | Type               | Description                                                                                  |
+| ------------ | ------------------ | -------------------------------------------------------------------------------------------- |
+| `detail`     | `string \| object` | The error returned from the API. Either a `string` or an `object` depending on the response. |
+| `status`     | `number`           | HTTP status code of the response.                                                            |
+| `statusText` | `string`           | Status text for the response.                                                                |
 
 ## Development
 

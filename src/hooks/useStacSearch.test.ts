@@ -10,6 +10,14 @@ function parseRequestPayload(mockApiCall?: RequestInit) {
   return JSON.parse(mockApiCall.body as string);
 }
 
+async function setupStacSearch() {
+  const { result } = renderHook(() => useStacSearch(), { wrapper });
+  await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
+  await act(async () => {});
+  await waitFor(() => expect(result.current.isLoading).toBe(false));
+  return result;
+}
+
 describe('useStacSearch — API supports POST', () => {
   beforeEach(() => {
     fetch.resetMocks();
@@ -27,28 +35,22 @@ describe('useStacSearch — API supports POST', () => {
       })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
+    const result = await setupStacSearch();
 
-    // 1. Wait for initial API capabilities fetch (stacApi initialization)
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
-
-    // 3. Set search parameters and submit (debounced)
+    // Set search parameters and submit (debounced)
     act(() => result.current.setIds(['collection_1', 'collection_2']));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-
-    // 6. Wait for the search request to complete (second fetch call)
+    // Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Wait for results to be set in state
+    // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual({ data: '12345' }));
-    // 8. Validate POST payload
+    // Validate POST payload
     const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
     expect(postPayload).toEqual({ ids: ['collection_1', 'collection_2'], limit: 25 });
   });
@@ -60,27 +62,22 @@ describe('useStacSearch — API supports POST', () => {
       })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial API capabilities fetch (stacApi initialization)
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
+    const result = await setupStacSearch();
 
-    // 3. Set search parameters and submit (debounced)
+    // Set search parameters and submit (debounced)
     act(() => result.current.setBbox([-0.59, 51.24, 0.3, 51.74]));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-
-    // 6. Wait for the search request to complete (second fetch call)
+    // Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Wait for results to be set in state
+    // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual({ data: '12345' }));
-    // 8. Validate POST payload
+    // Validate POST payload
     const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
     expect(postPayload).toEqual({ bbox: [-0.59, 51.24, 0.3, 51.74], limit: 25 });
   });
@@ -92,27 +89,22 @@ describe('useStacSearch — API supports POST', () => {
       })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial API capabilities fetch (stacApi initialization)
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
+    const result = await setupStacSearch();
 
-    // 3. Set search parameters and submit (debounced)
+    // Set search parameters and submit (debounced)
     act(() => result.current.setBbox([0.3, 51.74, -0.59, 51.24]));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-
-    // 6. Wait for the search request to complete (second fetch call)
+    // Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Wait for results to be set in state
+    // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual({ data: '12345' }));
-    // 8. Validate POST payload
+    // Validate POST payload
     const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
     expect(postPayload).toEqual({ bbox: [-0.59, 51.24, 0.3, 51.74], limit: 25 });
   });
@@ -124,27 +116,22 @@ describe('useStacSearch — API supports POST', () => {
       })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial API capabilities fetch (stacApi initialization)
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
+    const result = await setupStacSearch();
 
-    // 3. Set search parameters and submit (debounced)
+    // Set search parameters and submit (debounced)
     act(() => result.current.setCollections(['wildfire', 'surface_temp']));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-
-    // 6. Wait for the search request to complete (second fetch call)
+    // Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Wait for results to be set in state
+    // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual({ data: '12345' }));
-    // 8. Validate POST payload
+    // Validate POST payload
     const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
     expect(postPayload).toEqual({ collections: ['wildfire', 'surface_temp'], limit: 25 });
   });
@@ -156,27 +143,22 @@ describe('useStacSearch — API supports POST', () => {
       })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial API capabilities fetch (stacApi initialization)
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
+    const result = await setupStacSearch();
 
-    // 3. Set search parameters and submit (debounced)
+    // Set search parameters and submit (debounced)
     act(() => result.current.setCollections([]));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-
-    // 6. Wait for the search request to complete (second fetch call)
+    // Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Wait for results to be set in state
+    // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual({ data: '12345' }));
-    // 8. Validate POST payload
+    // Validate POST payload
     const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
     expect(postPayload).toEqual({ limit: 25 });
   });
@@ -188,28 +170,23 @@ describe('useStacSearch — API supports POST', () => {
       })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial API capabilities fetch (stacApi initialization)
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
+    const result = await setupStacSearch();
 
-    // 3. Set search parameters and submit (debounced)
+    // Set search parameters and submit (debounced)
     act(() => result.current.setDateRangeFrom('2022-01-17'));
     act(() => result.current.setDateRangeTo('2022-05-17'));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-
-    // 6. Wait for the search request to complete (second fetch call)
+    // Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Wait for results to be set in state
+    // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual({ data: '12345' }));
-    // 8. Validate POST payload
+    // Validate POST payload
     const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
     expect(postPayload).toEqual({ datetime: '2022-01-17/2022-05-17', limit: 25 });
   });
@@ -221,27 +198,22 @@ describe('useStacSearch — API supports POST', () => {
       })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial API capabilities fetch (stacApi initialization)
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
+    const result = await setupStacSearch();
 
-    // 3. Set search parameters and submit (debounced)
+    // Set search parameters and submit (debounced)
     act(() => result.current.setDateRangeFrom('2022-01-17'));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-
-    // 6. Wait for the search request to complete (second fetch call)
+    // Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Wait for results to be set in state
+    // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual({ data: '12345' }));
-    // 8. Validate POST payload
+    // Validate POST payload
     const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
     expect(postPayload).toEqual({ datetime: '2022-01-17/..', limit: 25 });
   });
@@ -253,27 +225,22 @@ describe('useStacSearch — API supports POST', () => {
       })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial API capabilities fetch (stacApi initialization)
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
+    const result = await setupStacSearch();
 
-    // 3. Set search parameters and submit (debounced)
+    // Set search parameters and submit (debounced)
     act(() => result.current.setDateRangeTo('2022-05-17'));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-
-    // 6. Wait for the search request to complete (second fetch call)
+    // Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Wait for results to be set in state
+    // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual({ data: '12345' }));
-    // 8. Validate POST payload
+    // Validate POST payload
     const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
     expect(postPayload).toEqual({ datetime: '../2022-05-17', limit: 25 });
   });
@@ -288,24 +255,19 @@ describe('useStacSearch — API supports POST', () => {
         statusText: 'Bad Request',
       });
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial API capabilities fetch (stacApi initialization)
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
+    const result = await setupStacSearch();
 
-    // 3. Submit (debounced)
+    // Submit (debounced)
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-
-    // 6. Wait for the search request to complete (second fetch call)
+    // Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Wait for error to be set in state
+    // Wait for error to be set in state
     await waitFor(() =>
       expect(result.current.error).toEqual({
         status: 400,
@@ -322,24 +284,20 @@ describe('useStacSearch — API supports POST', () => {
       })
       .mockResponseOnce('Wrong query', { status: 400, statusText: 'Bad Request' });
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial API capabilities fetch (stacApi initialization)
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
+    const result = await setupStacSearch();
 
-    // 3. Submit (debounced)
+    // Submit (debounced)
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
 
-    // 6. Wait for the search request to complete (second fetch call)
+    // Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Wait for error to be set in state
+    // Wait for error to be set in state
     await waitFor(() =>
       expect(result.current.error).toEqual({
         status: 400,
@@ -370,33 +328,28 @@ describe('useStacSearch — API supports POST', () => {
       })
       .mockResponseOnce(JSON.stringify(response));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial API capabilities fetch (stacApi initialization)
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
+    const result = await setupStacSearch();
 
-    // 3. Set search parameters and submit (debounced)
+    // Set search parameters and submit (debounced)
     act(() => result.current.setDateRangeTo('2022-05-17'));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-
-    // 6. Wait for the search request to complete (second fetch call)
+    // Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Wait for results to be set in state
+    // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual(response));
-    expect(result.current.nextPage).toBeDefined();
-
-    // 8. Trigger nextPage and validate
+    // Wait for pagination links to be extracted from results
+    await waitFor(() => expect(result.current.nextPage).toBeDefined());
+    // Trigger nextPage and validate
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.nextPage && result.current.nextPage());
-    await waitFor(() => expect(result.current.state).toBe('LOADING'));
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(true));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     const postPayload = parseRequestPayload(fetch.mock.calls[2][1]);
     expect(result.current.results).toEqual({ data: '12345' });
     expect(postPayload).toEqual(response.links[0].body);
@@ -423,33 +376,28 @@ describe('useStacSearch — API supports POST', () => {
       })
       .mockResponseOnce(JSON.stringify(response));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial API capabilities fetch (stacApi initialization)
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
+    const result = await setupStacSearch();
 
-    // 3. Set search parameters and submit (debounced)
+    // Set search parameters and submit (debounced)
     act(() => result.current.setDateRangeTo('2022-05-17'));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-
-    // 6. Wait for the search request to complete (second fetch call)
+    // Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Wait for results to be set in state
+    // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual(response));
-    expect(result.current.previousPage).toBeDefined();
-
-    // 8. Trigger previousPage and validate
+    // Wait for pagination links to be extracted from results
+    await waitFor(() => expect(result.current.previousPage).toBeDefined());
+    // Trigger previousPage and validate
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.previousPage && result.current.previousPage());
-    await waitFor(() => expect(result.current.state).toBe('LOADING'));
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(true));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     const postPayload = parseRequestPayload(fetch.mock.calls[2][1]);
     expect(result.current.results).toEqual({ data: '12345' });
     expect(postPayload).toEqual(response.links[0].body);
@@ -476,33 +424,28 @@ describe('useStacSearch — API supports POST', () => {
       })
       .mockResponseOnce(JSON.stringify(response));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial API capabilities fetch (stacApi initialization)
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
+    const result = await setupStacSearch();
 
-    // 3. Set search parameters and submit (debounced)
+    // Set search parameters and submit (debounced)
     act(() => result.current.setDateRangeTo('2022-05-17'));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-
-    // 6. Wait for the search request to complete (second fetch call)
+    // Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Wait for results to be set in state
+    // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual(response));
-    expect(result.current.previousPage).toBeDefined();
-
-    // 8. Trigger previousPage and validate
+    // Wait for pagination links to be extracted from results
+    await waitFor(() => expect(result.current.previousPage).toBeDefined());
+    // Trigger previousPage and validate
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.previousPage && result.current.previousPage());
-    await waitFor(() => expect(result.current.state).toBe('LOADING'));
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(true));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     const postPayload = parseRequestPayload(fetch.mock.calls[2][1]);
     expect(result.current.results).toEqual({ data: '12345' });
     expect(postPayload).toEqual(response.links[0].body);
@@ -530,33 +473,28 @@ describe('useStacSearch — API supports POST', () => {
       })
       .mockResponseOnce(JSON.stringify(response));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial API capabilities fetch (stacApi initialization)
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
+    const result = await setupStacSearch();
 
-    // 3. Set search parameters and submit (debounced)
+    // Set search parameters and submit (debounced)
     act(() => result.current.setBbox([-0.59, 51.24, 0.3, 51.74]));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-
-    // 6. Wait for the search request to complete (second fetch call)
+    // Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Wait for results to be set in state
+    // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual(response));
-    expect(result.current.previousPage).toBeDefined();
-
-    // 8. Trigger previousPage and validate merged body
+    // Wait for pagination links to be extracted from results
+    await waitFor(() => expect(result.current.previousPage).toBeDefined());
+    // Trigger previousPage and validate merged body
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.previousPage && result.current.previousPage());
-    await waitFor(() => expect(result.current.state).toBe('LOADING'));
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(true));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     const postPayload = parseRequestPayload(fetch.mock.calls[2][1]);
     expect(result.current.results).toEqual({ data: '12345' });
     expect(postPayload).toEqual({
@@ -589,33 +527,28 @@ describe('useStacSearch — API supports POST', () => {
       })
       .mockResponseOnce(JSON.stringify(response));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial API capabilities fetch (stacApi initialization)
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
+    const result = await setupStacSearch();
 
-    // 3. Set search parameters and submit (debounced)
+    // Set search parameters and submit (debounced)
     act(() => result.current.setBbox([-0.59, 51.24, 0.3, 51.74]));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-
-    // 6. Wait for the search request to complete (second fetch call)
+    // Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Wait for results to be set in state
+    // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual(response));
-    expect(result.current.previousPage).toBeDefined();
-
-    // 8. Trigger previousPage and validate header
+    // Wait for pagination links to be extracted from results
+    await waitFor(() => expect(result.current.previousPage).toBeDefined());
+    // Trigger previousPage and validate header
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.previousPage && result.current.previousPage());
-    await waitFor(() => expect(result.current.state).toBe('LOADING'));
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(true));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.results).toEqual({ data: '12345' });
     const postHeader = fetch.mock.calls[2][1]?.headers;
     expect(postHeader).toEqual({ 'Content-Type': 'application/json', next: '123abc' });
@@ -636,33 +569,28 @@ describe('useStacSearch — API supports POST', () => {
       })
       .mockResponseOnce(JSON.stringify(response));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial API capabilities fetch (stacApi initialization)
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
+    const result = await setupStacSearch();
 
-    // 3. Set search parameters and submit (debounced)
+    // Set search parameters and submit (debounced)
     act(() => result.current.setDateRangeTo('2022-05-17'));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-
-    // 6. Wait for the search request to complete (second fetch call)
+    // Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Wait for results to be set in state
+    // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual(response));
-    expect(result.current.nextPage).toBeDefined();
-
-    // 8. Trigger nextPage and validate GET request
+    // Wait for pagination links to be extracted from results
+    await waitFor(() => expect(result.current.nextPage).toBeDefined());
+    // Trigger nextPage and validate GET request
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.nextPage && result.current.nextPage());
-    await waitFor(() => expect(result.current.state).toBe('LOADING'));
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(true));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(fetch.mock.calls[2][0]).toEqual('https://fake-stac-api.net/?page=2');
     expect(fetch.mock.calls[2][1]?.method).toEqual('GET');
     expect(result.current.results).toEqual({ data: '12345' });
@@ -683,33 +611,28 @@ describe('useStacSearch — API supports POST', () => {
       })
       .mockResponseOnce(JSON.stringify(response));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial API capabilities fetch (stacApi initialization)
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
+    const result = await setupStacSearch();
 
-    // 3. Set search parameters and submit (debounced)
+    // Set search parameters and submit (debounced)
     act(() => result.current.setDateRangeTo('2022-05-17'));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-
-    // 6. Wait for the search request to complete (second fetch call)
+    // Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Wait for results to be set in state
+    // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual(response));
-    expect(result.current.previousPage).toBeDefined();
-
-    // 8. Trigger previousPage and validate GET request
+    // Wait for pagination links to be extracted from results
+    await waitFor(() => expect(result.current.previousPage).toBeDefined());
+    // Trigger previousPage and validate GET request
     fetch.mockResponseOnce(JSON.stringify({ data: '12345' }));
     act(() => result.current.previousPage && result.current.previousPage());
-    await waitFor(() => expect(result.current.state).toBe('LOADING'));
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    await waitFor(() => expect(result.current.isLoading).toBe(true));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(fetch.mock.calls[2][0]).toEqual('https://fake-stac-api.net/?page=2');
     expect(fetch.mock.calls[2][1]?.method).toEqual('GET');
     expect(result.current.results).toEqual({ data: '12345' });
@@ -722,27 +645,22 @@ describe('useStacSearch — API supports POST', () => {
       })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial API capabilities fetch (stacApi initialization)
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
+    const result = await setupStacSearch();
 
-    // 3. Set search parameters and submit (debounced)
+    // Set search parameters and submit (debounced)
     act(() => result.current.setSortby([{ field: 'id', direction: 'asc' }]));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-
-    // 6. Wait for the search request to complete (second fetch call)
+    // Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Wait for results to be set in state
+    // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual({ data: '12345' }));
-    // 8. Validate POST payload
+    // Validate POST payload
     const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
     expect(postPayload).toEqual({ sortby: [{ field: 'id', direction: 'asc' }], limit: 25 });
   });
@@ -754,27 +672,22 @@ describe('useStacSearch — API supports POST', () => {
       })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial API capabilities fetch (stacApi initialization)
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
+    const result = await setupStacSearch();
 
-    // 3. Set search parameters and submit (debounced)
+    // Set search parameters and submit (debounced)
     act(() => result.current.setLimit(50));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-
-    // 6. Wait for the search request to complete (second fetch call)
+    // Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Wait for results to be set in state
+    // Wait for results to be set in state
     await waitFor(() => expect(result.current.results).toEqual({ data: '12345' }));
-    // 8. Validate POST payload
+    // Validate POST payload
     const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
     expect(postPayload).toEqual({ limit: 50 });
   });
@@ -817,24 +730,21 @@ describe('useStacSearch — API supports GET', () => {
       .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial hook setup
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
-    // 3. Set search parameters and submit (debounced)
+    const result = await setupStacSearch();
+
+    // Set search parameters and submit (debounced)
     act(() => result.current.setBbox([-0.59, 51.24, 0.3, 51.74]));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-    // 6. Wait for state to be IDLE
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    // Wait for state to be IDLE
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Assert fetch URL and results
+    // Assert fetch URL and results
     expect(fetch.mock.calls[1][0]).toEqual(
       'https://fake-stac-api.net/search?limit=25&bbox=-0.59%2C51.24%2C0.3%2C51.74'
     );
@@ -846,24 +756,21 @@ describe('useStacSearch — API supports GET', () => {
       .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial hook setup
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
-    // 3. Set search parameters and submit (debounced)
+    const result = await setupStacSearch();
+
+    // Set search parameters and submit (debounced)
     act(() => result.current.setCollections(['wildfire', 'surface_temp']));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-    // 6. Wait for state to be IDLE
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    // Wait for state to be IDLE
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Assert fetch URL and results
+    // Assert fetch URL and results
     expect(fetch.mock.calls[1][0]).toEqual(
       'https://fake-stac-api.net/search?limit=25&collections=wildfire%2Csurface_temp'
     );
@@ -875,25 +782,22 @@ describe('useStacSearch — API supports GET', () => {
       .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial hook setup
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
-    // 3. Set search parameters and submit (debounced)
+    const result = await setupStacSearch();
+
+    // Set search parameters and submit (debounced)
     act(() => result.current.setDateRangeFrom('2022-01-17'));
     act(() => result.current.setDateRangeTo('2022-05-17'));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-    // 6. Wait for state to be IDLE and fetch to be called twice
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    // Wait for state to be IDLE and fetch to be called twice
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Assert fetch URL and results
+    // Assert fetch URL and results
     expect(fetch.mock.calls[1][0]).toEqual(
       'https://fake-stac-api.net/search?limit=25&datetime=2022-01-17%2F2022-05-17'
     );
@@ -905,24 +809,21 @@ describe('useStacSearch — API supports GET', () => {
       .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial hook setup
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
-    // 3. Set search parameters and submit (debounced)
+    const result = await setupStacSearch();
+
+    // Set search parameters and submit (debounced)
     act(() => result.current.setDateRangeFrom('2022-01-17'));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-    // 6. Wait for state to be IDLE and fetch to be called twice
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    // Wait for state to be IDLE and fetch to be called twice
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Assert fetch URL and results
+    // Assert fetch URL and results
     expect(fetch.mock.calls[1][0]).toEqual(
       'https://fake-stac-api.net/search?limit=25&datetime=2022-01-17%2F..'
     );
@@ -934,24 +835,21 @@ describe('useStacSearch — API supports GET', () => {
       .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial hook setup
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
-    // 3. Set search parameters and submit (debounced)
+    const result = await setupStacSearch();
+
+    // Set search parameters and submit (debounced)
     act(() => result.current.setDateRangeTo('2022-05-17'));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-    // 6. Wait for state to be IDLE and fetch to be called twice
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    // Wait for state to be IDLE and fetch to be called twice
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Assert fetch URL and results
+    // Assert fetch URL and results
     expect(fetch.mock.calls[1][0]).toEqual(
       'https://fake-stac-api.net/search?limit=25&datetime=..%2F2022-05-17'
     );
@@ -963,12 +861,9 @@ describe('useStacSearch — API supports GET', () => {
       .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial hook setup
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
-    // 3. Set search parameters and submit (debounced)
+    const result = await setupStacSearch();
+
+    // Set search parameters and submit (debounced)
     act(() =>
       result.current.setSortby([
         { field: 'id', direction: 'asc' },
@@ -976,16 +871,16 @@ describe('useStacSearch — API supports GET', () => {
       ])
     );
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-    // 6. Wait for state to be IDLE and fetch to be called twice
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    // Wait for state to be IDLE and fetch to be called twice
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Assert fetch URL and results
+    // Assert fetch URL and results
     expect(fetch.mock.calls[1][0]).toEqual(
       'https://fake-stac-api.net/search?limit=25&sortby=%2Bid%2C-properties.cloud'
     );
@@ -997,24 +892,21 @@ describe('useStacSearch — API supports GET', () => {
       .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { result } = renderHook(() => useStacSearch(), { wrapper });
-    // 1. Wait for initial hook setup
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    // 2. Flush React state update so stacApi is available
-    await act(async () => {});
-    // 3. Set search parameters and submit (debounced)
+    const result = await setupStacSearch();
+
+    // Set search parameters and submit (debounced)
     act(() => result.current.setLimit(50));
     act(() => result.current.submit());
-    // 4. Advance timers to trigger debounce
+    // Advance timers to trigger debounce
     act(() => {
       jest.advanceTimersByTime(300);
     });
-    // 5. Flush microtasks to ensure debounced function and state updates complete
+    // Flush microtasks to ensure debounced function and state updates complete
     await act(async () => {});
-    // 6. Wait for state to be IDLE and fetch to be called twice
-    await waitFor(() => expect(result.current.state).toBe('IDLE'));
+    // Wait for state to be IDLE and fetch to be called twice
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-    // 7. Assert fetch URL and results
+    // Assert fetch URL and results
     expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/search?limit=50');
     expect(result.current.results).toEqual({ data: '12345' });
   });
