@@ -6,16 +6,11 @@ import { useStacApiContext } from './useStacApiContext';
 
 // Mock fetch for testing - returns a successful response
 beforeEach(() => {
-  (global.fetch as jest.Mock) = jest.fn((url: string) =>
-    Promise.resolve({
-      ok: true,
-      url, // Return the requested URL
-      json: () =>
-        Promise.resolve({
-          links: [],
-        }),
-    })
-  );
+  (global.fetch as jest.Mock) = jest.fn((url: string) => {
+    const response = new Response(JSON.stringify({ links: [] }));
+    Object.defineProperty(response, 'url', { value: url });
+    return Promise.resolve(response);
+  });
 });
 
 // Component to test that hooks work inside StacApiProvider

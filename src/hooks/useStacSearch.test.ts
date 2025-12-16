@@ -2,6 +2,7 @@ import fetch from 'jest-fetch-mock';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import useStacSearch from './useStacSearch';
 import wrapper from './wrapper';
+import { ApiError } from '../utils/ApiError';
 
 function parseRequestPayload(mockApiCall?: RequestInit) {
   if (!mockApiCall) {
@@ -268,13 +269,16 @@ describe('useStacSearch — API supports POST', () => {
     // Wait for the search request to complete (second fetch call)
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // Wait for error to be set in state
-    await waitFor(() =>
-      expect(result.current.error).toEqual({
-        status: 400,
-        statusText: 'Bad Request',
-        detail: { error: 'Wrong query' },
-      })
-    );
+    await waitFor(() => {
+      expect(result.current.error).toEqual(
+        new ApiError(
+          'Bad Request',
+          400,
+          { error: 'Wrong query' },
+          'https://fake-stac-api.net/search'
+        )
+      );
+    });
   });
 
   it('handles error with non-JSON response', async () => {
@@ -299,11 +303,9 @@ describe('useStacSearch — API supports POST', () => {
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // Wait for error to be set in state
     await waitFor(() =>
-      expect(result.current.error).toEqual({
-        status: 400,
-        statusText: 'Bad Request',
-        detail: 'Wrong query',
-      })
+      expect(result.current.error).toEqual(
+        new ApiError('Bad Request', 400, 'Wrong query', 'https://fake-stac-api.net/search')
+      )
     );
   });
 
