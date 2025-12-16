@@ -101,9 +101,6 @@ describe('StacApi', () => {
         'https://api.example.com/search?collections=sentinel-2-l2a&datetime=2025-12-01%2F2025-12-31',
         expect.objectContaining({
           method: 'GET',
-          headers: expect.objectContaining({
-            'Content-Type': 'application/json',
-          }),
         })
       );
     });

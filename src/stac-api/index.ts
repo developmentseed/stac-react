@@ -92,9 +92,8 @@ class StacApi {
     return fetch(url, {
       method,
       headers: {
-        'Content-Type': 'application/json',
-        ...headers,
         ...this.options?.headers,
+        ...headers,
       },
       body: payload ? JSON.stringify(payload) : undefined,
     });
@@ -114,7 +113,7 @@ class StacApi {
       return this.fetch(`${this.baseUrl}/search`, {
         method: 'POST',
         payload: requestPayload,
-        headers,
+        headers: { 'Content-Type': 'application/json', ...headers },
       });
     } else {
       const query = this.payloadToQuery(requestPayload);
