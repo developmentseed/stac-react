@@ -6,15 +6,13 @@ import type { GenericObject } from '../types';
  */
 export class ApiError extends Error {
   status: number;
-  statusText: string;
   detail?: GenericObject | string;
   url?: string;
 
-  constructor(statusText: string, status: number, detail?: GenericObject | string, url?: string) {
-    super(statusText);
+  constructor(message: string, status: number, detail?: GenericObject | string, url?: string) {
+    super(message);
     this.name = 'ApiError';
     this.status = status;
-    this.statusText = statusText;
     this.detail = detail;
     this.url = url;
 
