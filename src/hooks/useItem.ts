@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import type { StacHook, StacRefetchFn, ApiErrorType } from '../types';
+import type { StacHook, StacRefetchFn } from '../types';
 import type { Item } from '../types/stac';
 import { useStacApiContext } from '../context/useStacApiContext';
 import { handleStacResponse } from '../utils/handleStacResponse';
 import { generateItemQueryKey } from '../utils/queryKeys';
+import { ApiError } from '../utils/ApiError';
 
 interface StacItemHook extends StacHook {
   item?: Item;
@@ -25,7 +26,7 @@ function useItem(url: string): StacItemHook {
     isLoading,
     isFetching,
     refetch,
-  } = useQuery<Item, ApiErrorType>({
+  } = useQuery<Item, ApiError>({
     queryKey: generateItemQueryKey(url),
     queryFn: fetchItem,
     enabled: !!stacApi,
@@ -36,7 +37,7 @@ function useItem(url: string): StacItemHook {
     item,
     isLoading,
     isFetching,
-    error: error as ApiErrorType,
+    error,
     refetch,
   };
 }

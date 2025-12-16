@@ -157,8 +157,6 @@ if (error && error.status === 404) {
 **After:**
 
 ```typescript
-import type { ApiErrorType } from 'stac-react';
-
 const { error } = useCollection('my-collection');
 
 if (error?.status === 404) {
@@ -176,13 +174,11 @@ if (error?.status === 404) {
 **What's different?**
 
 - Errors are now proper class instances with `ApiError`
-- Better TypeScript support with `ApiErrorType`
 - Includes HTTP status codes and response details
 - Consistent across all hooks
 
 **Migration checklist:**
 
-- [ ] Import `ApiErrorType` from 'stac-react'
 - [ ] Update error checks to use typed properties
 - [ ] Test error scenarios (404, 500, network failures)
 
@@ -196,7 +192,7 @@ The most significant changes are in `useStacSearch`:
 
 #### Before: Manual State Management
 
-```typescript
+```tsx
 function MySearch() {
   const {
     state,
@@ -226,7 +222,7 @@ function MySearch() {
 
 #### After: TanStack Query Integration
 
-```typescript
+```tsx
 function MySearch() {
   const {
     isLoading,
@@ -347,7 +343,7 @@ You now must configure TanStack Query. The library doesn't do this for you (to a
 
 #### Before
 
-```jsx
+```tsx
 import { StacApiProvider } from 'stac-react';
 
 function App() {
@@ -357,7 +353,7 @@ function App() {
 
 #### After
 
-```jsx
+```tsx
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StacApiProvider } from 'stac-react';
 
@@ -426,7 +422,7 @@ const { collection: col2 } = useCollection('landsat-8');
 
 ### Request Deduplication
 
-```typescript
+```tsx
 // Multiple components request same collection
 // Only ONE network request is made, even if 5 components use the hook
 
@@ -438,7 +434,7 @@ const { collection: col2 } = useCollection('landsat-8');
 
 ### Invalidation on API Change
 
-```typescript
+```tsx
 // If API URL changes, all queries are automatically invalidated
 <StacApiProvider apiUrl="https://old-api.com" />
 // Switch to new API:
@@ -469,7 +465,7 @@ test('loads collections', async () => {
 
 ### After
 
-```typescript
+```tsx
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useCollections } from 'stac-react';
@@ -518,13 +514,13 @@ If you're using TypeScript, new types are available:
 
 ```typescript
 import type {
-  ApiErrorType, // Error response
   FetchRequest, // Request types for useStacSearch
   SearchRequestPayload, // Search parameters
 } from 'stac-react';
 
 // Your hook usage
-const { error }: { error?: ApiErrorType } = useCollection('id');
+// Error is of type ApiError
+const { error } = useCollection('id');
 
 if (error) {
   console.log(error.status); // number
@@ -541,7 +537,7 @@ if (error) {
 
 **Before:**
 
-```typescript
+```tsx
 {state === 'LOADING' && <Skeleton />}
 {state === 'IDLE' && results && <Results items={results.features} />}
 {error && <Error message={error.message} />}
@@ -549,7 +545,7 @@ if (error) {
 
 **After:**
 
-```typescript
+```tsx
 {isLoading && <Skeleton />}
 {!isLoading && results && <Results items={results.features} />}
 {error && <Error message={error.statusText} />}
@@ -559,7 +555,7 @@ if (error) {
 
 **Before:**
 
-```typescript
+```tsx
 <button onClick={search} disabled={state === 'LOADING'}>
   Search
 </button>
@@ -567,7 +563,7 @@ if (error) {
 
 **After:**
 
-```typescript
+```tsx
 <button onClick={search} disabled={isLoading || isFetching}>
   {isFetching ? 'Searching...' : 'Search'}
 </button>
@@ -678,7 +674,6 @@ const testClient = new QueryClient({
 - [ ] Replace `state` with `isLoading`/`isFetching` in all components
 - [ ] Rename `reload` to `refetch` in all components
 - [ ] Replace context data access with individual hooks
-- [ ] Update error handling to use typed `ApiErrorType`
 - [ ] Update tests to use test QueryClient
 - [ ] Remove context data subscriptions
 - [ ] Review caching strategy for your app

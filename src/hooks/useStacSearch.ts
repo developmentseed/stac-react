@@ -2,7 +2,7 @@ import { useCallback, useState, useMemo, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import debounce from '../utils/debounce';
 import { generateStacSearchQueryKey } from '../utils/queryKeys';
-import type { StacHook, ApiErrorType } from '../types';
+import type { StacHook } from '../types';
 import { handleStacResponse } from '../utils/handleStacResponse';
 import type {
   Link,
@@ -13,6 +13,7 @@ import type {
   FetchRequest,
 } from '../types/stac';
 import { useStacApiContext } from '../context/useStacApiContext';
+import { ApiError } from '../utils/ApiError';
 
 type PaginationHandler = () => void;
 
@@ -125,7 +126,7 @@ function useStacSearch(): StacSearchHook {
     error,
     isLoading,
     isFetching,
-  } = useQuery<SearchResponse, ApiErrorType>({
+  } = useQuery<SearchResponse, ApiError>({
     queryKey: currentRequest ? generateStacSearchQueryKey(currentRequest) : ['stacSearch', 'idle'],
     queryFn: () => fetchRequest(currentRequest!),
     enabled: currentRequest !== null,
@@ -211,7 +212,7 @@ function useStacSearch(): StacSearchHook {
     results,
     isLoading,
     isFetching,
-    error: error as ApiErrorType,
+    error,
     sortby,
     setSortby,
     limit,
