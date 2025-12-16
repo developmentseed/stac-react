@@ -188,7 +188,10 @@ describe('useStacSearch — API supports POST', () => {
     await waitFor(() => expect(result.current.results).toEqual({ data: '12345' }));
     // Validate POST payload
     const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
-    expect(postPayload).toEqual({ datetime: '2022-01-17/2022-05-17', limit: 25 });
+    expect(postPayload).toEqual({
+      datetime: '2022-01-17T00:00:00Z/2022-05-17T23:59:59Z',
+      limit: 25,
+    });
   });
 
   it('includes open date range in search (no to-date)', async () => {
@@ -215,7 +218,7 @@ describe('useStacSearch — API supports POST', () => {
     await waitFor(() => expect(result.current.results).toEqual({ data: '12345' }));
     // Validate POST payload
     const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
-    expect(postPayload).toEqual({ datetime: '2022-01-17/..', limit: 25 });
+    expect(postPayload).toEqual({ datetime: '2022-01-17T00:00:00Z/..', limit: 25 });
   });
 
   it('includes open date range in search (no from-date)', async () => {
@@ -242,7 +245,7 @@ describe('useStacSearch — API supports POST', () => {
     await waitFor(() => expect(result.current.results).toEqual({ data: '12345' }));
     // Validate POST payload
     const postPayload = parseRequestPayload(fetch.mock.calls[1][1]);
-    expect(postPayload).toEqual({ datetime: '../2022-05-17', limit: 25 });
+    expect(postPayload).toEqual({ datetime: '../2022-05-17T23:59:59Z', limit: 25 });
   });
 
   it('handles error with JSON response', async () => {
@@ -799,7 +802,7 @@ describe('useStacSearch — API supports GET', () => {
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // Assert fetch URL and results
     expect(fetch.mock.calls[1][0]).toEqual(
-      'https://fake-stac-api.net/search?limit=25&datetime=2022-01-17%2F2022-05-17'
+      'https://fake-stac-api.net/search?limit=25&datetime=2022-01-17T00%3A00%3A00Z%2F2022-05-17T23%3A59%3A59Z'
     );
     expect(result.current.results).toEqual({ data: '12345' });
   });
@@ -825,7 +828,7 @@ describe('useStacSearch — API supports GET', () => {
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // Assert fetch URL and results
     expect(fetch.mock.calls[1][0]).toEqual(
-      'https://fake-stac-api.net/search?limit=25&datetime=2022-01-17%2F..'
+      'https://fake-stac-api.net/search?limit=25&datetime=2022-01-17T00%3A00%3A00Z%2F..'
     );
     expect(result.current.results).toEqual({ data: '12345' });
   });
@@ -851,7 +854,7 @@ describe('useStacSearch — API supports GET', () => {
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
     // Assert fetch URL and results
     expect(fetch.mock.calls[1][0]).toEqual(
-      'https://fake-stac-api.net/search?limit=25&datetime=..%2F2022-05-17'
+      'https://fake-stac-api.net/search?limit=25&datetime=..%2F2022-05-17T23%3A59%3A59Z'
     );
     expect(result.current.results).toEqual({ data: '12345' });
   });

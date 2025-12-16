@@ -51,17 +51,18 @@ class StacApi {
   }
 
   makeDatetimePayload(dateRange?: DateRange): string | undefined {
-    if (!dateRange) {
+    if (!dateRange?.from && !dateRange?.to) {
       return undefined;
     }
 
-    const { from, to } = dateRange;
+    const formatDate = (date: string | undefined, end?: boolean) => {
+      if (!date) return '..';
 
-    if (from || to) {
-      return `${from || '..'}/${to || '..'}`;
-    } else {
-      return undefined;
-    }
+      const timePart = end ? 'T23:59:59Z' : 'T00:00:00Z';
+      return date.includes('T') ? date : `${date}${timePart}`;
+    };
+
+    return `${formatDate(dateRange?.from)}/${formatDate(dateRange?.to, true)}`;
   }
 
   payloadToQuery({ sortby, ...payload }: SearchPayload): string {
