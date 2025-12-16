@@ -24,29 +24,28 @@ import { ApiError } from './ApiError';
  * ```
  */
 export async function handleStacResponse<T>(response: Response): Promise<T> {
+  // Some STAC APIs return errors as JSON others as string.
+  // Clone the response so we can read the body as text if json fails.
+  const clone = response.clone();
+
   if (!response.ok) {
     let detail;
     try {
       detail = await response.json();
     } catch {
-      const clone = response.clone();
-      try {
-        detail = await clone.text();
-      } catch {
-        detail = 'Unable to parse error response';
-      }
+      detail = await clone.text();
     }
-
     throw new ApiError(response.statusText, response.status, detail, response.url);
   }
 
   try {
-    return await response.json();
+    const result: T = await response.json();
+    return result;
   } catch (error) {
     throw new ApiError(
-      'Invalid JSON Response',
+      `Invalid JSON: ${error instanceof Error ? error.message : String(error)}`,
       response.status,
-      `Response is not valid JSON: ${error instanceof Error ? error.message : String(error)}`,
+      await clone.text(),
       response.url
     );
   }

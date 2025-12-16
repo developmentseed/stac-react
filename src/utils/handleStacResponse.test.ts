@@ -6,16 +6,19 @@ describe('handleStacResponse', () => {
     it('should parse and return JSON data', async () => {
       const mockData = { id: 'collection-1', type: 'Collection' };
       const jsonFn = jest.fn().mockResolvedValue(mockData);
+      const cloneFn = jest.fn();
       const mockResponse = {
         ok: true,
         status: 200,
         url: 'https://api.example.com/collections/collection-1',
         json: jsonFn,
+        clone: cloneFn,
       } as unknown as Response;
 
       const result = await handleStacResponse(mockResponse);
       expect(result).toEqual(mockData);
       expect(jsonFn).toHaveBeenCalledTimes(1);
+      expect(cloneFn).toHaveBeenCalledTimes(1);
     });
 
     it('should handle different data types', async () => {
@@ -25,6 +28,7 @@ describe('handleStacResponse', () => {
         status: 200,
         url: 'https://api.example.com/search',
         json: jest.fn().mockResolvedValue(mockData),
+        clone: jest.fn(),
       } as unknown as Response;
 
       const result = await handleStacResponse(mockResponse);
@@ -41,12 +45,13 @@ describe('handleStacResponse', () => {
         statusText: 'Not Found',
         url: 'https://api.example.com/collections/missing',
         json: jest.fn().mockResolvedValue(errorDetail),
+        clone: jest.fn(),
       } as unknown as Response;
 
       await expect(handleStacResponse(mockResponse)).rejects.toThrow(ApiError);
       await expect(handleStacResponse(mockResponse)).rejects.toMatchObject({
         status: 404,
-        statusText: 'Not Found',
+        message: 'Not Found',
         detail: errorDetail,
         url: 'https://api.example.com/collections/missing',
       });
@@ -68,29 +73,8 @@ describe('handleStacResponse', () => {
       await expect(handleStacResponse(mockResponse)).rejects.toThrow(ApiError);
       await expect(handleStacResponse(mockResponse)).rejects.toMatchObject({
         status: 500,
-        statusText: 'Internal Server Error',
+        message: 'Internal Server Error',
         detail: errorText,
-        url: 'https://api.example.com/search',
-      });
-    });
-
-    it('should handle case where both JSON and text parsing fail', async () => {
-      const mockResponse = {
-        ok: false,
-        status: 502,
-        statusText: 'Bad Gateway',
-        url: 'https://api.example.com/search',
-        json: jest.fn().mockRejectedValue(new Error('Invalid JSON')),
-        clone: jest.fn().mockReturnValue({
-          text: jest.fn().mockRejectedValue(new Error('Cannot read text')),
-        }),
-      } as unknown as Response;
-
-      await expect(handleStacResponse(mockResponse)).rejects.toThrow(ApiError);
-      await expect(handleStacResponse(mockResponse)).rejects.toMatchObject({
-        status: 502,
-        statusText: 'Bad Gateway',
-        detail: 'Unable to parse error response',
         url: 'https://api.example.com/search',
       });
     });
@@ -103,11 +87,14 @@ describe('handleStacResponse', () => {
         status: 200,
         url: 'https://api.example.com/collections',
         json: jest.fn().mockRejectedValue(new SyntaxError('Unexpected token')),
+        clone: jest.fn().mockReturnValue({
+          text: jest.fn().mockResolvedValue('Invalid JSON'),
+        }),
       } as unknown as Response;
 
       await expect(handleStacResponse(mockResponse)).rejects.toThrow(ApiError);
       await expect(handleStacResponse(mockResponse)).rejects.toMatchObject({
-        statusText: 'Invalid JSON Response',
+        message: 'Invalid JSON: Unexpected token',
         status: 200,
         url: 'https://api.example.com/collections',
       });
@@ -119,6 +106,9 @@ describe('handleStacResponse', () => {
         status: 200,
         url: 'https://api.example.com/collections',
         json: jest.fn().mockRejectedValue(new SyntaxError('Unexpected end of JSON input')),
+        clone: jest.fn().mockReturnValue({
+          text: jest.fn().mockResolvedValue('Original non jsnon response'),
+        }),
       } as unknown as Response;
 
       try {
@@ -127,8 +117,8 @@ describe('handleStacResponse', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(ApiError);
         const apiError = error as ApiError;
-        expect(apiError.detail).toContain('Response is not valid JSON');
-        expect(apiError.detail).toContain('Unexpected end of JSON input');
+        expect(apiError.detail).toContain('Original non jsnon response');
+        expect(apiError.message).toContain('Invalid JSON: Unexpected end of JSON input');
       }
     });
   });
@@ -142,6 +132,7 @@ describe('handleStacResponse', () => {
         status: 200,
         url: 'https://api.example.com/collections/col-1',
         json: jest.fn().mockResolvedValue(mockData),
+        clone: jest.fn(),
       } as unknown as Response;
 
       const result = await handleStacResponse<Collection>(mockResponse);
