@@ -3,19 +3,13 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { StacApiProvider } from './index';
 import { useStacApiContext } from './useStacApiContext';
+import { makeMockResponse } from '../../jest.utils';
 
 // Mock fetch for testing - returns a successful response
 beforeEach(() => {
-  (global.fetch as jest.Mock) = jest.fn((url: string) =>
-    Promise.resolve({
-      ok: true,
-      url, // Return the requested URL
-      json: () =>
-        Promise.resolve({
-          links: [],
-        }),
-    })
-  );
+  (global.fetch as jest.Mock) = jest.fn((url: string) => {
+    return Promise.resolve(makeMockResponse(JSON.stringify({ links: [] }), url));
+  });
 });
 
 // Component to test that hooks work inside StacApiProvider

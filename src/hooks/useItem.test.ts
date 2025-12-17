@@ -2,6 +2,7 @@ import fetch from 'jest-fetch-mock';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import useItem from './useItem';
 import wrapper from './wrapper';
+import { ApiError } from '../utils/ApiError';
 
 describe('useItem', () => {
   beforeEach(() => {
@@ -32,11 +33,14 @@ describe('useItem', () => {
       wrapper,
     });
     await waitFor(() =>
-      expect(result.current.error).toEqual({
-        status: 400,
-        statusText: 'Bad Request',
-        detail: { error: 'Wrong query' },
-      })
+      expect(result.current.error).toEqual(
+        new ApiError(
+          'Bad Request',
+          400,
+          { error: 'Wrong query' },
+          'https://fake-stac-api.net/search'
+        )
+      )
     );
   });
 
@@ -49,11 +53,9 @@ describe('useItem', () => {
       wrapper,
     });
     await waitFor(() =>
-      expect(result.current.error).toEqual({
-        status: 400,
-        statusText: 'Bad Request',
-        detail: 'Wrong query',
-      })
+      expect(result.current.error).toEqual(
+        new ApiError('Bad Request', 400, 'Wrong query', 'https://fake-stac-api.net/search')
+      )
     );
   });
 

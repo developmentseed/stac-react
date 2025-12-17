@@ -1,14 +1,8 @@
 import type { QueryObserverResult } from '@tanstack/react-query';
+import { ApiError } from '../utils/ApiError';
 
 export type GenericObject = {
   [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-};
-
-export type ApiErrorType = {
-  detail?: GenericObject | string;
-  status: number;
-  statusText: string;
-  url?: string;
 };
 
 /**
@@ -22,11 +16,11 @@ export interface StacHook {
   /** True during any fetch operation (including background refetches) */
   isFetching: boolean;
   /** Error information if the last request was unsuccessful */
-  error?: ApiErrorType;
+  error: ApiError | null;
 }
 
 /**
  * Generic refetch function type for STAC hooks.
  * Returns a Promise with the query result including data and error information.
  */
-export type StacRefetchFn<T> = () => Promise<QueryObserverResult<T, ApiErrorType>>;
+export type StacRefetchFn<T> = () => Promise<QueryObserverResult<T, ApiError>>;

@@ -27,6 +27,7 @@ function App() {
 
   // Debug: Verify QueryClient configuration
   if (isDevelopment && typeof window !== 'undefined') {
+    // eslint-disable-next-line no-console
     console.log('[App] QueryClient defaults:', queryClient.getDefaultOptions());
   }
 

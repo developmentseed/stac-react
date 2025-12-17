@@ -1,4 +1,4 @@
-import type { ApiErrorType, GenericObject } from '../types';
+import type { GenericObject } from '../types';
 import type { Bbox, SearchPayload, DateRange } from '../types/stac';
 
 type RequestPayload = SearchPayload;
@@ -87,43 +87,16 @@ class StacApi {
     return new URLSearchParams(queryObj).toString();
   }
 
-  async handleError(response: Response) {
-    const { status, statusText } = response;
-    const e: ApiErrorType = {
-      status,
-      statusText,
-    };
-
-    // Some STAC APIs return errors as JSON others as string.
-    // Clone the response so we can read the body as text if json fails.
-    const clone = response.clone();
-    try {
-      e.detail = await response.json();
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err) {
-      e.detail = await clone.text();
-    }
-    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-    return Promise.reject(e);
-  }
-
-  fetch(url: string, options: Partial<FetchOptions> = {}): Promise<Response> {
+  async fetch(url: string, options: Partial<FetchOptions> = {}): Promise<Response> {
     const { method = 'GET', payload, headers = {} } = options;
 
     return fetch(url, {
       method,
       headers: {
-        'Content-Type': 'application/json',
-        ...headers,
         ...this.options?.headers,
+        ...headers,
       },
       body: payload ? JSON.stringify(payload) : undefined,
-    }).then(async (response) => {
-      if (response.ok) {
-        return response;
-      }
-
-      return this.handleError(response);
     });
   }
 
@@ -141,7 +114,7 @@ class StacApi {
       return this.fetch(`${this.baseUrl}/search`, {
         method: 'POST',
         payload: requestPayload,
-        headers,
+        headers: { 'Content-Type': 'application/json', ...headers },
       });
     } else {
       const query = this.payloadToQuery(requestPayload);

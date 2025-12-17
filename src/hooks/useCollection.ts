@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import type { StacHook, StacRefetchFn, ApiErrorType } from '../types';
+import type { StacHook, StacRefetchFn } from '../types';
 import type { Collection } from '../types/stac';
 import { handleStacResponse } from '../utils/handleStacResponse';
 import { generateCollectionQueryKey } from '../utils/queryKeys';
 import { useStacApiContext } from '../context/useStacApiContext';
+import { ApiError } from '../utils/ApiError';
 
 interface StacCollectionHook extends StacHook {
   collection?: Collection;
@@ -25,7 +26,7 @@ function useCollection(collectionId: string): StacCollectionHook {
     isLoading,
     isFetching,
     refetch,
-  } = useQuery<Collection, ApiErrorType>({
+  } = useQuery<Collection, ApiError>({
     queryKey: generateCollectionQueryKey(collectionId),
     queryFn: fetchCollection,
     enabled: !!stacApi,
@@ -37,7 +38,7 @@ function useCollection(collectionId: string): StacCollectionHook {
     isLoading,
     isFetching,
     refetch,
-    error: error as ApiErrorType,
+    error,
   };
 }
 

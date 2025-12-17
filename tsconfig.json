@@ -16,6 +16,6 @@
     "strictNullChecks": true,
     "allowSyntheticDefaultImports": true
   },
-  "include": ["src", "jest.setup.ts", "vite.config.ts"],
+  "include": ["src", "jest.setup.ts", "vite.config.ts", "jest.utils.ts"],
   "exclude": ["node_modules", "dist"]
 }

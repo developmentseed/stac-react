@@ -4,7 +4,9 @@ import { H2 } from '../../components/headers';
 import Panel from '../../layout/Panel';
 import { Button } from '../../components/buttons';
 
+// eslint-disable-next-line react/prop-types
 function ItemDetails({ item, onClose }) {
+  // eslint-disable-next-line react/prop-types
   const itemUrl = item.links.find((r) => r.rel === 'self')?.href;
   const { item: newItem, isLoading, error, reload } = useItem(itemUrl);
 
