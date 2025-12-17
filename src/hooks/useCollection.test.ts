@@ -1,9 +1,10 @@
 import fetch from 'jest-fetch-mock';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import useCollection from './useCollection';
 import wrapper from './wrapper';
+import { ApiError } from '../utils/ApiError';
 
-describe('useCollection' ,() => {
+describe('useCollection', () => {
   beforeEach(() => {
     fetch.resetMocks();
   });
@@ -11,63 +12,56 @@ describe('useCollection' ,() => {
   it('queries collection', async () => {
     fetch
       .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
-      .mockResponseOnce(JSON.stringify({
-        collections: [
-          {id: 'abc', title: 'Collection A'},
-          {id: 'def', title: 'Collection B'}
-        ]
-      }));
+      .mockResponseOnce(JSON.stringify({ id: 'abc', title: 'Collection A' }));
 
-    const { result, waitForNextUpdate } = renderHook(
-      () => useCollection('abc'),
-      { wrapper }
+    const { result } = renderHook(() => useCollection('abc'), { wrapper });
+    await waitFor(() => expect(result.current.isLoading).toEqual(false));
+    await waitFor(() =>
+      expect(result.current.collection).toEqual({ id: 'abc', title: 'Collection A' })
     );
-    await waitForNextUpdate();
-    await waitForNextUpdate();
-    expect(result.current.collection).toEqual({id: 'abc', title: 'Collection A'});
-    expect(result.current.state).toEqual('IDLE');
+    expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/collections/abc');
   });
 
   it('returns error if collection does not exist', async () => {
     fetch
       .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
-      .mockResponseOnce(JSON.stringify({
-        collections: [
-          {id: 'abc', title: 'Collection A'},
-          {id: 'def', title: 'Collection B'}
-        ]
-      }));
+      .mockResponseOnce(JSON.stringify({ error: 'Collection not found' }), {
+        status: 404,
+        statusText: 'Not Found',
+      });
 
-    const { result, waitForNextUpdate } = renderHook(
-      () => useCollection('ghi'),
-      { wrapper }
+    const { result } = renderHook(() => useCollection('nonexistent'), { wrapper });
+    await waitFor(() =>
+      expect(result.current.error).toEqual(
+        new ApiError(
+          'Not Found',
+          404,
+          { error: 'Collection not found' },
+          'https://fake-stac-api.net/collections/nonexistent'
+        )
+      )
     );
-    await waitForNextUpdate();
-    await waitForNextUpdate();
-    expect(result.current.error).toEqual({
-      status: 404,
-      statusText: 'Not found',
-      detail: 'Collection does not exist'
-    });
   });
 
   it('handles error with JSON response', async () => {
     fetch
       .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
-      .mockResponseOnce(JSON.stringify({ error: 'Wrong query' }), { status: 400, statusText: 'Bad Request' });
+      .mockResponseOnce(JSON.stringify({ error: 'Wrong query' }), {
+        status: 400,
+        statusText: 'Bad Request',
+      });
 
-    const { result, waitForNextUpdate } = renderHook(
-      () => useCollection('abc'),
-      { wrapper }
+    const { result } = renderHook(() => useCollection('abc'), { wrapper });
+    await waitFor(() =>
+      expect(result.current.error).toEqual(
+        new ApiError(
+          'Bad Request',
+          400,
+          { error: 'Wrong query' },
+          'https://fake-stac-api.net/search'
+        )
+      )
     );
-    await waitForNextUpdate();
-    await waitForNextUpdate();
-
-    expect(result.current.error).toEqual({
-      status: 400,
-      statusText: 'Bad Request',
-      detail: { error: 'Wrong query' }
-    });
   });
 
   it('handles error with non-JSON response', async () => {
@@ -75,47 +69,31 @@ describe('useCollection' ,() => {
       .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
       .mockResponseOnce('Wrong query', { status: 400, statusText: 'Bad Request' });
 
-    const { result, waitForNextUpdate } = renderHook(
-      () => useCollection('abc'),
-      { wrapper }
+    const { result } = renderHook(() => useCollection('abc'), { wrapper });
+    await waitFor(() =>
+      expect(result.current.error).toEqual(
+        new ApiError('Bad Request', 400, 'Wrong query', 'https://fake-stac-api.net/search')
+      )
     );
-    await waitForNextUpdate();
-    await waitForNextUpdate();
-
-    expect(result.current.error).toEqual({
-      status: 400,
-      statusText: 'Bad Request',
-      detail: 'Wrong query'
-    });
   });
 
   it('reloads collection', async () => {
     fetch
       .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
-      .mockResponseOnce(JSON.stringify({
-        collections: [
-          {id: 'abc', title: 'Collection A'},
-          {id: 'def', title: 'Collection B'}
-        ]
-      }))
-      .mockResponseOnce(JSON.stringify({
-        collections: [
-          {id: 'abc', title: 'Collection A - Updated'},
-          {id: 'def', title: 'Collection B'}
-        ]
-      }));
+      .mockResponseOnce(JSON.stringify({ id: 'abc', title: 'Collection A' }))
+      .mockResponseOnce(JSON.stringify({ id: 'abc', title: 'Collection A - Updated' }));
 
-    const { result, waitForNextUpdate } = renderHook(
-      () => useCollection('abc'),
-      { wrapper }
+    const { result } = renderHook(() => useCollection('abc'), { wrapper });
+    await waitFor(() =>
+      expect(result.current.collection).toEqual({ id: 'abc', title: 'Collection A' })
     );
-    await waitForNextUpdate();
-    await waitForNextUpdate();
-    expect(result.current.collection).toEqual({id: 'abc', title: 'Collection A'});
 
-    act(() => result.current.reload());
+    await act(async () => {
+      await result.current.refetch();
+    });
 
-    await waitForNextUpdate();
-    expect(result.current.collection).toEqual({id: 'abc', title: 'Collection A - Updated'});
+    await waitFor(() =>
+      expect(result.current.collection).toEqual({ id: 'abc', title: 'Collection A - Updated' })
+    );
   });
 });

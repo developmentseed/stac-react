@@ -1,44 +1,44 @@
-import { useMemo, useState, useEffect } from 'react';
-
-import type { ApiError, LoadingState } from '../types';
+import { useQuery } from '@tanstack/react-query';
+import type { StacHook, StacRefetchFn } from '../types';
 import type { Collection } from '../types/stac';
-import useCollections from './useCollections';
+import { handleStacResponse } from '../utils/handleStacResponse';
+import { generateCollectionQueryKey } from '../utils/queryKeys';
+import { useStacApiContext } from '../context/useStacApiContext';
+import { ApiError } from '../utils/ApiError';
 
-type StacCollectionHook = {
-  collection?: Collection,
-  state: LoadingState,
-  error?: ApiError,
-  reload: () => void
-};
+interface StacCollectionHook extends StacHook {
+  collection?: Collection;
+  refetch: StacRefetchFn<Collection>;
+}
 
 function useCollection(collectionId: string): StacCollectionHook {
-  const { collections, state, error: requestError, reload } = useCollections();
-  const [ error, setError ] = useState<ApiError>();
+  const { stacApi } = useStacApiContext();
 
-  useEffect(() => {
-    setError(requestError);
-  }, [requestError]);
+  const fetchCollection = async (): Promise<Collection> => {
+    if (!stacApi) throw new Error('No STAC API configured');
+    const response: Response = await stacApi.getCollection(collectionId);
+    return handleStacResponse<Collection>(response);
+  };
 
-  const collection = useMemo(
-    () => {
-      const coll = collections?.collections.find(({ id }) => id === collectionId);
-      if (!coll) {
-        setError({
-          status: 404,
-          statusText: 'Not found',
-          detail: 'Collection does not exist'
-        });
-      }
-      return coll;
-    },
-    [collectionId, collections]
-  );
+  const {
+    data: collection,
+    error,
+    isLoading,
+    isFetching,
+    refetch,
+  } = useQuery<Collection, ApiError>({
+    queryKey: generateCollectionQueryKey(collectionId),
+    queryFn: fetchCollection,
+    enabled: !!stacApi,
+    retry: false,
+  });
 
   return {
     collection,
-    state,
+    isLoading,
+    isFetching,
+    refetch,
     error,
-    reload
   };
 }
 

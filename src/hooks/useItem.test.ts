@@ -1,7 +1,8 @@
 import fetch from 'jest-fetch-mock';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import useItem from './useItem';
 import wrapper from './wrapper';
+import { ApiError } from '../utils/ApiError';
 
 describe('useItem', () => {
   beforeEach(() => {
@@ -12,32 +13,35 @@ describe('useItem', () => {
     fetch
       .mockResponseOnce(JSON.stringify({ id: 'abc', links: [] }))
       .mockResponseOnce(JSON.stringify({ id: 'abc' }));
-    
-    const { result, waitForNextUpdate } = renderHook(
-      () => useItem('https://fake-stac-api.net/items/abc'),
-      { wrapper }
-    );
-    await waitForNextUpdate();
-    expect(result.current.item).toEqual({ id: 'abc' });
-    expect(result.current.state).toEqual('IDLE');
+
+    const { result } = renderHook(() => useItem('https://fake-stac-api.net/items/abc'), {
+      wrapper,
+    });
+    await waitFor(() => expect(result.current.item).toEqual({ id: 'abc' }));
+    await waitFor(() => expect(result.current.isLoading).toEqual(false));
   });
 
   it('handles error with JSON response', async () => {
     fetch
       .mockResponseOnce(JSON.stringify({ id: 'abc', links: [] }))
-      .mockResponseOnce(JSON.stringify({ error: 'Wrong query' }), { status: 400, statusText: 'Bad Request' });
+      .mockResponseOnce(JSON.stringify({ error: 'Wrong query' }), {
+        status: 400,
+        statusText: 'Bad Request',
+      });
 
-    const { result, waitForNextUpdate } = renderHook(
-      () => useItem('https://fake-stac-api.net/items/abc'),
-      { wrapper }
-    );
-    await waitForNextUpdate();
-
-    expect(result.current.error).toEqual({
-      status: 400,
-      statusText: 'Bad Request',
-      detail: { error: 'Wrong query' }
+    const { result } = renderHook(() => useItem('https://fake-stac-api.net/items/abc'), {
+      wrapper,
     });
+    await waitFor(() =>
+      expect(result.current.error).toEqual(
+        new ApiError(
+          'Bad Request',
+          400,
+          { error: 'Wrong query' },
+          'https://fake-stac-api.net/search'
+        )
+      )
+    );
   });
 
   it('handles error with non-JSON response', async () => {
@@ -45,17 +49,14 @@ describe('useItem', () => {
       .mockResponseOnce(JSON.stringify({ id: 'abc', links: [] }))
       .mockResponseOnce('Wrong query', { status: 400, statusText: 'Bad Request' });
 
-    const { result, waitForNextUpdate } = renderHook(
-      () => useItem('https://fake-stac-api.net/items/abc'),
-      { wrapper }
-    );
-    await waitForNextUpdate();
-
-    expect(result.current.error).toEqual({
-      status: 400,
-      statusText: 'Bad Request',
-      detail: 'Wrong query'
+    const { result } = renderHook(() => useItem('https://fake-stac-api.net/items/abc'), {
+      wrapper,
     });
+    await waitFor(() =>
+      expect(result.current.error).toEqual(
+        new ApiError('Bad Request', 400, 'Wrong query', 'https://fake-stac-api.net/search')
+      )
+    );
   });
 
   it('reloads item', async () => {
@@ -63,17 +64,16 @@ describe('useItem', () => {
       .mockResponseOnce(JSON.stringify({ id: 'abc', links: [] }))
       .mockResponseOnce(JSON.stringify({ id: 'abc' }))
       .mockResponseOnce(JSON.stringify({ id: 'abc', description: 'Updated' }));
-    
-    const { result, waitForNextUpdate } = renderHook(
-      () => useItem('https://fake-stac-api.net/items/abc'),
-      { wrapper }
-    );
-    await waitForNextUpdate();
-    expect(result.current.item).toEqual({ id: 'abc' });
 
-    act(() => result.current.reload());
+    const { result } = renderHook(() => useItem('https://fake-stac-api.net/items/abc'), {
+      wrapper,
+    });
+    await waitFor(() => expect(result.current.item).toEqual({ id: 'abc' }));
 
-    await waitForNextUpdate();
-    expect(result.current.item).toEqual({ id: 'abc', description: 'Updated' });
+    await act(async () => {
+      await result.current.refetch();
+    });
+
+    await waitFor(() => expect(result.current.item).toEqual({ id: 'abc', description: 'Updated' }));
   });
 });

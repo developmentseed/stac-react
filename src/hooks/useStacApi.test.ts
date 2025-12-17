@@ -1,35 +1,34 @@
 import fetch from 'jest-fetch-mock';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import useCollections from './useCollections';
 import wrapper from './wrapper';
 
 describe('useStacApi', () => {
-  beforeEach(() => fetch.resetMocks());
-  it('initilises StacAPI', async () => {
+  beforeEach(() => {
+    fetch.resetMocks();
+  });
+
+  it('initializes StacAPI', async () => {
     fetch
       .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net' })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { waitForNextUpdate } = renderHook(
-      () => useCollections(),
-      { wrapper }
+    renderHook(() => useCollections(), { wrapper });
+    await waitFor(() =>
+      expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/collections')
     );
-    await waitForNextUpdate();
-    await waitForNextUpdate();
-    expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/collections');
   });
 
-  it('initilises StacAPI with redirect URL', async () => {
+  it('initializes StacAPI with redirect URL', async () => {
     fetch
-      .mockResponseOnce(JSON.stringify({ links: [] }), { url: 'https://fake-stac-api.net/redirect/' })
+      .mockResponseOnce(JSON.stringify({ links: [] }), {
+        url: 'https://fake-stac-api.net/redirect/',
+      })
       .mockResponseOnce(JSON.stringify({ data: '12345' }));
 
-    const { waitForNextUpdate } = renderHook(
-      () => useCollections(),
-      { wrapper }
+    renderHook(() => useCollections(), { wrapper });
+    await waitFor(() =>
+      expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/redirect/collections')
     );
-    await waitForNextUpdate();
-    await waitForNextUpdate();
-    expect(fetch.mock.calls[1][0]).toEqual('https://fake-stac-api.net/redirect/collections');
   });
 });

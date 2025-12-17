@@ -3,15 +3,18 @@ import T from 'prop-types';
 import Legend from './Legend';
 
 function Checkbox({ label, name, options, values, onChange }) {
-  const handleChange = useCallback((event) => {
-    const { value } = event.target;
+  const handleChange = useCallback(
+    (event) => {
+      const { value } = event.target;
 
-    const nextValues = values.includes(value)
-      ? values.filter((v) => v !== value)
-      : [ ...values, value ];
+      const nextValues = values.includes(value)
+        ? values.filter((v) => v !== value)
+        : [...values, value];
 
-    onChange(nextValues);
-  }, [values, onChange]);
+      onChange(nextValues);
+    },
+    [values, onChange]
+  );
 
   return (
     <fieldset>
@@ -21,7 +24,7 @@ function Checkbox({ label, name, options, values, onChange }) {
 
         return (
           <div className="block" key={fieldId}>
-            <input 
+            <input
               id={fieldId}
               name={name}
               value={value}
@@ -29,7 +32,9 @@ function Checkbox({ label, name, options, values, onChange }) {
               onChange={handleChange}
               checked={values.includes(value)}
             />
-            <label htmlFor={fieldId} className="ml-2">{optionLabel}</label>
+            <label htmlFor={fieldId} className="ml-2">
+              {optionLabel}
+            </label>
           </div>
         );
       })}
@@ -43,11 +48,11 @@ Checkbox.propTypes = {
   options: T.arrayOf(
     T.shape({
       value: T.string.isRequired,
-      label: T.string.isRequired
+      label: T.string.isRequired,
     })
   ).isRequired,
   values: T.arrayOf(T.string).isRequired,
-  onChange: T.func.isRequired
-}
+  onChange: T.func.isRequired,
+};
 
 export default Checkbox;

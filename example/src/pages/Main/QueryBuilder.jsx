@@ -1,13 +1,13 @@
 import T from 'prop-types';
 import { useCallback, useMemo } from 'react';
 
-import { PrimaryButton } from "../../components/buttons";
+import { PrimaryButton } from '../../components/buttons';
 import { Checkbox, Legend } from '../../components/form';
-import { H2 } from "../../components/headers";
-import Panel from "../../layout/Panel";
+import { H2 } from '../../components/headers';
+import Panel from '../../layout/Panel';
 import Section from '../../layout/Section';
 
-function QueryBuilder ({
+function QueryBuilder({
   setIsBboxDrawEnabled,
   collections,
   selectedCollections,
@@ -16,15 +16,21 @@ function QueryBuilder ({
   dateRangeFrom,
   setDateRangeFrom,
   dateRangeTo,
-  setDateRangeTo
+  setDateRangeTo,
 }) {
   const handleEnableBbox = useCallback(() => setIsBboxDrawEnabled(true), [setIsBboxDrawEnabled]);
-  
-  const handleRangeFromChange = useCallback((e) => setDateRangeFrom(e.target.value), [setDateRangeFrom]);
+
+  const handleRangeFromChange = useCallback(
+    (e) => setDateRangeFrom(e.target.value),
+    [setDateRangeFrom]
+  );
   const handleRangeToChange = useCallback((e) => setDateRangeTo(e.target.value), [setDateRangeTo]);
 
   const collectionOptions = useMemo(
-    () => collections.collections ? collections.collections.map(({ id, title }) => ({ value: id, label: title})) : [],
+    () =>
+      collections.collections
+        ? collections.collections.map(({ id, title }) => ({ value: id, label: title }))
+        : [],
     [collections]
   );
 
@@ -45,10 +51,22 @@ function QueryBuilder ({
       <Section className="px-4">
         <fieldset>
           <Legend>Select Date Range</Legend>
-          <label htmlFor='date_from'>From</label>
-          <input type="date" name="date_from" id="date_from" onChange={handleRangeFromChange} value={dateRangeFrom} />
-          <label htmlFor='date_to'>To</label>
-          <input type="date" name="date_to" id="date_to" onChange={handleRangeToChange} value={dateRangeTo} />
+          <label htmlFor="date_from">From</label>
+          <input
+            type="date"
+            name="date_from"
+            id="date_from"
+            onChange={handleRangeFromChange}
+            value={dateRangeFrom}
+          />
+          <label htmlFor="date_to">To</label>
+          <input
+            type="date"
+            name="date_to"
+            id="date_to"
+            onChange={handleRangeToChange}
+            value={dateRangeTo}
+          />
         </fieldset>
       </Section>
 
@@ -72,11 +90,11 @@ QueryBuilder.propTypes = {
   dateRangeFrom: T.string.isRequired,
   setDateRangeFrom: T.func.isRequired,
   dateRangeTo: T.string.isRequired,
-  setDateRangeTo: T.func.isRequired
-}
+  setDateRangeTo: T.func.isRequired,
+};
 
 QueryBuilder.defaultProps = {
-  collections: {}
-}
+  collections: {},
+};
 
 export default QueryBuilder;

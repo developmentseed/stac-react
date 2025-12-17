@@ -1,40 +1,36 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import StacApi, { SearchMode } from '../stac-api';
 import { Link } from '../types/stac';
 import { GenericObject } from '../types';
+import { generateStacApiQueryKey } from '../utils/queryKeys';
+import { handleStacResponse } from '../utils/handleStacResponse';
 
 type StacApiHook = {
-  stacApi?: StacApi
-}
+  stacApi?: StacApi;
+  isLoading: boolean;
+  isError: boolean;
+};
 
 function useStacApi(url: string, options?: GenericObject): StacApiHook {
-  const [ stacApi, setStacApi ] = useState<StacApi>();
+  const { data, isSuccess, isLoading, isError } = useQuery({
+    queryKey: generateStacApiQueryKey(url, options),
+    queryFn: async () => {
+      const response = await fetch(url, {
+        headers: {
+          ...options?.headers,
+        },
+      });
+      const stacData = await handleStacResponse<{ links?: Link[] }>(response);
 
-  useEffect(() => {
-    let baseUrl: string;
-    let searchMode = SearchMode.GET;
+      const doesPost = stacData.links?.find(
+        ({ rel, method }: Link) => rel === 'search' && method === 'POST'
+      );
 
-    fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers
-      }
-    })
-      .then(response => {
-        baseUrl = response.url;
-        return response;
-      })
-      .then(response => response.json())
-      .then(response => {
-        const doesPost = response.links.find(({ rel, method }: Link) => rel === 'search' && method === 'POST');
-        if (doesPost) {
-          searchMode = SearchMode.POST;
-        }
-      })
-      .then(() => setStacApi(new StacApi(baseUrl, searchMode, options)));
-  }, [url, options]);
-
-  return { stacApi };
+      return new StacApi(response.url, doesPost ? SearchMode.POST : SearchMode.GET, options);
+    },
+    staleTime: Infinity,
+  });
+  return { stacApi: isSuccess ? data : undefined, isLoading, isError };
 }
 
 export default useStacApi;

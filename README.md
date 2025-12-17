@@ -1,9 +1,9 @@
 # stac-react
 
-React hooks to build front-end applications for STAC APIs. 
+React hooks to build front-end applications for STAC APIs.
 
 > **Note:**
-> stac-react is in early development, the API will likely break in future versions. 
+> stac-react is in early development, the API will likely break in future versions.
 
 ## Installation
 
@@ -19,47 +19,88 @@ With Yarn:
 yarn add @developmentseed/stac-react
 ```
 
+### Peer Dependency: @tanstack/react-query
+
+stac-react relies on [TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview) for data fetching and caching. To avoid duplicate React Query clients and potential version conflicts, stac-react lists `@tanstack/react-query` as a **peer dependency**. This means you must install it in your project:
+
+```sh
+npm install @tanstack/react-query
+# or
+yarn add @tanstack/react-query
+```
+
+If you do not install it, your package manager will warn you, and stac-react will not work correctly.
+
 ## Getting started
 
-Stac-react's hooks must be used inside children of a React context that provides access to the stac-react's core functionality. 
+stac-react's hooks must be used inside children of a React context that provides access to the stac-react's core functionality.
 
-To get started, initialize `StacApiProvider` with the base URL of the STAC catalog. 
+To get started, initialize `StacApiProvider` with the base URL of the STAC catalog. `StacApiProvider` automatically sets up a [TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview) QueryClientProvider for you, so you do not need to wrap your app with QueryClientProvider yourself.
 
 ```jsx
-import { StacApiProvider } from "stac-react";
+import { StacApiProvider } from 'stac-react';
 
 function StacApp() {
   return (
-    <StacApiProvider apiUrl="https://my-stac-api.com">
-      // Other components
-    </StacApiProvide>
+    <StacApiProvider apiUrl="https://my-stac-api.com">{/* Other components */}</StacApiProvider>
   );
 }
 ```
 
+If you want to provide your own custom QueryClient (for advanced caching or devtools), you can pass it as a prop:
+
+```jsx
+import { StacApiProvider } from 'stac-react';
+import { QueryClient } from '@tanstack/react-query';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+    },
+  },
+});
+
+function StacApp() {
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
+  return (
+    <StacApiProvider
+      apiUrl="https://my-stac-api.com"
+      queryClient={queryClient}
+      enableDevTools={isDevelopment}
+    >
+      {/* Other components */}
+    </StacApiProvider>
+  );
+}
+```
+
+For additional information, see the React Query setup guide: [docs/react-query-setup.md](docs/react-query-setup.md).
+
 Now you can start using stac-react hooks in child components of `StacApiProvider`
 
 ```jsx
-import { StacApiProvider, useCollections } from "stac-react";
+import { StacApiProvider, useCollections } from 'stac-react';
 
 function Collections() {
   const { collections } = useCollections();
-  
+
   return (
-	  <ul>
-	    {collections.collections.map(({ id, title }) => (
-	      <li key={id}>{ title }</li>
-	    ))}
-	  </ul>
-    
-  )
+    <ul>
+      {collections.collections.map(({ id, title }) => (
+        <li key={id}>{title}</li>
+      ))}
+    </ul>
+  );
 }
 
 function StacApp() {
   return (
     <StacApiProvider apiUrl="https://my-stac-api.com">
       <Collections />
-    </StacApiProvide>
+    </StacApiProvider>
   );
 }
 ```
@@ -68,27 +109,26 @@ function StacApp() {
 
 ### StacApiProvider
 
-Provides the React context required for stac-react hooks. 
+Provides the React context required for stac-react hooks.
 
 #### Initialization
 
 ```jsx
-import { StacApiProvider } from "stac-react";
+import { StacApiProvider } from 'stac-react';
 
 function StacApp() {
-  return (
-    <StacApiProvider apiUrl="https://my-stac-api.com">
-      // Other components
-    </StacApiProvide>
-  );
+  return <StacApiProvider apiUrl="https://my-stac-api.com">// Other components</StacApiProvider>;
 }
 ```
 
 ##### Component Properties
 
-Option          | Type      | Description
---------------- | --------- | -------------
-`apiUrl`.       | `string`  | The base url of the STAC catalog.
+| Option           | Type          | Description                                                                                                                                                                                       |
+| ---------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apiUrl`         | `string`      | The base URL of the STAC catalog.                                                                                                                                                                 |
+| `queryClient`    | `QueryClient` | Optional. Custom TanStack Query QueryClient instance. If not provided, a default QueryClient will be created.                                                                                     |
+| `options`        | `object`      | Optional. Configuration object for customizing STAC API requests (e.g., headers, authentication).                                                                                                 |
+| `enableDevTools` | `boolean`     | Optional. Enables TanStack Query DevTools browser extension integration by exposing the QueryClient on `window.__TANSTACK_QUERY_CLIENT__`. Defaults to `false`. Recommended for development only. |
 
 ### useCollections
 
@@ -97,18 +137,19 @@ Retrieves collections from a STAC catalog.
 #### Initialization
 
 ```js
-import { useCollections } from "stac-react";
+import { useCollections } from 'stac-react';
 const { collections } = useCollections();
 ```
 
 #### Return values
 
-Option          | Type      | Description
---------------- | --------- | -------------
-`collections`   | `array`   | A list of collections available from the STAC catalog. Is `null` if collections have not been retrieved.
-`state`         | `str`     | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress. 
-`reload`        | `function`| Callback function to trigger a reload of collections.
-`error`         | [`Error`](#error)   | Error information if the last request was unsuccessful. `undefined` if the last request was successful. 
+| Option        | Type              | Description                                                                                              |
+| ------------- | ----------------- | -------------------------------------------------------------------------------------------------------- |
+| `collections` | `array`           | A list of collections available from the STAC catalog. Is `null` if collections have not been retrieved. |
+| `isLoading`   | `boolean`         | `true` when the initial request is in progress. `false` once data is loaded or an error occurred.        |
+| `isFetching`  | `boolean`         | `true` when any request is in progress (including background refetches). `false` otherwise.              |
+| `reload`      | `function`        | Callback function to trigger a reload of collections.                                                    |
+| `error`       | [`Error`](#error) | Error information if the last request was unsuccessful. `undefined` if the last request was successful.  |
 
 #### Example
 
@@ -116,9 +157,9 @@ Option          | Type      | Description
 import { useCollections } from "stac-react";
 
 function CollectionList() {
-  const { collections, state } = useCollections();
+  const { collections, isLoading } = useCollections();
 
-  if (state === "LOADING") {
+  if (isLoading) {
     return <p>Loading collections...</p>
   }
 
@@ -141,52 +182,53 @@ function CollectionList() {
 
 ### useCollection
 
-Retrieves a single collection from the STAC catalog. 
+Retrieves a single collection from the STAC catalog.
 
 #### Initialization
 
 ```js
-import { useCollection } from "stac-react";
+import { useCollection } from 'stac-react';
 const { collection } = useCollection(id);
 ```
 
 #### Parameters
 
-Option          | Type      | Description
---------------- | --------- | -------------
-`id`            | `string`  | The collection ID. 
+| Option | Type     | Description        |
+| ------ | -------- | ------------------ |
+| `id`   | `string` | The collection ID. |
 
 #### Return values
 
-Option          | Type      | Description
---------------- | --------- | -------------
-`collection`    | `object`  | The collection matching the provided ID. Is `null` if collection has not been retrieved.
-`state`         | `str`     | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress. 
-`reload`        | `function`| Callback function to trigger a reload of the collection.
-`error`         | [`Error`](#error)   | Error information if the last request was unsuccessful. `undefined` if the last request was successful. 
+| Option       | Type              | Description                                                                                             |
+| ------------ | ----------------- | ------------------------------------------------------------------------------------------------------- |
+| `collection` | `object`          | The collection matching the provided ID. Is `null` if collection has not been retrieved.                |
+| `isLoading`  | `boolean`         | `true` when the initial request is in progress. `false` once data is loaded or an error occurred.       |
+| `isFetching` | `boolean`         | `true` when any request is in progress (including background refetches). `false` otherwise.             |
+| `reload`     | `function`        | Callback function to trigger a reload of the collection.                                                |
+| `error`      | [`Error`](#error) | Error information if the last request was unsuccessful. `undefined` if the last request was successful. |
 
 #### Example
 
 ```js
-import { useCollection } from "stac-react";
+import { useCollection } from 'stac-react';
 
 function Collection() {
-  const { collection, state } = useCollection("collection_id");
+  const { collection, isLoading } = useCollection('collection_id');
 
-  if (state === "LOADING") {
-    return <p>Loading collection...</p>
+  if (isLoading) {
+    return <p>Loading collection...</p>;
   }
 
   return (
     <>
-    {collection ? (
-      <>
-        <h2>{collection.id}</h2>
-        <p>{collection.description}</p>
-      </>
-    ) : (
-      <p>Not found</p>
-    )}
+      {collection ? (
+        <>
+          <h2>{collection.id}</h2>
+          <p>{collection.description}</p>
+        </>
+      ) : (
+        <p>Not found</p>
+      )}
     </>
   );
 }
@@ -199,47 +241,48 @@ Retrieves an item from the STAC catalog. To retrieve an item, provide its full u
 #### Initialization
 
 ```js
-import { useItem } from "stac-react";
+import { useItem } from 'stac-react';
 const { item } = useItem(url);
 ```
 
 #### Parameters
 
-Option          | Type      | Description
---------------- | --------- | -------------
-`url`           | `string`  | The URL of the item you want to retrieve.  
+| Option | Type     | Description                               |
+| ------ | -------- | ----------------------------------------- |
+| `url`  | `string` | The URL of the item you want to retrieve. |
 
 #### Return values
 
-Option          | Type      | Description
---------------- | --------- | -------------
-`item`          | `object`  | The item matching the provided URL.
-`state`         | `str`     | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress. 
-`reload`        | `function`| Callback function to trigger a reload of the item.
-`error`         | [`Error`](#error)   | Error information if the last request was unsuccessful. `undefined` if the last request was successful. 
+| Option       | Type              | Description                                                                                             |
+| ------------ | ----------------- | ------------------------------------------------------------------------------------------------------- |
+| `item`       | `object`          | The item matching the provided URL.                                                                     |
+| `isLoading`  | `boolean`         | `true` when the initial request is in progress. `false` once data is loaded or an error occurred.       |
+| `isFetching` | `boolean`         | `true` when any request is in progress (including background refetches). `false` otherwise.             |
+| `reload`     | `function`        | Callback function to trigger a reload of the item.                                                      |
+| `error`      | [`Error`](#error) | Error information if the last request was unsuccessful. `undefined` if the last request was successful. |
 
 #### Examples
 
 ```js
-import { useItem } from "stac-react";
+import { useItem } from 'stac-react';
 
 function Item() {
-  const { item, state } = useItem("https://stac-catalog.com/items/abc123");
+  const { item, isLoading } = useItem('https://stac-catalog.com/items/abc123');
 
-  if (state === "LOADING") {
-    return <p>Loading item...</p>
+  if (isLoading) {
+    return <p>Loading item...</p>;
   }
 
   return (
     <>
-    {item ? (
-      <>
-        <h2>{item.id}</h2>
-        <p>{items.description}</p>
-      </>
-    ) : (
-      <p>Not found</p>
-    )}
+      {item ? (
+        <>
+          <h2>{item.id}</h2>
+          <p>{item.description}</p>
+        </>
+      ) : (
+        <p>Not found</p>
+      )}
     </>
   );
 }
@@ -252,41 +295,42 @@ Executes a search against a STAC API using the provided search parameters.
 #### Initialization
 
 ```js
-import { useStacSearch } from "stac-react";
+import { useStacSearch } from 'stac-react';
 const { results } = useStacSearch();
 ```
 
 #### Return values
 
-Option             | Type      | Description
------------------- | --------- | -------------
-`submit`           | `function` | Callback to submit the search using the current filter parameters. Excecutes an API call to the specified STAC API.
-`ids`              | `array<string>`   | List of item IDs to match in the search, `undefined` if unset.
-`setIds(itemIds)`     | `function` | Callback to set `ids`. `itemIds` must be an `array` of `string` with the IDs of the selected items, or `undefined` to reset.
-`bbox`             | `array<number>`   | Array of coordinates `[northWestLon, northWestLat, southEastLon, southEastLat]`, `undefined` if unset.
-`setBbox(bbox)`    | `function` | Callback to set `bbox`. `bbox` must be an array of coordinates `[northWestLon, northWestLat, southEastLon, southEastLat]`, or `undefined` to reset.
-`collections`      | `array<string>`   | List of select collection IDs included in the search query. `undefined` if unset.
-`setCollections(collectionIDs)`   | `function` | Callback to set `collections`. `collectionIDs` must be an `array` of `string` with the IDs of the selected collections, or `undefined` to reset. 
-`dateRangeFrom`    | `string` | The from-date of the search query. `undefined` if unset.
-`setDateRangeFrom(fromDate)` | `function` | Callback to set `dateRangeFrom`. `fromDate` must be ISO representation of a date, ie. `2022-05-18`, or `undefined` to reset.
-`dateRangeTo`      | `string` | The to-date of the search query. `undefined` if unset.
-`setDateRangeTo(toDate)`   | `function` | Callback to set `dateRangeto`. `toDate` must be ISO representation of a date, ie. `2022-05-18`, or `undefined` to reset.
-`sortby`             | `array`   | Specifies the order of results. Array of `{ field: string, direction: 'asc' | 'desc' }`
-`setSortby(sort)`          | `function` | Callback to set `sortby`. `sort` must be an array of `{ field: string, direction: 'asc' | 'desc' }`, or `undefined` to reset.
-`limit`            | `number`   | The number of results returned per result page.
-`setLimit(limit)`  | `function` | Callback to set `limit`. `limit` must be a `number`, or `undefined` to reset.
-`results`          | `object`   | The result of the last search query; a [GeoJSON `FeatureCollection` with additional members](https://github.com/radiantearth/stac-api-spec/blob/v1.0.0-rc.2/fragments/itemcollection/README.md). `undefined` if the search request has not been submitted, or if there was an error. 
-`state`            | `string` | The status of the request. `"IDLE"` before and after the request is sent or received. `"LOADING"` when the request is in progress. 
-`error`            | [`Error`](#error)   | Error information if the last request was unsuccessful. `undefined` if the last request was successful. 
-`nextPage`         | `function` | Callback function to load the next page of results. Is `undefined` if the last page is the currently loaded.
-`previousPage`     | `function` | Callback function to load the previous page of results. Is `undefined` if the first page is the currently loaded.
+| Option                          | Type              | Description                                                                                                                                                                                                                                                                          |
+| ------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------- |
+| `submit`                        | `function`        | Callback to submit the search using the current filter parameters. Excecutes an API call to the specified STAC API.                                                                                                                                                                  |
+| `ids`                           | `array<string>`   | List of item IDs to match in the search, `undefined` if unset.                                                                                                                                                                                                                       |
+| `setIds(itemIds)`               | `function`        | Callback to set `ids`. `itemIds` must be an `array` of `string` with the IDs of the selected items, or `undefined` to reset.                                                                                                                                                         |
+| `bbox`                          | `array<number>`   | Array of coordinates `[northWestLon, northWestLat, southEastLon, southEastLat]`, `undefined` if unset.                                                                                                                                                                               |
+| `setBbox(bbox)`                 | `function`        | Callback to set `bbox`. `bbox` must be an array of coordinates `[northWestLon, northWestLat, southEastLon, southEastLat]`, or `undefined` to reset.                                                                                                                                  |
+| `collections`                   | `array<string>`   | List of select collection IDs included in the search query. `undefined` if unset.                                                                                                                                                                                                    |
+| `setCollections(collectionIDs)` | `function`        | Callback to set `collections`. `collectionIDs` must be an `array` of `string` with the IDs of the selected collections, or `undefined` to reset.                                                                                                                                     |
+| `dateRangeFrom`                 | `string`          | The from-date of the search query. `undefined` if unset.                                                                                                                                                                                                                             |
+| `setDateRangeFrom(fromDate)`    | `function`        | Callback to set `dateRangeFrom`. `fromDate` must be ISO representation of a date, ie. `2022-05-18`, or `undefined` to reset.                                                                                                                                                         |
+| `dateRangeTo`                   | `string`          | The to-date of the search query. `undefined` if unset.                                                                                                                                                                                                                               |
+| `setDateRangeTo(toDate)`        | `function`        | Callback to set `dateRangeto`. `toDate` must be ISO representation of a date, ie. `2022-05-18`, or `undefined` to reset.                                                                                                                                                             |
+| `sortby`                        | `array`           | Specifies the order of results. Array of `{ field: string, direction: 'asc'                                                                                                                                                                                                          | 'desc' }`                           |
+| `setSortby(sort)`               | `function`        | Callback to set `sortby`. `sort` must be an array of `{ field: string, direction: 'asc'                                                                                                                                                                                              | 'desc' }`, or `undefined` to reset. |
+| `limit`                         | `number`          | The number of results returned per result page.                                                                                                                                                                                                                                      |
+| `setLimit(limit)`               | `function`        | Callback to set `limit`. `limit` must be a `number`, or `undefined` to reset.                                                                                                                                                                                                        |
+| `results`                       | `object`          | The result of the last search query; a [GeoJSON `FeatureCollection` with additional members](https://github.com/radiantearth/stac-api-spec/blob/v1.0.0-rc.2/fragments/itemcollection/README.md). `undefined` if the search request has not been submitted, or if there was an error. |
+| `isLoading`                     | `boolean`         | `true` when the initial request is in progress. `false` once data is loaded or an error occurred.                                                                                                                                                                                    |
+| `isFetching`                    | `boolean`         | `true` when any request is in progress (including background refetches and pagination). `false` otherwise.                                                                                                                                                                           |
+| `error`                         | [`Error`](#error) | Error information if the last request was unsuccessful. `undefined` if the last request was successful.                                                                                                                                                                              |
+| `nextPage`                      | `function`        | Callback function to load the next page of results. Is `undefined` if the last page is the currently loaded.                                                                                                                                                                         |
+| `previousPage`                  | `function`        | Callback function to load the previous page of results. Is `undefined` if the first page is the currently loaded.                                                                                                                                                                    |
 
 #### Examples
 
 ##### Render results
 
 ```jsx
-import { useStacSearch } from "stac-react";
+import { useStacSearch } from 'stac-react';
 
 function StacComponent() {
   const { result } = useStacSearch();
@@ -297,23 +341,23 @@ function StacComponent() {
         {results && (
           <ul>
             {results.features.map(({ id }) => (
-              <li key={id}>{ id }</li>
+              <li key={id}>{id}</li>
             ))}
           </ul>
         )}
       </div>
     </>
-  )
+  );
 }
 ```
 
 ##### Handle errors
 
 ```jsx
-import { useCallback } from "react";
-import { useStacSearch } from "stac-react";
+import { useCallback } from 'react';
+import { useStacSearch } from 'stac-react';
 
-import Map from "./map";
+import Map from './map';
 
 function StacComponent() {
   const { error, result } = useStacSearch();
@@ -321,17 +365,17 @@ function StacComponent() {
   return (
     <>
       <div class="item-list">
-        {error && <p>{ error.detail }</p>}
+        {error && <p>{error.detail}</p>}
         {results && (
           <ul>
             {results.features.map(({ id }) => (
-              <li key={id}>{ id }</li>
+              <li key={id}>{id}</li>
             ))}
           </ul>
         )}
       </div>
     </>
-  )
+  );
 }
 ```
 
@@ -389,7 +433,7 @@ function StacComponent() {
           <fieldset>
             <legend>Select collections</legend>
             {collections.map(({ id, title }) => (
-              <input 
+              <input
                 id={id}
                 name="collections"
                 value={id}
@@ -411,21 +455,24 @@ function StacComponent() {
 ##### Set bounding box
 
 ```jsx
-import { useCallback } from "react";
-import { useStacSearch } from "stac-react";
+import { useCallback } from 'react';
+import { useStacSearch } from 'stac-react';
 
 function StacComponent() {
   const { bbox, setBbox, submit } = useStacSearch();
 
-  const handleDrawComplete = useCallback((feature) => {
-    setIsBboxDrawEnabled(false);
-    
-    const { coordinates } = feature.geometry;
-    const bbox = [...coordinates[0][0], ...coordinates[0][2]];
-    setBbox(bbox);
-  }, [setBbox]);
+  const handleDrawComplete = useCallback(
+    (feature) => {
+      setIsBboxDrawEnabled(false);
 
-  <Map handleDrawComplete={handleDrawComplete} />
+      const { coordinates } = feature.geometry;
+      const bbox = [...coordinates[0][0], ...coordinates[0][2]];
+      setBbox(bbox);
+    },
+    [setBbox]
+  );
+
+  <Map handleDrawComplete={handleDrawComplete} />;
 }
 ```
 
@@ -467,12 +514,11 @@ function StacComponent() {
 }
 ```
 
-Option             | Type      | Description
------------------- | --------- | -------------
-`detail`           | `string` | `object | The error return from the API. Either a `string` or and `object` depending on the response. 
-`status`           | `number` | HTTP status code of the response.
-`statusText`       | `string` | Status text for the response. 
-
+| Option       | Type               | Description                                                                                  |
+| ------------ | ------------------ | -------------------------------------------------------------------------------------------- |
+| `detail`     | `string \| object` | The error returned from the API. Either a `string` or an `object` depending on the response. |
+| `status`     | `number`           | HTTP status code of the response.                                                            |
+| `statusText` | `string`           | Status text for the response.                                                                |
 
 ## Development
 

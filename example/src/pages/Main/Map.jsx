@@ -9,7 +9,6 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { TItemList } from './proptypes';
 
-
 mapbox.accessToken = process.env.REACT_APP_MAPBOX_TOKEN || '';
 
 const addDrawControl = (map, drawingCompleted) => {
@@ -19,7 +18,7 @@ const addDrawControl = (map, drawingCompleted) => {
     modes: {
       ...modes,
       draw_rectangle: DrawRectangle,
-      static: StaticMode
+      static: StaticMode,
     },
     boxSelect: false,
     displayControlsDefault: false,
@@ -36,10 +35,10 @@ const addDrawControl = (map, drawingCompleted) => {
   return draw;
 };
 
-function Map ({ className, isBboxDrawEnabled, handleDrawComplete, items }) {
+function Map({ className, isBboxDrawEnabled, handleDrawComplete, items }) {
   const mapContainerRef = useRef();
   const drawControleRef = useRef();
-  const [ map, setMap ] = useState();
+  const [map, setMap] = useState();
 
   useEffect(() => {
     const m = new mapbox.Map({
@@ -54,20 +53,20 @@ function Map ({ className, isBboxDrawEnabled, handleDrawComplete, items }) {
 
     const onLoad = () => {
       setMap(m);
-        m.addSource('items', {
+      m.addSource('items', {
         type: 'geojson',
-        data: { type: 'FeatureCollection', features: []}
+        data: { type: 'FeatureCollection', features: [] },
       });
 
       m.addLayer({
-        'id': 'items',
-        'type': 'line',
-        'source': 'items',
-        'layout': {},
-        'paint': {
+        id: 'items',
+        type: 'line',
+        source: 'items',
+        layout: {},
+        paint: {
           'line-color': '#0080ff',
-          'line-width': 1
-        }
+          'line-width': 1,
+        },
       });
     };
     m.on('load', onLoad);
@@ -90,23 +89,27 @@ function Map ({ className, isBboxDrawEnabled, handleDrawComplete, items }) {
   }, [isBboxDrawEnabled, map]);
 
   useEffect(() => {
-    if(map) {
-      if(items) {
-        map.getSource('items').setData(items)
+    if (map) {
+      if (items) {
+        map.getSource('items').setData(items);
       } else {
-        map.getSource('items').setData({ type: 'FeatureCollection', features: []})
+        map.getSource('items').setData({ type: 'FeatureCollection', features: [] });
       }
     }
   }, [items, map]);
 
-  return <div ref={mapContainerRef} id='map' className={`flex items-stretch ${className}`}>Map</div>
+  return (
+    <div ref={mapContainerRef} id="map" className={`flex items-stretch ${className}`}>
+      Map
+    </div>
+  );
 }
 
 Map.propTypes = {
   className: T.string,
   isBboxDrawEnabled: T.bool,
   handleDrawComplete: T.func.isRequired,
-  item: TItemList
+  items: TItemList,
 };
 
 export default Map;
