@@ -1,6 +1,6 @@
 {
   "name": "@developmentseed/stac-react",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "description": "React components and hooks for building STAC-API front-ends",
   "repository": "git@github.com:developmentseed/stac-react.git",
   "authors": [
