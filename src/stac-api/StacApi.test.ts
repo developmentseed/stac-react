@@ -24,32 +24,32 @@ describe('StacApi', () => {
       expect(result).toBeUndefined();
     });
 
-    it('should format date range with from and to', () => {
+    it('should format date range with from and to appending time parts', () => {
       const dateRange = { from: '2025-12-01', to: '2025-12-31' };
       const result = stacApi.makeDatetimePayload(dateRange);
       // Simple date format for STAC API compatibility
-      expect(result).toBe('2025-12-01/2025-12-31');
+      expect(result).toBe('2025-12-01T00:00:00Z/2025-12-31T23:59:59Z');
     });
 
     it('should format date range with only from', () => {
       const dateRange = { from: '2025-12-01' };
       const result = stacApi.makeDatetimePayload(dateRange);
-      expect(result).toBe('2025-12-01/..');
+      expect(result).toBe('2025-12-01T00:00:00Z/..');
     });
 
     it('should format date range with only to', () => {
       const dateRange = { to: '2025-12-31' };
       const result = stacApi.makeDatetimePayload(dateRange);
-      expect(result).toBe('../2025-12-31');
+      expect(result).toBe('../2025-12-31T23:59:59Z');
     });
 
     it('should handle full datetime strings', () => {
       const dateRange = {
-        from: '2025-12-01T00:00:00Z',
-        to: '2025-12-31T23:59:59Z',
+        from: '2025-12-01T11:11:11Z',
+        to: '2025-12-31T11:11:11Z',
       };
       const result = stacApi.makeDatetimePayload(dateRange);
-      expect(result).toBe('2025-12-01T00:00:00Z/2025-12-31T23:59:59Z');
+      expect(result).toBe('2025-12-01T11:11:11Z/2025-12-31T11:11:11Z');
     });
   });
 
@@ -80,7 +80,7 @@ describe('StacApi', () => {
           }),
           body: JSON.stringify({
             collections: ['sentinel-2-l2a'],
-            datetime: '2025-12-01/2025-12-31',
+            datetime: '2025-12-01T00:00:00Z/2025-12-31T23:59:59Z',
             ids: undefined,
             bbox: undefined,
           }),
@@ -98,7 +98,7 @@ describe('StacApi', () => {
       await getStacApi.search(searchPayload);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.example.com/search?collections=sentinel-2-l2a&datetime=2025-12-01%2F2025-12-31',
+        'https://api.example.com/search?collections=sentinel-2-l2a&datetime=2025-12-01T00%3A00%3A00Z%2F2025-12-31T23%3A59%3A59Z',
         expect.objectContaining({
           method: 'GET',
           headers: expect.objectContaining({
