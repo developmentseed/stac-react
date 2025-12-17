@@ -1,15 +1,17 @@
-import { useQuery } from '@tanstack/react-query';
-import type { StacHook, StacRefetchFn } from '../types';
+import { useQuery, type QueryObserverResult } from '@tanstack/react-query';
 import type { Collection } from '../types/stac';
 import { handleStacResponse } from '../utils/handleStacResponse';
 import { generateCollectionQueryKey } from '../utils/queryKeys';
 import { useStacApiContext } from '../context/useStacApiContext';
 import { ApiError } from '../utils/ApiError';
 
-interface StacCollectionHook extends StacHook {
+type StacCollectionHook = {
   collection?: Collection;
-  refetch: StacRefetchFn<Collection>;
-}
+  isLoading: boolean;
+  isFetching: boolean;
+  refetch: () => Promise<QueryObserverResult<Collection, ApiError>>;
+  error: ApiError | null;
+};
 
 function useCollection(collectionId: string): StacCollectionHook {
   const { stacApi } = useStacApiContext();
