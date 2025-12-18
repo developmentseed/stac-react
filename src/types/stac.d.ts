@@ -90,7 +90,7 @@ export type Item = {
   type: 'Feature';
   properties: GenericObject;
   links: Link[];
-  assets: ItemAsset[];
+  assets: Record<string, ItemAsset>;
 };
 
 type Role = 'licensor' | 'producer' | 'processor' | 'host';
@@ -126,7 +126,7 @@ export type Collection = {
   providers: Provider[];
   extent: Extent;
   links: Link[];
-  assets: GenericObject;
+  assets: Record<string, ItemAsset>;
 };
 
 export type CollectionsResponse = {
