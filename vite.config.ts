@@ -20,6 +20,10 @@ export default defineConfig({
       exclude: ['**/*.test.ts'],
       outDir: 'dist',
       insertTypesEntry: true,
+      copyDtsFiles: true,
+      beforeWriteFile(filePath, content) {
+        return filePath.match(/\/(vite|jest)\./) ? false : { filePath, content };
+      },
     }),
   ],
 });
