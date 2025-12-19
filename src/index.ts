@@ -5,4 +5,5 @@ import useItem from './hooks/useItem';
 import useStacApi from './hooks/useStacApi';
 import { StacApiProvider } from './context';
 
+export * from './types/stac.d';
 export { useCollections, useCollection, useItem, useStacSearch, useStacApi, StacApiProvider };
