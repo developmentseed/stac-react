@@ -502,6 +502,69 @@ function StacComponent() {
 }
 ```
 
+### useStacQuery
+
+A declarative search hook that runs automatically whenever `payload` changes. Unlike `useStacSearch`, there is no `submit()` call — the query fires as soon as `stacApi` is available and re-runs on every payload change.
+
+Use this hook when you want data-bound search (e.g., filters wired to component state or URL params that should immediately reflect results). Use `useStacSearch` when you need explicit user control over when searches execute.
+
+#### Initialization
+
+```js
+import { useStacQuery } from 'stac-react';
+const { results } = useStacQuery(payload);
+```
+
+#### Parameters
+
+| Option    | Type            | Description                                                             |
+| --------- | --------------- | ----------------------------------------------------------------------- |
+| `payload` | `SearchPayload` | Search parameters. The query re-runs whenever this value changes.       |
+
+`SearchPayload` fields:
+
+| Field         | Type            | Description                                                    |
+| ------------- | --------------- | -------------------------------------------------------------- |
+| `collections` | `string[]`      | Collection IDs to filter by.                                   |
+| `bbox`        | `number[]`      | Bounding box `[minLon, minLat, maxLon, maxLat]`.               |
+| `dateRange`   | `object`        | Date range with optional `from` and `to` ISO date strings.     |
+| `ids`         | `string[]`      | Item IDs to filter by.                                         |
+| `sortby`      | `Sortby[]`      | Array of `{ field, direction }` sort specifications.           |
+
+#### Return values
+
+| Option       | Type              | Description                                                                                                                   |
+| ------------ | ----------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `results`    | `SearchResponse`  | The search result (a GeoJSON `FeatureCollection` with STAC links). `undefined` until the first successful response.           |
+| `isLoading`  | `boolean`         | `true` during the initial fetch (no cached data available). `false` once data is loaded or an error occurred.                 |
+| `isFetching` | `boolean`         | `true` during any in-flight request, including re-fetches triggered by payload changes. `false` otherwise.                    |
+| `error`      | [`Error`](#error) | Error information if the last request failed. `null` if the last request was successful.                                      |
+
+#### Example
+
+```jsx
+import { useState } from 'react';
+import { useStacQuery } from 'stac-react';
+
+function LiveSearch() {
+  const [collections, setCollections] = useState(['sentinel-2-l2a']);
+
+  // Automatically re-fetches whenever `collections` changes — no submit button needed.
+  const { results, isLoading, error } = useStacQuery({ collections });
+
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+
+  return (
+    <ul>
+      {results?.features.map(({ id }) => (
+        <li key={id}>{id}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
 ### Types
 
 #### Error
