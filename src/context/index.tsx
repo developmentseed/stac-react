@@ -4,11 +4,18 @@ import { GenericObject } from '../types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import useStacApi from '../hooks/useStacApi';
+import type { OptionsGetter } from '../stac-api';
 
 type StacApiProviderType = {
   apiUrl: string;
   children: React.ReactNode;
-  options?: GenericObject;
+  /**
+   * Static options applied to every request, or a function invoked
+   * per-request that returns options. Use the function form when values
+   * (e.g. an auth header) must update across renders without rebuilding
+   * the underlying StacApi instance. See {@link OptionsGetter}.
+   */
+  options?: GenericObject | OptionsGetter;
   queryClient?: QueryClient;
   enableDevTools?: boolean;
 };

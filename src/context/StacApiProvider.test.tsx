@@ -143,6 +143,58 @@ describe('StacApiProvider', () => {
     });
   });
 
+  describe('callable options integration', () => {
+    it('reads fresh options across renders without rebuilding StacApi', async () => {
+      // Stateful options simulates a login event after the provider mounts.
+      let token: string | undefined;
+      const options = jest.fn(() =>
+        token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
+      );
+
+      // Capture the StacApi instance to verify it's the *same* before/after login.
+      const seenInstances: unknown[] = [];
+
+      function Probe() {
+        const { stacApi } = useStacApiContext();
+        if (stacApi) seenInstances.push(stacApi);
+        return <div data-testid="ready">{stacApi ? 'ready' : 'loading'}</div>;
+      }
+
+      const { rerender } = render(
+        <StacApiProvider apiUrl="https://test-stac-api.com" options={options}>
+          <Probe />
+        </StacApiProvider>,
+      );
+
+      await waitFor(() => expect(screen.getByTestId('ready')).toHaveTextContent('ready'));
+
+      const stacApi = seenInstances[0] as { fetch: (url: string) => Promise<Response> };
+
+      // Pre-login: options returns undefined, no Authorization sent.
+      (global.fetch as jest.Mock).mockClear();
+      await stacApi.fetch('https://test-stac-api.com/collections');
+      const preInit = (global.fetch as jest.Mock).mock.calls[0][1] as RequestInit;
+      expect(preInit.headers).not.toHaveProperty('Authorization');
+
+      // Simulate login + a re-render (consumer would update its token state).
+      token = 'after-login';
+      rerender(
+        <StacApiProvider apiUrl="https://test-stac-api.com" options={options}>
+          <Probe />
+        </StacApiProvider>,
+      );
+
+      // Post-login: same StacApi instance, but next fetch carries the bearer.
+      (global.fetch as jest.Mock).mockClear();
+      await stacApi.fetch('https://test-stac-api.com/collections');
+      const postInit = (global.fetch as jest.Mock).mock.calls[0][1] as RequestInit;
+      expect(postInit.headers).toMatchObject({ Authorization: 'Bearer after-login' });
+
+      // Same instance throughout — no rebuild on options / token change.
+      expect(new Set(seenInstances).size).toBe(1);
+    });
+  });
+
   describe('Context value', () => {
     it('provides stacApi with correct apiUrl', async () => {
       function ApiUrlChecker() {
