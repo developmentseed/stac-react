@@ -116,17 +116,34 @@ export type Extent = {
 };
 
 export type Collection = {
+  // Must be set to `Collection` to be a valid Collection.
   type: 'Collection';
+  // The STAC version the Collection implements.
   stac_version: string;
+  // A list of extension identifiers the Collection implements.
   stac_extensions?: string[];
+  // Identifier for the Collection that is unique across all collections in the root catalog.
   id: string;
+  // short descriptive one-line title for the Collection.
   title?: string;
+  // Detailed multi-line description to fully explain the Collection. CommonMark 0.29 syntax MAY be used for rich text representation.
+  description: string;
+  // List of keywords describing the Collection.
   keywords?: string[];
+  // License(s) of the data collection as SPDX License identifier, SPDX License expression, or `other`.
   license: string;
-  providers: Provider[];
+  // A list of providers, which may include all organizations capturing or processing the data or the hosting provider.
+  providers?: Provider[];
+  // Spatial and temporal extents.
   extent: Extent;
+  // STRONGLY RECOMMENDED. A map of property summaries, either a set of values, a range of values or a JSON Schema.
+  summaries?: Record<string, unknown>;
+  // A list of references to other documents.
   links: Link[];
-  assets: Record<string, ItemAsset>;
+  // Dictionary of asset objects that can be downloaded, each with a unique key.
+  assets?: Record<string, ItemAsset>;
+  // A dictionary of assets that can be found in member Items.
+  item_assets?: Record<string, Omit<ItemAsset, 'href'>>;
 };
 
 export type CollectionsResponse = {
