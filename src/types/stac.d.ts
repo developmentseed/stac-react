@@ -1,13 +1,33 @@
-import type { Geometry } from 'geojson';
 import type { GenericObject } from '.';
+import type { StacItem, StacLink, StacCollection } from 'stac-ts';
+
+// Re-export stac-ts types so consumers can rely on stac-react as a single
+// import surface for STAC documents.
+export type {
+  StacAsset,
+  StacCatalog,
+  StacCollection,
+  StacExtensions,
+  StacItem,
+  StacLink,
+  StacProvider,
+  StacRoles,
+  StacVersion,
+} from 'stac-ts';
+
+// ---------------------------------------------------------------------------
+// stac-react-specific search input types
+// ---------------------------------------------------------------------------
 
 export type Bbox = [number, number, number, number];
 export type IdList = string[];
 export type CollectionIdList = string[];
+
 export type DateRange = {
   from?: string;
   to?: string;
 };
+
 export type Sortby = {
   field: string;
   direction: 'asc' | 'desc';
@@ -52,22 +72,25 @@ export type FetchRequest =
       url: string;
     };
 
+/**
+ * Body shape for STAC pagination links. Links served as `rel: next` may
+ * carry a structured `body` describing the next-page POST payload; this
+ * extends SearchPayload with a `merge` flag so the consumer knows whether
+ * to merge with the current search params.
+ */
 export type LinkBody = SearchPayload & {
   merge?: boolean;
 };
 
-export type SearchResponse = {
-  type: 'FeatureCollection';
-  features: Item[];
-  links: Link[];
-};
-
-export type Link = {
-  href: string;
-  rel: string;
-  type?: string;
+/**
+ * Pagination-aware extension of StacLink. STAC servers MAY add a typed
+ * `body` (per OGC API STAC pagination), plus stac-react surfaces `method`,
+ * `headers`, and `merge` for the consumer hooks. The base StacLink index
+ * signature already permits these fields; this type just gives them
+ * static types where stac-react reads them.
+ */
+export type Link = StacLink & {
   hreflang?: string;
-  title?: string;
   length?: number;
   method?: string;
   headers?: GenericObject;
@@ -75,78 +98,17 @@ export type Link = {
   merge?: boolean;
 };
 
-export type ItemAsset = {
-  href: string;
-  title?: string;
-  description?: string;
-  type?: string;
-  roles?: string[];
-};
+// ---------------------------------------------------------------------------
+// stac-react response wrappers (around stac-ts documents)
+// ---------------------------------------------------------------------------
 
-export type Item = {
-  id: string;
-  bbox: Bbox;
-  geometry: Geometry;
-  type: 'Feature';
-  properties: GenericObject;
+export type SearchResponse = {
+  type: 'FeatureCollection';
+  features: StacItem[];
   links: Link[];
-  assets: Record<string, ItemAsset>;
-};
-
-type Role = 'licensor' | 'producer' | 'processor' | 'host';
-
-export type Provider = {
-  name: string;
-  description?: string;
-  roles?: Role[];
-  url: string;
-};
-
-type SpatialExtent = {
-  bbox: number[][];
-};
-
-type TemporalExtent = {
-  interval: string | null[][];
-};
-
-export type Extent = {
-  spatial: SpatialExtent;
-  temporal: TemporalExtent;
-};
-
-export type Collection = {
-  // Must be set to `Collection` to be a valid Collection.
-  type: 'Collection';
-  // The STAC version the Collection implements.
-  stac_version: string;
-  // A list of extension identifiers the Collection implements.
-  stac_extensions?: string[];
-  // Identifier for the Collection that is unique across all collections in the root catalog.
-  id: string;
-  // short descriptive one-line title for the Collection.
-  title?: string;
-  // Detailed multi-line description to fully explain the Collection. CommonMark 0.29 syntax MAY be used for rich text representation.
-  description: string;
-  // List of keywords describing the Collection.
-  keywords?: string[];
-  // License(s) of the data collection as SPDX License identifier, SPDX License expression, or `other`.
-  license: string;
-  // A list of providers, which may include all organizations capturing or processing the data or the hosting provider.
-  providers?: Provider[];
-  // Spatial and temporal extents.
-  extent: Extent;
-  // STRONGLY RECOMMENDED. A map of property summaries, either a set of values, a range of values or a JSON Schema.
-  summaries?: Record<string, unknown>;
-  // A list of references to other documents.
-  links: Link[];
-  // Dictionary of asset objects that can be downloaded, each with a unique key.
-  assets?: Record<string, ItemAsset>;
-  // A dictionary of assets that can be found in member Items.
-  item_assets?: Record<string, Omit<ItemAsset, 'href'>>;
 };
 
 export type CollectionsResponse = {
-  collections: Collection[];
+  collections: StacCollection[];
   links: Link[];
 };

@@ -558,6 +558,7 @@ __metadata:
     prettier: "npm:^3.6.2"
     react: "npm:^19.2.0"
     react-dom: "npm:^19.2.0"
+    stac-ts: "npm:^1.0.5"
     ts-jest: "npm:^29.4.5"
     typescript: "npm:~5.9.3"
     typescript-eslint: "npm:^8.46.2"
@@ -567,6 +568,7 @@ __metadata:
     "@tanstack/react-query": ">=4.0.0"
     react: ^19.2.0
     react-dom: ^19.2.0
+    stac-ts: ^1
   languageName: unknown
   linkType: soft
 
@@ -7079,6 +7081,13 @@ __metadata:
   dependencies:
     minipass: "npm:^7.0.3"
   checksum: 10c0/caddd5f544b2006e88fa6b0124d8d7b28208b83c72d7672d5ade44d794525d23b540f3396108c4eb9280dcb7c01f0bef50682f5b4b2c34291f7c5e211fd1417d
+  languageName: node
+  linkType: hard
+
+"stac-ts@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "stac-ts@npm:1.0.5"
+  checksum: 10c0/dd406f4b52ea9d5114a81d98fc60a3100cdf20f681572f2950caa2aed3465dba8105cac737dd4c7b484907199baed4f62b0c4ffae3015fd94f5091371ba2ad06
   languageName: node
   linkType: hard
 
