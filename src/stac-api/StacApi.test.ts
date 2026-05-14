@@ -143,6 +143,97 @@ describe('StacApi', () => {
     });
   });
 
+  describe('options', () => {
+    beforeEach(() => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: jest.fn().mockResolvedValue({}),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+    });
+
+    function getSentHeaders(): Record<string, string> {
+      const init = mockFetch.mock.calls[0][1] as RequestInit;
+      return (init.headers || {}) as Record<string, string>;
+    }
+
+    it('applies static options.headers to every request', async () => {
+      const api = new StacApi('https://api.example.com', SearchMode.GET, {
+        headers: { 'X-Static': 'on' },
+      });
+
+      await api.fetch('https://api.example.com/collections');
+      expect(getSentHeaders()).toMatchObject({ 'X-Static': 'on' });
+    });
+
+    it('resolves callable options at call time', async () => {
+      const api = new StacApi('https://api.example.com', SearchMode.GET, () => ({
+        headers: { Authorization: 'Bearer tok-1' },
+      }));
+
+      await api.fetch('https://api.example.com/collections');
+      expect(getSentHeaders()).toMatchObject({ Authorization: 'Bearer tok-1' });
+    });
+
+    it('reads fresh values from a callable on each request', async () => {
+      let token = 'first';
+      const api = new StacApi('https://api.example.com', SearchMode.GET, () => ({
+        headers: { Authorization: `Bearer ${token}` },
+      }));
+
+      await api.fetch('https://api.example.com/collections');
+      expect(getSentHeaders()).toMatchObject({ Authorization: 'Bearer first' });
+
+      mockFetch.mockClear();
+      token = 'second';
+      await api.fetch('https://api.example.com/collections');
+      expect(getSentHeaders()).toMatchObject({ Authorization: 'Bearer second' });
+    });
+
+    it('handles callable returning undefined (unauthenticated state)', async () => {
+      let opts: { headers: Record<string, string> } | undefined;
+      const api = new StacApi(
+        'https://api.example.com',
+        SearchMode.GET,
+        () => opts,
+      );
+
+      await api.fetch('https://api.example.com/collections');
+      expect(getSentHeaders()).not.toHaveProperty('Authorization');
+
+      mockFetch.mockClear();
+      opts = { headers: { Authorization: 'Bearer late' } };
+      await api.fetch('https://api.example.com/collections');
+      expect(getSentHeaders()).toMatchObject({ Authorization: 'Bearer late' });
+    });
+
+    it('lets call-time headers override options.headers', async () => {
+      const api = new StacApi('https://api.example.com', SearchMode.GET, () => ({
+        headers: { Authorization: 'Bearer tok-1' },
+      }));
+
+      await api.fetch('https://api.example.com/collections', {
+        headers: { Authorization: 'Bearer override' },
+      });
+      expect(getSentHeaders()).toMatchObject({ Authorization: 'Bearer override' });
+    });
+
+    it('sends options.headers on any URL the caller passes (no in-domain scoping)', async () => {
+      const api = new StacApi('https://api.example.com', SearchMode.GET, () => ({
+        headers: { Authorization: 'Bearer tok-1' },
+      }));
+
+      await api.fetch('https://other.example.com/asset.tif');
+      // Library does no scoping; consumers must gate sensitive URLs themselves.
+      expect(getSentHeaders()).toMatchObject({ Authorization: 'Bearer tok-1' });
+    });
+
+    it('strips multiple trailing slashes from baseUrl', () => {
+      const api = new StacApi('https://api.example.com///', SearchMode.GET);
+      expect(api.baseUrl).toBe('https://api.example.com');
+    });
+  });
+
   describe('payloadToQuery', () => {
     it('should convert arrays to comma-separated strings', () => {
       const payload = {

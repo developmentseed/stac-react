@@ -8,6 +8,34 @@ type FetchOptions = {
   headers?: GenericObject;
 };
 
+/**
+ * Resolves request options at call time. Pass a function form of
+ * `options` when values must vary across renders (e.g. an auth header
+ * driven by a token that rotates) without rebuilding the StacApi
+ * instance.
+ *
+ * stac-react does no scoping of these options — they're sent on every
+ * request `StacApi.fetch` issues, including any URL the caller passes
+ * (item asset hrefs, etc.). If you need to keep secrets off external
+ * URLs, gate at the consumer (e.g. don't route external URLs through
+ * `stacApi.fetch`, or wrap it with your own URL check).
+ *
+ * @example
+ * ```tsx
+ * const tokenRef = useRef<string | undefined>();
+ * useEffect(() => { tokenRef.current = oidc.user?.access_token; }, [oidc.user]);
+ *
+ * <StacApiProvider
+ *   apiUrl={url}
+ *   options={() => {
+ *     const t = tokenRef.current;
+ *     return t ? { headers: { Authorization: `Bearer ${t}` } } : undefined;
+ *   }}
+ * />
+ * ```
+ */
+export type OptionsGetter = () => GenericObject | undefined;
+
 export enum SearchMode {
   GET = 'GET',
   POST = 'POST',
@@ -15,13 +43,21 @@ export enum SearchMode {
 
 class StacApi {
   baseUrl: string;
-  options?: GenericObject;
+  options?: GenericObject | OptionsGetter;
   searchMode = SearchMode.GET;
 
-  constructor(baseUrl: string, searchMode: SearchMode, options?: GenericObject) {
-    this.baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  constructor(
+    baseUrl: string,
+    searchMode: SearchMode,
+    options?: GenericObject | OptionsGetter,
+  ) {
+    this.baseUrl = baseUrl.replace(/\/+$/, '');
     this.searchMode = searchMode;
     this.options = options;
+  }
+
+  private resolveOptions(): GenericObject | undefined {
+    return typeof this.options === 'function' ? this.options() : this.options;
   }
 
   fixBboxCoordinateOrder(bbox?: Bbox): Bbox | undefined {
@@ -87,13 +123,20 @@ class StacApi {
     return new URLSearchParams(queryObj).toString();
   }
 
+  /**
+   * Issue a request through the configured fetch implementation.
+   *
+   * Header precedence (last wins): instance `options.headers` (resolved
+   * at call time when `options` is a function) → per-call `headers`.
+   */
   async fetch(url: string, options: Partial<FetchOptions> = {}): Promise<Response> {
     const { method = 'GET', payload, headers = {} } = options;
+    const resolved = this.resolveOptions();
 
     return fetch(url, {
       method,
       headers: {
-        ...this.options?.headers,
+        ...resolved?.headers,
         ...headers,
       },
       body: payload ? JSON.stringify(payload) : undefined,
