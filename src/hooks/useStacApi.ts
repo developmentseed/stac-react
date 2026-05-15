@@ -13,18 +13,14 @@ type StacApiHook = {
 };
 
 function resolveOptions(
-  options: GenericObject | OptionsGetter | undefined,
+  options: GenericObject | OptionsGetter | undefined
 ): GenericObject | undefined {
   return typeof options === 'function' ? options() : options;
 }
 
-function useStacApi(
-  url: string,
-  options?: GenericObject | OptionsGetter,
-): StacApiHook {
-  // Hold the latest options in a ref so the StacApi instance reads fresh
-  // values per request without rebuilding (which would re-fire the
-  // landing-page probe). Both static and callable forms route through
+function useStacApi(url: string, options?: GenericObject | OptionsGetter): StacApiHook {
+  // Hold the latest options in a ref so the StacApi instance reads fresh values
+  // per request without rebuilding. Both static and callable forms route through
   // the ref, so consumers don't have to memoize a static options object.
   const optionsRef = useRef(options);
   useEffect(() => {
@@ -45,15 +41,13 @@ function useStacApi(
       });
       const stacData = await handleStacResponse<{ links?: Link[] }>(response);
 
-      const doesPost = stacData.links?.find(
+      const searchMode = stacData.links?.find(
         ({ rel, method }: Link) => rel === 'search' && method === 'POST'
-      );
+      )
+        ? SearchMode.POST
+        : SearchMode.GET;
 
-      return new StacApi(
-        response.url,
-        doesPost ? SearchMode.POST : SearchMode.GET,
-        () => resolveOptions(optionsRef.current),
-      );
+      return new StacApi(response.url, searchMode, () => resolveOptions(optionsRef.current));
     },
     staleTime: Infinity,
   });

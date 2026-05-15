@@ -1,10 +1,9 @@
 import type { GenericObject } from '../types';
 import type { Bbox, SearchPayload, DateRange } from '../types/stac';
 
-type RequestPayload = SearchPayload;
 type FetchOptions = {
   method?: string;
-  payload?: RequestPayload;
+  payload?: unknown;
   headers?: GenericObject;
 };
 
@@ -43,21 +42,13 @@ export enum SearchMode {
 
 class StacApi {
   baseUrl: string;
-  options?: GenericObject | OptionsGetter;
+  options?: OptionsGetter;
   searchMode = SearchMode.GET;
 
-  constructor(
-    baseUrl: string,
-    searchMode: SearchMode,
-    options?: GenericObject | OptionsGetter,
-  ) {
+  constructor(baseUrl: string, searchMode: SearchMode, options?: OptionsGetter) {
     this.baseUrl = baseUrl.replace(/\/+$/, '');
     this.searchMode = searchMode;
     this.options = options;
-  }
-
-  private resolveOptions(): GenericObject | undefined {
-    return typeof this.options === 'function' ? this.options() : this.options;
   }
 
   fixBboxCoordinateOrder(bbox?: Bbox): Bbox | undefined {
@@ -131,12 +122,11 @@ class StacApi {
    */
   async fetch(url: string, options: Partial<FetchOptions> = {}): Promise<Response> {
     const { method = 'GET', payload, headers = {} } = options;
-    const resolved = this.resolveOptions();
 
     return fetch(url, {
       method,
       headers: {
-        ...resolved?.headers,
+        ...this.options?.()?.headers,
         ...headers,
       },
       body: payload ? JSON.stringify(payload) : undefined,

@@ -157,10 +157,10 @@ describe('StacApi', () => {
       return (init.headers || {}) as Record<string, string>;
     }
 
-    it('applies static options.headers to every request', async () => {
-      const api = new StacApi('https://api.example.com', SearchMode.GET, {
+    it('applies options.headers to every request', async () => {
+      const api = new StacApi('https://api.example.com', SearchMode.GET, () => ({
         headers: { 'X-Static': 'on' },
-      });
+      }));
 
       await api.fetch('https://api.example.com/collections');
       expect(getSentHeaders()).toMatchObject({ 'X-Static': 'on' });
