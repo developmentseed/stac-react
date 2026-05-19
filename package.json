@@ -16,7 +16,8 @@
   "peerDependencies": {
     "@tanstack/react-query": ">=4.0.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "stac-ts": "^1"
   },
   "devDependencies": {
     "@tanstack/react-query": "^5.90.5",
@@ -42,6 +43,7 @@
     "prettier": "^3.6.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "stac-ts": "^1.0.5",
     "ts-jest": "^29.4.5",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.2",

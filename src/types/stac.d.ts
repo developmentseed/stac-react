@@ -1,13 +1,33 @@
-import type { Geometry } from 'geojson';
 import type { GenericObject } from '.';
+import type { StacItem, StacLink, StacCollection } from 'stac-ts';
+
+// Re-export stac-ts types so consumers can rely on stac-react as a single
+// import surface for STAC documents.
+export type {
+  StacAsset,
+  StacCatalog,
+  StacCollection,
+  StacExtensions,
+  StacItem,
+  StacLink,
+  StacProvider,
+  StacRoles,
+  StacVersion,
+} from 'stac-ts';
+
+// ---------------------------------------------------------------------------
+// stac-react-specific search input types
+// ---------------------------------------------------------------------------
 
 export type Bbox = [number, number, number, number];
 export type IdList = string[];
 export type CollectionIdList = string[];
+
 export type DateRange = {
   from?: string;
   to?: string;
 };
+
 export type Sortby = {
   field: string;
   direction: 'asc' | 'desc';
@@ -52,22 +72,25 @@ export type FetchRequest =
       url: string;
     };
 
+/**
+ * Body shape for STAC pagination links. Links served as `rel: next` may
+ * carry a structured `body` describing the next-page POST payload; this
+ * extends SearchPayload with a `merge` flag so the consumer knows whether
+ * to merge with the current search params.
+ */
 export type LinkBody = SearchPayload & {
   merge?: boolean;
 };
 
-export type SearchResponse = {
-  type: 'FeatureCollection';
-  features: Item[];
-  links: Link[];
-};
-
-export type Link = {
-  href: string;
-  rel: string;
-  type?: string;
+/**
+ * Pagination-aware extension of StacLink. STAC servers MAY add a typed
+ * `body` (per OGC API STAC pagination), plus stac-react surfaces `method`,
+ * `headers`, and `merge` for the consumer hooks. The base StacLink index
+ * signature already permits these fields; this type just gives them
+ * static types where stac-react reads them.
+ */
+export type Link = StacLink & {
   hreflang?: string;
-  title?: string;
   length?: number;
   method?: string;
   headers?: GenericObject;
@@ -75,61 +98,17 @@ export type Link = {
   merge?: boolean;
 };
 
-export type ItemAsset = {
-  href: string;
-  title?: string;
-  description?: string;
-  type?: string;
-  roles?: string[];
-};
+// ---------------------------------------------------------------------------
+// stac-react response wrappers (around stac-ts documents)
+// ---------------------------------------------------------------------------
 
-export type Item = {
-  id: string;
-  bbox: Bbox;
-  geometry: Geometry;
-  type: 'Feature';
-  properties: GenericObject;
+export type SearchResponse = {
+  type: 'FeatureCollection';
+  features: StacItem[];
   links: Link[];
-  assets: Record<string, ItemAsset>;
-};
-
-type Role = 'licensor' | 'producer' | 'processor' | 'host';
-
-export type Provider = {
-  name: string;
-  description?: string;
-  roles?: Role[];
-  url: string;
-};
-
-type SpatialExtent = {
-  bbox: number[][];
-};
-
-type TemporalExtent = {
-  interval: string | null[][];
-};
-
-export type Extent = {
-  spatial: SpatialExtent;
-  temporal: TemporalExtent;
-};
-
-export type Collection = {
-  type: 'Collection';
-  stac_version: string;
-  stac_extensions?: string[];
-  id: string;
-  title?: string;
-  keywords?: string[];
-  license: string;
-  providers: Provider[];
-  extent: Extent;
-  links: Link[];
-  assets: Record<string, ItemAsset>;
 };
 
 export type CollectionsResponse = {
-  collections: Collection[];
+  collections: StacCollection[];
   links: Link[];
 };
