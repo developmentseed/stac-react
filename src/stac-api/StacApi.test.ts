@@ -191,12 +191,8 @@ describe('StacApi', () => {
     });
 
     it('handles callable returning undefined (unauthenticated state)', async () => {
-      let opts: { headers: Record<string, string> } | undefined;
-      const api = new StacApi(
-        'https://api.example.com',
-        SearchMode.GET,
-        () => opts,
-      );
+      let opts: { headers: Record<string, string> } | undefined = undefined;
+      const api = new StacApi('https://api.example.com', SearchMode.GET, () => opts);
 
       await api.fetch('https://api.example.com/collections');
       expect(getSentHeaders()).not.toHaveProperty('Authorization');

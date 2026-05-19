@@ -146,9 +146,9 @@ describe('StacApiProvider', () => {
   describe('callable options integration', () => {
     it('reads fresh options across renders without rebuilding StacApi', async () => {
       // Stateful options simulates a login event after the provider mounts.
-      let token: string | undefined;
+      let token: string | undefined = undefined;
       const options = jest.fn(() =>
-        token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
+        token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
       );
 
       // Capture the StacApi instance to verify it's the *same* before/after login.
@@ -163,7 +163,7 @@ describe('StacApiProvider', () => {
       const { rerender } = render(
         <StacApiProvider apiUrl="https://test-stac-api.com" options={options}>
           <Probe />
-        </StacApiProvider>,
+        </StacApiProvider>
       );
 
       await waitFor(() => expect(screen.getByTestId('ready')).toHaveTextContent('ready'));
@@ -181,7 +181,7 @@ describe('StacApiProvider', () => {
       rerender(
         <StacApiProvider apiUrl="https://test-stac-api.com" options={options}>
           <Probe />
-        </StacApiProvider>,
+        </StacApiProvider>
       );
 
       // Post-login: same StacApi instance, but next fetch carries the bearer.
