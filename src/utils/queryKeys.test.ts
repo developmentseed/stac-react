@@ -50,37 +50,16 @@ describe('Query Key Generators', () => {
   });
 
   describe('generateStacApiQueryKey', () => {
-    it('should generate key with URL only when no options', () => {
+    it('should generate key with URL', () => {
       const url = 'https://example.com/stac';
       const key = generateStacApiQueryKey(url);
-      expect(key).toEqual(['stacApi', url, undefined]);
+      expect(key).toEqual(['stacApi', url]);
     });
 
-    it('should extract only headers from options', () => {
-      const url = 'https://example.com/stac';
-      const options = {
-        headers: { Authorization: 'Bearer token123' },
-        someOtherField: { deeply: { nested: { object: 'value' } } },
-        anotherField: 'ignored',
-      };
-      const key = generateStacApiQueryKey(url, options);
-      expect(key).toEqual(['stacApi', url, { headers: { Authorization: 'Bearer token123' } }]);
-    });
-
-    it('should handle options without headers', () => {
-      const url = 'https://example.com/stac';
-      const options = {
-        someField: 'value',
-        anotherField: { nested: 'data' },
-      };
-      const key = generateStacApiQueryKey(url, options);
-      expect(key).toEqual(['stacApi', url, undefined]);
-    });
-
-    it('should handle empty options object', () => {
-      const url = 'https://example.com/stac';
-      const key = generateStacApiQueryKey(url, {});
-      expect(key).toEqual(['stacApi', url, undefined]);
+    it('should generate distinct keys for different URLs', () => {
+      const key1 = generateStacApiQueryKey('https://example.com/a');
+      const key2 = generateStacApiQueryKey('https://example.com/b');
+      expect(key1).not.toEqual(key2);
     });
   });
 
