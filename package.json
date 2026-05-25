@@ -53,7 +53,11 @@
   "scripts": {
     "lint": "eslint .",
     "test": "jest",
-    "build": "tsc -b && vite build"
+    "build": "tsc -b && vite build",
+    "prepublishOnly": "rm -rf dist && yarn build"
   },
+  "files": [
+    "dist"
+  ],
   "packageManager": "yarn@4.10.3"
 }
