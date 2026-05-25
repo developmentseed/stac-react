@@ -1,5 +1,4 @@
 import type { SearchRequestPayload, FetchRequest } from '../types/stac';
-import type { GenericObject } from '../types';
 
 /**
  * Extracts only the essential search parameters from a payload for query key generation.
@@ -63,15 +62,9 @@ export function generateItemQueryKey(url: string): [string, string] {
 
 /**
  * Generates a query key for STAC API initialization.
- * Extracts only the headers from options to avoid including large nested objects.
  */
-export function generateStacApiQueryKey(
-  url: string,
-  options?: GenericObject
-): [string, string, { headers: GenericObject } | undefined] {
-  // Only include headers in the query key, as other options don't affect the API initialization
-  const relevantOptions = options?.headers ? { headers: options.headers } : undefined;
-  return ['stacApi', url, relevantOptions];
+export function generateStacApiQueryKey(url: string): [string, string] {
+  return ['stacApi', url];
 }
 
 /**

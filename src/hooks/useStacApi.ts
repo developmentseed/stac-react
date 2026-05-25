@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import StacApi, { SearchMode } from '../stac-api';
 import { Link } from '../types/stac';
@@ -13,8 +14,9 @@ type StacApiHook = {
 
 function useStacApi(url: string, options?: GenericObject): StacApiHook {
   const { data, isSuccess, isLoading, isError } = useQuery({
-    queryKey: generateStacApiQueryKey(url, options),
+    queryKey: generateStacApiQueryKey(url),
     queryFn: async () => {
+      // Inspect STAC API for supported search modes
       const response = await fetch(url, {
         headers: {
           ...options?.headers,
@@ -26,11 +28,29 @@ function useStacApi(url: string, options?: GenericObject): StacApiHook {
         ({ rel, method }: Link) => rel === 'search' && method === 'POST'
       );
 
-      return new StacApi(response.url, doesPost ? SearchMode.POST : SearchMode.GET, options);
+      return {
+        mode: doesPost ? SearchMode.POST : SearchMode.GET,
+        url: response.url,
+      };
     },
     staleTime: Infinity,
   });
-  return { stacApi: isSuccess ? data : undefined, isLoading, isError };
+
+  return useMemo(() => {
+    if (isSuccess) {
+      return {
+        stacApi: new StacApi(data.url, data.mode, options),
+        isLoading,
+        isError,
+      };
+    }
+
+    return {
+      stacApi: undefined,
+      isLoading,
+      isError,
+    };
+  }, [data, isSuccess, isLoading, isError, options]);
 }
 
 export default useStacApi;
