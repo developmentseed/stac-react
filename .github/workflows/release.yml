@@ -44,10 +44,11 @@ jobs:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Install latest npm for trusted publishing
+        run: npm install -g npm@latest
+
       - name: Install
         run: corepack enable && yarn install
 
       - name: Publish to npm
         run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
