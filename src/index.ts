@@ -1,4 +1,5 @@
 import useStacSearch from './hooks/useStacSearch';
+import useStacQuery from './hooks/useStacQuery';
 import useCollections from './hooks/useCollections';
 import useCollection from './hooks/useCollection';
 import useItem from './hooks/useItem';
@@ -6,4 +7,12 @@ import useStacApi from './hooks/useStacApi';
 import { StacApiProvider } from './context';
 
 export * from './types/stac.d';
-export { useCollections, useCollection, useItem, useStacSearch, useStacApi, StacApiProvider };
+export {
+  useCollections,
+  useCollection,
+  useItem,
+  useStacSearch,
+  useStacQuery,
+  useStacApi,
+  StacApiProvider,
+};
