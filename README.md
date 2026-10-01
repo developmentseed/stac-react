@@ -544,10 +544,16 @@ Run tests
 pnpm test
 ```
 
-Lint
+Lint and check formatting ([Biome](https://biomejs.dev))
 
 ```sh
 pnpm lint
+```
+
+Format
+
+```sh
+pnpm format
 ```
 
 Build

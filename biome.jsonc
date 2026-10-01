@@ -1,0 +1,77 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": {
+    "includes": ["**", "!!**/dist", "!!**/build", "!!**/coverage"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "javascript": {
+    // tsconfig.json uses `"jsx": "react"`, so React must stay a value import.
+    "jsxRuntime": "reactClassic",
+    "formatter": {
+      "quoteStyle": "single",
+      "trailingCommas": "es5",
+      "semicolons": "always"
+    }
+  },
+  "assist": {
+    "actions": { "source": { "organizeImports": "off" } }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "correctness": {
+        // Enforce the rules of hooks, e.g. no conditional hook calls.
+        "useHookAtTopLevel": "error",
+        // Unused parameters must be prefixed with `_`.
+        "noUnusedFunctionParameters": "error"
+      },
+      "suspicious": {
+        // Helps with cleaning debug statements by erroring on console.
+        "noConsole": "error",
+        // Array indexes as keys should not be used. The occasional time it is
+        // needed, an ignore can be added.
+        "noArrayIndexKey": "error",
+        // TODO: Consider making this an error in the future.
+        "noExplicitAny": "warn"
+      },
+      "style": {
+        // Force self closing components when there are no children.
+        // Prevents `<MyComp prop='1'></MyComp>`
+        "useSelfClosingElements": "error"
+      },
+      "nursery": {
+        // Type-aware promise checks, replacing the equivalent
+        // typescript-eslint type-checked rules.
+        "noFloatingPromises": "error",
+        "noMisusedPromises": "error",
+        // Off: Biome's type inference does not resolve overloads like
+        // `act(async () => {})` and reports them as non-thenables.
+        "useAwaitThenable": "off"
+      }
+    }
+  },
+  "overrides": [
+    {
+      // The example app is due to be rebuilt; keep its lint scope to what
+      // ESLint enforced before.
+      "includes": ["example/**"],
+      "linter": {
+        "rules": {
+          "a11y": "off",
+          "suspicious": {
+            "noShadowRestrictedNames": "off",
+            // Tailwind v3 directives
+            "noUnknownAtRules": { "level": "error", "options": { "ignore": ["tailwind"] } }
+          }
+        }
+      }
+    }
+  ]
+}
