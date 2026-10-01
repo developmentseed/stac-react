@@ -18,7 +18,7 @@ export default defineConfig({
   plugins: [
     dts({
       exclude: ['**/*.test.ts'],
-      outDir: 'dist',
+      outDirs: 'dist',
       insertTypesEntry: true,
       copyDtsFiles: true,
       beforeWriteFile(filePath, content) {
