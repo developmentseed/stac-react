@@ -5,7 +5,7 @@ import path from 'path';
 export default defineConfig({
   build: {
     lib: {
-      entry: path.resolve(__dirname, 'src/index.ts'),
+      entry: path.resolve(import.meta.dirname, 'src/index.ts'),
       name: 'StacReact',
       formats: ['es', 'cjs'],
       fileName: (format) => `stac-react.${format === 'es' ? 'es.mjs' : 'cjs'}`,
@@ -18,7 +18,7 @@ export default defineConfig({
   plugins: [
     dts({
       exclude: ['**/*.test.ts'],
-      outDir: 'dist',
+      outDirs: 'dist',
       insertTypesEntry: true,
       copyDtsFiles: true,
       beforeWriteFile(filePath, content) {

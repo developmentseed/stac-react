@@ -27,7 +27,7 @@ const customRules = {
 };
 
 export default defineConfig([
-  globalIgnores(['dist', 'node_modules', 'build', 'coverage']),
+  globalIgnores(['dist', 'node_modules', '**/build', 'coverage']),
   js.configs.recommended,
   react.configs.flat.recommended,
   prettier,
