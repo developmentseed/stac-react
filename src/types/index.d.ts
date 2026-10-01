@@ -2,7 +2,8 @@ import type { QueryObserverResult } from '@tanstack/react-query';
 import { ApiError } from '../utils/ApiError';
 
 export type GenericObject = {
-  [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: arbitrary JSON values
+  [key: string]: any;
 };
 
 /**

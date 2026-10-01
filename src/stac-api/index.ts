@@ -45,7 +45,7 @@ class StacApi {
     return sortedBbox;
   }
 
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  // biome-ignore lint/suspicious/noExplicitAny: accepts arrays of any payload type
   makeArrayPayload(arr?: any[]) {
     return arr?.length ? arr : undefined;
   }
@@ -66,7 +66,7 @@ class StacApi {
   }
 
   payloadToQuery({ sortby, ...payload }: SearchPayload): string {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // biome-ignore lint/suspicious/noExplicitAny: query values can be of any type
     const queryObj: { [key: string]: any } = {};
     for (const [key, value] of Object.entries(payload)) {
       if (!value) continue;

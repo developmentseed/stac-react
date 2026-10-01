@@ -1,3 +1,4 @@
+import type { GenericObject } from '../types';
 import { ApiError } from './ApiError';
 
 /**
@@ -29,7 +30,7 @@ export async function handleStacResponse<T>(response: Response): Promise<T> {
   const clone = response.clone();
 
   if (!response.ok) {
-    let detail;
+    let detail: GenericObject | string;
     try {
       detail = await response.json();
     } catch {

@@ -59,7 +59,7 @@ describe('StacApi', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         json: jest.fn().mockResolvedValue({ features: [] }),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // biome-ignore lint/suspicious/noExplicitAny: partial Response mock
       } as any);
     });
 

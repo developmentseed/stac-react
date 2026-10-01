@@ -13,7 +13,7 @@ import type {
   FetchRequest,
 } from '../types/stac';
 import { useStacApiContext } from '../context/useStacApiContext';
-import { ApiError } from '../utils/ApiError';
+import type { ApiError } from '../utils/ApiError';
 
 type PaginationHandler = () => void;
 
@@ -73,6 +73,7 @@ function useStacSearch(): StacSearchHook {
   /**
    * Reset state when stacApi changes
    */
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only re-run when the API changes
   useEffect(() => {
     if (stacApi) {
       reset();

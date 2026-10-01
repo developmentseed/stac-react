@@ -27,7 +27,7 @@ function App() {
 
   // Debug: Verify QueryClient configuration
   if (isDevelopment && typeof window !== 'undefined') {
-    // eslint-disable-next-line no-console
+    // biome-ignore lint/suspicious/noConsole: debug output in the example app
     console.log('[App] QueryClient defaults:', queryClient.getDefaultOptions());
   }
 

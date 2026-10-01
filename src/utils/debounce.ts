@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* biome-ignore-all lint/suspicious/noExplicitAny: generic function wrapper */
 
 type DebouncedFunction<T extends (...args: any) => any> = T & {
   cancel: () => void;

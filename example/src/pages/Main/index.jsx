@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-// eslint-disable-next-line no-unused-vars
+// biome-ignore lint/correctness/noUnusedImports: kept for reference in the example
 import { useStacSearch, useCollections, useStacApi, StacApiProvider } from 'stac-react';
 
 import ItemList from './ItemList';
@@ -7,7 +7,7 @@ import Map from './Map';
 import QueryBuilder from './QueryBuilder';
 import ItemDetails from './ItemDetails';
 
-// eslint-disable-next-line no-unused-vars
+// biome-ignore lint/correctness/noUnusedVariables: kept for reference in the example
 const options = {
   headers: {
     Authorization: 'Basic ' + btoa(process.env.REACT_APP_STAC_API_TOKEN + ':'),
