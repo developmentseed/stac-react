@@ -54,10 +54,10 @@
     "lint": "eslint .",
     "test": "jest",
     "build": "tsc -b && vite build",
-    "prepublishOnly": "rm -rf dist && yarn build"
+    "prepublishOnly": "rm -rf dist && pnpm build"
   },
   "files": [
     "dist"
   ],
-  "packageManager": "yarn@4.10.3"
+  "packageManager": "pnpm@12.8.1"
 }
