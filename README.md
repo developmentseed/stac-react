@@ -19,6 +19,12 @@ With Yarn:
 yarn add @developmentseed/stac-react
 ```
 
+With pnpm:
+
+```sh
+pnpm add @developmentseed/stac-react
+```
+
 ### Peer Dependency: @tanstack/react-query
 
 stac-react relies on [TanStack Query](https://tanstack.com/query/latest/docs/framework/react/overview) for data fetching and caching. To avoid duplicate React Query clients and potential version conflicts, stac-react lists `@tanstack/react-query` as a **peer dependency**. This means you must install it in your project:
@@ -27,6 +33,8 @@ stac-react relies on [TanStack Query](https://tanstack.com/query/latest/docs/fra
 npm install @tanstack/react-query
 # or
 yarn add @tanstack/react-query
+# or
+pnpm add @tanstack/react-query
 ```
 
 If you do not install it, your package manager will warn you, and stac-react will not work correctly.
@@ -522,20 +530,28 @@ function StacComponent() {
 
 ## Development
 
+This project uses [pnpm](https://pnpm.io/installation). The version is pinned in the `packageManager` field of `package.json`.
+
+Install dependencies
+
+```sh
+pnpm install
+```
+
 Run tests
 
 ```sh
-yarn test
+pnpm test
 ```
 
 Lint
 
 ```sh
-yarn lint
+pnpm lint
 ```
 
 Build
 
-```
-yarn build
+```sh
+pnpm build
 ```
