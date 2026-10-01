@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { StacApiContext } from './context';
-import { GenericObject } from '../types';
+import type { GenericObject } from '../types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import useStacApi from '../hooks/useStacApi';

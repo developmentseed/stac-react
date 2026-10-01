@@ -4,7 +4,7 @@ import type { CollectionsResponse } from '../types/stac';
 import { handleStacResponse } from '../utils/handleStacResponse';
 import { generateCollectionsQueryKey } from '../utils/queryKeys';
 import { useStacApiContext } from '../context/useStacApiContext';
-import { ApiError } from '../utils/ApiError';
+import type { ApiError } from '../utils/ApiError';
 
 interface StacCollectionsHook extends StacHook {
   collections?: CollectionsResponse;

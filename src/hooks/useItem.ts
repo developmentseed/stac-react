@@ -4,7 +4,7 @@ import type { StacItem } from '../types/stac';
 import { useStacApiContext } from '../context/useStacApiContext';
 import { handleStacResponse } from '../utils/handleStacResponse';
 import { generateItemQueryKey } from '../utils/queryKeys';
-import { ApiError } from '../utils/ApiError';
+import type { ApiError } from '../utils/ApiError';
 
 interface StacItemHook extends StacHook {
   item?: StacItem;

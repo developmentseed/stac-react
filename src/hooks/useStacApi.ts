@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import StacApi, { SearchMode } from '../stac-api';
-import { Link } from '../types/stac';
-import { GenericObject } from '../types';
+import type { Link } from '../types/stac';
+import type { GenericObject } from '../types';
 import { generateStacApiQueryKey } from '../utils/queryKeys';
 import { handleStacResponse } from '../utils/handleStacResponse';
 

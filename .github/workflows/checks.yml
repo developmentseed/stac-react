@@ -56,7 +56,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: pnpm lint
+        run: pnpm exec biome ci .
 
   test:
     needs: prep
